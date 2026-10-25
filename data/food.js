@@ -1,5 +1,5 @@
 /* 餐廳清單（整理自 12_餐廳.md；時間多為 2025–26 資料，出發前一週再確認）。
-   area：小樽／Kiroro／銭函／富良野／美瑛・旭川／札幌。closed：公休星期（0=日…6=六）。fit：8 人（3 大人＋保姆）帶 4 個幼兒 ok？ */
+   area：小樽／Kiroro／銭函／富良野／美瑛・旭川／札幌。closed：公休星期（0=日…6=六）。fit：8 人（4 大 4 小，保姆另計）帶 4 個幼兒 ok？ */
 window.FOOD = [
   /* Kiroro 山上（午餐；官網與食客評論核對 2026-10，菜單與價格要等 2026-27 新雪季更新） */
   { id: "brasserie", rec: 1, name: "Brasserie Akaigawa", area: "Kiroro", kind: "麵食", what: "優先選這家：赤井川番茄擔擔麵、赤井川豬肉角煮醬油拉麵（食客實際點餐紀錄，官方也主推麵類），用當地蔬菜與肉；Kiroro Gondola 山麓站 1F", hours: "11:00–15:00 LO（2025-26）", fit: "ok", lat: 43.0668, lon: 140.9918, meal: "lunch" },

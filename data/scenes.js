@@ -25,7 +25,7 @@ window.SCENES = {
     scenes: [
       { type: "title", eyebrow: "DAY 02 · KIRORO", h: "Kiroro 初滑", s: "第一次上山。先把節奏抓起來。", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], amb: "snow", dur: 5500 },
       { stop: "villa", label: "早上", imgs: ["scene/villa-6.jpg", "scene/villa-7.jpg", "scene/villa-2.jpg"], h: "07:50 出發。", s: "早餐在家吃，雪板前一晚就上車。", amb: "quiet", dur: 6000 },
-      { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "第一次上 Kiroro。", s: "上午跟教練認識雪場。小孩交給保姆，三個大人都在雪上。", amb: "quiet", dur: 7000 },
+      { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "第一次上 Kiroro。", s: "上午跟教練認識雪場。小孩交給保姆，四個大人都在雪上。", amb: "quiet", dur: 7000 },
       { t: "下午", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "自己的雪道，滑到纜車收。", s: "教練走了之後，才是真正開始滑的時候。", amb: "quiet", dur: 7000 },
       { stop: "kiroro_onsen", imgs: ["scene/asari-1.jpg", "scene/kiroro-2.jpg"], h: "滑到纜車收，直接泡湯。", s: "就在雪場旁邊。小孩這時候跟保姆在山鄉。", amb: "quiet", warm: true, dur: 6500 },
       { stop: "villa", label: "接小孩", imgs: ["scene/villa-5.jpg", "scene/villa-3.jpg"], h: "回山鄉接保姆和小孩。", s: "然後一起去小樽。", amb: "quiet", warm: true, dur: 5500 },
@@ -87,7 +87,7 @@ window.SCENES = {
     poster: { img: "poster/0114.jpg", line: "最後一個有保姆的上午。下午送她到車站，然後兩家自己來。" },
     scenes: [
       { type: "title", eyebrow: "DAY 08 · FURANO", h: "上午滑雪・送保姆", s: "上午滑雪，13:30 收板。", imgs: ["scene/furano-1.jpg", "scene/lodge-1.jpg", "scene/furano-4.jpg"], amb: "snow", dur: 5500 },
-      { stop: "kita", imgs: ["scene/furano-1.jpg", "scene/furano-3.jpg"], h: "上午滑雪，13:30 收板。", s: "最後一個三個大人都在雪上的上午。", amb: "quiet", dur: 7000 },
+      { stop: "kita", imgs: ["scene/furano-1.jpg", "scene/furano-3.jpg"], h: "上午滑雪，13:30 收板。", s: "最後一個四個大人都在雪上的上午。", amb: "quiet", dur: 7000 },
       { t: "上午", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "把握最後一個完整的上午。", amb: "quiet", dur: 6000 },
       { stop: "fstn", imgs: ["scene/furano-2.jpg", "scene/road-2.jpg"], h: "送保姆到車站。", s: "謝謝她這七天。巴士 14:00。", amb: "snow", dur: 6500 },
       { type: "end", t: "今晚", imgs: ["scene/lodge-3.jpg", "scene/lodge-5.jpg", "scene/lodge-2.jpg"], h: "從今天起，四個小孩，<br>兩家自己來。", amb: "fire", warm: true, dur: 7500 }
