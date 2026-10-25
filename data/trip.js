@@ -12,10 +12,11 @@ window.TRIP = {
   bases: [
     { id: "villa", name: "山郷 春 Villa -SHUN-", short: "小樽・山鄉", area: "小樽", lat: 43.1467841, lon: 141.1354924,
       from: "2027-01-07", to: "2027-01-11", nights: 4, checkin: "15:00", checkout: "11:00",
-      notes: ["步行 5 分到 Onze 雪場（夜滑到 22:45）", "免費停車；車用導航建議用電話號碼設定"] },
+      notes: ["步行 5 分到 Onze 雪場（夜滑到 22:45）", "停車：免費（官網沒寫車位數，🔎 入住前問清楚兩台 Delica 能不能都停）；車用導航建議用電話號碼設定"] },
     { id: "furano", name: "BEST DAY EVER FURANO LODGES", short: "富良野・北之峰", area: "富良野", lat: 43.3325009, lon: 142.3631996,
       from: "2027-01-11", to: "2027-01-16", nights: 5, checkin: "", checkout: "",
-      notes: ["開車 5 分到北之峰纜車站", "第 5 晚（1/15）加訂待確認"] },
+      notes: ["開車 5 分到北之峰纜車站", "停車：免費（訂房頁寫有免費停車場，車位數🔎）；入住 15:00、退房 10:00；全套廚房、洗衣機",
+      "第 5 晚（1/15）加訂待確認"] },
     { id: "sapporo", name: "FAV LUX 札幌薄野", short: "札幌・薄野", area: "札幌", lat: 43.0523778, lon: 141.3485722,
       from: "2027-01-16", to: "2027-01-19", nights: 3, checkin: "15:00", checkout: "10:00",
       notes: ["飯店沒有停車場：找附近平面停車場（Delica 車高約 1.9 m，進不了一般立體停車場），三晚停好就別動",
