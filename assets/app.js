@@ -275,8 +275,22 @@
 
   function popupHTML(p) {
     var a = '<a href="' + navUrl(p.lat, p.lon) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
+    if (p.link) a = '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' + a;
     if (p.baseId) a += '<button type="button" data-origin="' + p.baseId + '">從這裡算車程</button>';
-    return '<p class="pop-t">' + esc(p.name) + '</p>' + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
+    return '<p class="pop-t">' + esc(p.name) + '</p>' + (p.sub ? '<p class="pop-s">' + esc(p.sub) + '</p>' : '') + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
+  }
+  /* 探索地圖的點：景點來自 data/spots.js、餐廳來自 data/food.js（和景點地圖、美食地圖同一份資料），其他類別來自 trip.js */
+  function explorePois() {
+    var list = [];
+    var ST = { plan: "正式行程", saved: "收藏", check: "待確認" };
+    (window.SPOTS || []).forEach(function (s) {
+      list.push({ type: "sight", name: s.name, lat: s.lat, lon: s.lon, approx: s.approx, sub: ST[s.status] + (s.day ? " " + md(s.day) : "") + " · " + s.kind + (s.g && s.g.rating ? " · ★ " + s.g.rating.toFixed(1) : ""), note: s.what.length > 90 ? s.what.slice(0, 90) + "…" : s.what, link: BASE + "spots/#" + s.id, linkText: "景點地圖 →" });
+    });
+    (window.FOOD || []).forEach(function (f) {
+      list.push({ type: "food", name: f.name, lat: f.lat, lon: f.lon, approx: f.approx, sub: f.kind + " · " + f.hours + (f.g && f.g.rating ? " · ★ " + f.g.rating.toFixed(1) : ""), note: f.what.length > 90 ? f.what.slice(0, 90) + "…" : f.what, link: BASE + "food/#" + f.id, linkText: "美食地圖 →" });
+    });
+    T.places.forEach(function (p) { if (p.type !== "sight" && p.type !== "food") list.push(p); });
+    return list;
   }
   function keyPoints() {
     var pts = [];
@@ -319,7 +333,7 @@
   function initMap() {
     if (!has("mapcanvas")) return;
     renderLayers(); renderAreas(); renderStops(); applyMode();
-    KEYS = keyPoints(); POIS = T.places.slice();
+    KEYS = keyPoints(); POIS = explorePois();
     if (!window.maplibregl) { $("#mapfallback").hidden = false; return; }
     try {
       map = new maplibregl.Map({
@@ -327,6 +341,7 @@
         center: [141.75, 43.28], zoom: 7, cooperativeGestures: true, attributionControl: { compact: true }
       });
     } catch (e) { $("#mapfallback").hidden = false; return; }
+    window.SNOW13_MAP = map;
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     map.getContainer().addEventListener("click", function (e) {
       var b = e.target.closest("[data-origin]"); if (!b) return;
