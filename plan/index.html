@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>行程編輯 · 北海道・雪上的大小腳印</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#070B12">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/editor.css">
+<script>window.BASE = "../";</script>
+</head>
+<body class="editor">
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="../" aria-label="回首頁"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">行程編輯</span></a>
+    <span class="dirty" id="dirty" hidden>未儲存</span>
+    <div class="ed-actions">
+      <button type="button" class="btn btn-ghost" id="reload">重新載入</button>
+      <button type="button" class="btn btn-ghost" id="settings" aria-label="設定">設定</button>
+      <button type="button" class="btn" id="save">儲存到網站</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap ed-main">
+  <p class="ed-msg" id="msg" aria-live="polite"></p>
+  <div class="daystrip" id="daytabs" role="tablist" aria-label="選擇日期"></div>
+
+  <div class="ed-grid">
+    <section class="ed-left">
+      <div class="ed-head">
+        <div>
+          <p class="dh-k" id="edk"></p>
+          <h1 class="ed-h" id="edh"></h1>
+        </div>
+        <div class="modeseg seg" id="modeseg" role="tablist" aria-label="路況"></div>
+      </div>
+      <div class="ed-summary" id="summary"></div>
+      <ol class="stoplist" id="stoplist"></ol>
+      <div class="addrow">
+        <input type="text" id="addq" list="placelist" placeholder="新增站點：輸入地點名稱，或貼 Google Maps 連結" autocomplete="off">
+        <datalist id="placelist"></datalist>
+        <button type="button" class="btn" id="addbtn">加到最後</button>
+      </div>
+      <p class="ed-note">站點時間都是推算：前一站離開＋移動時間。改停留分鐘、固定時間、順序，後面全部自動重算。紅色＝晚於固定時間。</p>
+    </section>
+    <aside class="ed-right">
+      <div class="mapbox ed-map"><div id="mapcanvas" class="mapcanvas"></div></div>
+    </aside>
+  </div>
+</main>
+
+<dialog id="dlg" class="dlg">
+  <form method="dialog">
+    <h2>儲存設定</h2>
+    <p>儲存會直接寫進 GitHub 的 <code>data/plan.json</code>，一分鐘後全站更新。需要一把只能寫這個 repo 的金鑰，只存在這個瀏覽器裡。</p>
+    <ol class="steps">
+      <li>GitHub → Settings → Developer settings → Personal access tokens → <b>Fine-grained tokens</b> → Generate new token</li>
+      <li>Repository access 選 <b>Only select repositories</b> → <code>hokkaido-ski-2027</code></li>
+      <li>Permissions → Repository permissions → <b>Contents：Read and write</b>，其他不用</li>
+      <li>Expiration 選最長（到旅程結束後），Generate，把 <code>github_pat_…</code> 貼到下面</li>
+    </ol>
+    <label class="field"><span>金鑰</span><input type="password" id="token" placeholder="github_pat_…" autocomplete="off"></label>
+    <label class="field"><span>你的名字（寫進修改紀錄）</span><input type="text" id="who" placeholder="例如 Sean"></label>
+    <p class="ed-msg" id="tokmsg"></p>
+    <div class="dlg-actions">
+      <button type="button" class="btn btn-ghost" id="toktest">測試</button>
+      <button type="button" class="btn btn-ghost" id="tokclear">清除</button>
+      <button type="submit" class="btn" id="toksave">儲存設定</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="../data/trip.js"></script>
+<script src="../assets/plan.js"></script>
+<script src="../assets/editor.js"></script>
+</body>
+</html>

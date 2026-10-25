@@ -34,7 +34,7 @@
   var TODAY = todayJST();
   var baseById = {}; T.bases.forEach(function (b) { baseById[b.id] = b; });
   var BASE_COLOR = { villa: "var(--glacier)", furano: "var(--ok)", sapporo: "var(--accent)" };
-  var state = { day: 0, origin: null, originManual: false, gps: null, wx: {}, wxTab: "villa", foodArea: "全部" };
+  var state = { day: 0, origin: null, originManual: false, gps: null, wx: {}, wxTab: "villa", foodArea: "全部", mode: (window.Plan ? Plan.mode() : "normal") };
 
   /* ---------- 日圓／台幣 ---------- */
   var CUR_MODES = ["both", "twd", "jpy"], CUR_LABEL = { both: "¥＋NT$", twd: "NT$", jpy: "¥" };
@@ -184,20 +184,27 @@
   }
   function renderDay() {
     if (!has("dayview")) return;
-    var d = T.days[state.day], b = baseById[d.base];
+    var d = T.days[state.day], b = baseById[d.base], sch = dayPlan();
     var html = '<div class="card">' + (has("dayhead") ? '<p class="panel-label">今天的安排</p><p class="day-sub" style="margin:0 0 4px">' + esc(d.sub) + '</p>' : '<p class="day-date">' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p>' +
       '<h3 class="day-title">' + esc(d.title) + '</h3><p class="day-sub">' + esc(d.sub) + '</p>') +
       (d.alert ? '<p class="alert">' + esc(d.alert) + '</p>' : "") +
-      '<ol class="timeline">' + d.plan.map(function (p) { return '<li><time>' + esc(p[0]) + '</time><span>' + em(p[1]) + '</span></li>'; }).join("") + '</ol></div>';
+      '<div class="modeseg seg" role="tablist" aria-label="路況"></div>' +
+      '<ol class="timeline">' + sch.stops.map(function (s, i) {
+        var row = "";
+        if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg"><time></time><span>' + (l.mode === "walk" ? "步行 " : l.mode === "shuttle" ? "接駁 " : "開車 ") + fmtMin(l.min) + ' · ' + l.km + ' km' + (l.est ? '（直線估算）' : '') + '</span></li>'; }
+        var last = i === sch.stops.length - 1;
+        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + (s.stay && !last ? ' <small class="stay">停 ' + fmtMin(s.stay) + '</small>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(s.note) + '</span>' : "") + '</span></li>';
+        return row;
+      }).join("") + '</ol></div>';
     html += '<div class="side">';
-    var pl = (window.DAYPLAN || {})[d.date], tn = 0, ts = 0, tk = 0;
-    if (pl) pl.legs.forEach(function (l) { if (l.mode !== "walk") { tn += l.normal; ts += l.snow; tk += l.km; } });
-    html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>一般</span><b>' + fmtMin(tn) + '</b></div><div><span>下雪</span><b>' + fmtMin(ts) + '</b></div><div><span>距離</span><b>' + Math.round(tk) + ' km</b></div></div></div>';
+    var alt = Plan.schedule(d.date, state.mode === "snow" ? "normal" : "snow");
+    html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>' + (state.mode === "snow" ? "下雪" : "一般") + '</span><b>' + fmtMin(sch.total.min) + '</b></div><div><span>' + (state.mode === "snow" ? "一般" : "下雪") + '</span><b>' + fmtMin(alt.total.min) + '</b></div><div><span>距離</span><b>' + sch.total.km + ' km</b></div>' + (sch.end != null ? '<div><span>最後到達</span><b>' + Plan.hm(sch.end) + '</b></div>' : "") + '</div></div>';
     html += '<div class="card"><p class="panel-label">天氣</p>' + dayWeather(d) + '</div>';
     html += '<div class="card"><p class="panel-label">日照</p><div class="sunrow"><div><span>日出</span><b>' + d.sun[0] + '</b></div><div><span>日落</span><b>' + d.sun[1] + '</b></div><div><span>天黑</span><b>' + d.sun[2] + '</b></div></div></div>';
     html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(d.meals[0]) + '</li><li><span>晚</span>' + esc(d.meals[1]) + '</li></ul></div>';
     html += '</div>';
     $("#dayview").innerHTML = html;
+    renderModeSeg();
     var nav = $("#daynav");
     if (nav) {
       var prev = T.days[state.day - 1], next = T.days[state.day + 1];
@@ -229,7 +236,14 @@
   state.area = PAGE === "day" ? "day" : "all";
   var isDark = true;
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#5A687A"; }
-  function dayPlan() { return (window.DAYPLAN || {})[T.days[state.day].date] || { stops: [], legs: [] }; }
+  function dayPlan() { return (window.Plan && Plan.plan) ? Plan.schedule(T.days[state.day].date, state.mode) : { stops: [], legs: [], total: { km: 0, min: 0 } }; }
+  function lateTag(s) { return s.late ? '<span class="late">晚 ' + s.late + ' 分' + (s.by ? '（最晚 ' + s.by + '）' : s.at ? '（' + s.at + ' 開始）' : '') + '</span>' : s.wait ? '<span class="wait">等 ' + s.wait + ' 分（' + s.at + ' 開始）</span>' : ''; }
+  function renderModeSeg() {
+    document.querySelectorAll(".modeseg").forEach(function (box) {
+      box.innerHTML = [["normal", "一般路況"], ["snow", "下雪路況"]].map(function (m) { return '<button type="button" role="tab" aria-selected="' + (state.mode === m[0]) + '" data-mode="' + m[0] + '">' + m[1] + '</button>'; }).join("");
+      box.onclick = function (e) { var b = e.target.closest("[data-mode]"); if (!b) return; state.mode = Plan.mode(b.dataset.mode); renderModeSeg(); renderDay(); updateRoute(true); };
+    });
+  }
 
   function popupHTML(p) {
     var a = '<a href="' + navUrl(p.lat, p.lon) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
@@ -270,9 +284,8 @@
     }) };
   }
   function routeData() {
-    var date = T.days[state.day].date;
-    var feats = state.routes ? state.routes.features.filter(function (f) { return f.properties.date === date; }) : [];
-    return { type: "FeatureCollection", features: feats };
+    return { type: "FeatureCollection", features: dayPlan().legs.filter(function (l) { return l.geom; }).map(function (l, i) {
+      return { type: "Feature", properties: { leg: i + 1, mode: l.mode === "walk" ? "walk" : "drive" }, geometry: { type: "LineString", coordinates: l.geom } }; }) };
   }
 
   function initMap() {
@@ -350,10 +363,7 @@
         map.on("mouseleave", id, function () { map.getCanvas().style.cursor = ""; });
       });
       mapReady = true;
-      if (PAGE === "day") {
-        fetch(BASE + "data/dayroutes.geojson").then(function (r) { return r.json(); }).then(function (gj) { state.routes = gj; updateRoute(false); })
-          .catch(function () { updateRoute(false); });
-      } else { applyMode(); fitArea(false); }
+      if (PAGE === "day") updateRoute(false); else { applyMode(); fitArea(false); }
     });
   }
   var EXPLORE_LAYERS = ["poi-cluster", "poi-count", "poi-dot", "poi-label", "key-dot", "key-label"];
@@ -425,9 +435,9 @@
         var nav = l.mode === "walk"
           ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + prev.lat + ',' + prev.lon + '&destination=' + s.lat + ',' + s.lon + '" target="_blank" rel="noopener">步行導航</a>'
           : '<a href="' + navUrl(s.lat, s.lon, prev) + '" target="_blank" rel="noopener">導航</a>';
-        html += '<li class="hop"><span>' + (l.mode === "walk" ? "步行 " : "") + l.km + ' km · ' + fmtMin(l.normal) + (l.mode === "walk" ? "" : '<em>雪 ' + fmtMin(l.snow) + '</em>') + '</span>' + nav + '</li>';
+        html += '<li class="hop"><span>' + (l.mode === "walk" ? "步行 " : l.mode === "shuttle" ? "接駁 " : "") + l.km + ' km · ' + fmtMin(l.min) + (l.mode === "drive" ? '<em>' + (state.mode === "snow" ? "一般 " + fmtMin(l.normal) : "雪 " + fmtMin(l.snow)) + '</em>' : "") + '</span>' + nav + '</li>';
       }
-      html += '<li class="stop' + role + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + '</div><div class="sn">' + em(s.note) + '</div></div></li>';
+      html += '<li class="stop' + role + (s.late ? " late" : "") + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + '</div><div class="sn">' + (s.stay && i < plan.stops.length - 1 ? '停 ' + fmtMin(s.stay) + ' → ' + s.timeDep + '　' : "") + lateTag(s) + em(s.note) + '</div></div></li>';
     });
     html += '</ol>';
     $("#stoppanel").innerHTML = html;
@@ -707,7 +717,8 @@
     loop();
   }
 
-  /* ---------- 啟動 ---------- */
+  /* ---------- 啟動（等 plan.json 載入） ---------- */
+  function boot() {
   renderFx();
   initSnow();
   renderHero();
@@ -726,4 +737,6 @@
   initMap();
   loadWeather();
   loadFx();
+  }
+  if (window.Plan) Plan.ready.then(boot).catch(function (e) { console.error(e); boot(); }); else boot();
 })();

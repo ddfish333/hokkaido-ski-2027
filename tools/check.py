@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""行程一致性檢查。行程的唯一事實來源是 data/trip.js（每天做什麼）與 data/dayplan.js（每天的站點與車程）。
+"""行程一致性檢查。行程的唯一事實來源是 data/plan.json（站點、停留、固定時間；編輯器寫入）與 data/trip.js（每天的標題、吃什麼、提醒）。
 其他東西（序幕腳本、海報、照片、單日頁）都應該跟著它們走；這支程式找出沒跟上的地方。
 
 用法：python3 tools/check.py [照片資料夾路徑]
@@ -13,19 +13,60 @@ def load_js(file, var):
     return json.loads(subprocess.run(["node", "-e", code, os.path.join(ROOT, file)], capture_output=True, text=True, check=True).stdout)
 
 trip = load_js("data/trip.js", "TRIP")
-dayplan = load_js("data/dayplan.js", "DAYPLAN")
+PLAN = json.load(open(os.path.join(ROOT, "data/plan.json"), encoding="utf-8"))
+LEGS = json.load(open(os.path.join(ROOT, "data/legs.json"), encoding="utf-8"))
 scenes = load_js("data/scenes.js", "SCENES")
+
+def mins(t): h, m = t.split(":"); return int(h) * 60 + int(m)
+def hm(x): return f"{x // 60:02d}:{x % 60:02d}"
+def leg_of(a, b, via):
+    k = f"{a}|{b}" + ("|walk" if via == "walk" else "|shuttle" if via == "shuttle" else "")
+    return LEGS.get(k)
+def schedule(date, mode):
+    """跟 assets/plan.js 同一套算法：前一站離開＋移動＝抵達；at 早到就等、晚到算遲；by 超過算遲。"""
+    out, t = [], None
+    stops = PLAN["days"][date]["stops"]
+    for i, s in enumerate(stops):
+        via = s.get("via", "drive")
+        if i == 0: arr = mins(s["at"]) if s.get("at") else 480
+        else:
+            L = leg_of(stops[i - 1]["id"], s["id"], via)
+            arr = t + (L[mode] if L else 0)
+        wait = late = 0
+        if i > 0 and s.get("at"):
+            a = mins(s["at"])
+            if arr < a: wait, arr = a - arr, a
+            elif arr > a: late = arr - a
+        if s.get("by") and arr > mins(s["by"]): late = max(late, arr - mins(s["by"]))
+        stay = 0 if i == len(stops) - 1 else int(s.get("stay") or 0)
+        out.append(dict(id=s["id"], arr=arr, dep=arr + stay, late=late, wait=wait))
+        t = arr + stay
+    return out
+# 相容舊的變數名：dayplan[date]["stops"] 需要 id/time/name
+dayplan = {d: {"stops": [dict(id=s["id"], time=hm(x["arr"]), name=PLAN["places"].get(s["id"], {}).get("name", s["id"])) for s, x in zip(v["stops"], schedule(d, "normal"))]} for d, v in PLAN["days"].items()}
 place_of = load_js("data/scenes.js", "PLACE_OF_STOP")
 days = [d["date"] for d in trip["days"]]
 errors, warns = [], []
 E = errors.append; W = warns.append
 
+# 0. plan.json 本身：站點要指向存在的地點；路段快取要齊；固定時間格式
+for d, v in PLAN["days"].items():
+    for i, s in enumerate(v["stops"]):
+        if s["id"] not in PLAN["places"]: E(f"{d}：第 {i+1} 站「{s['id']}」不在 plan.json 的 places 裡")
+        for k in ("at", "by"):
+            if s.get(k) and not re.fullmatch(r"\d{2}:\d{2}", s[k]): E(f"{d}：第 {i+1} 站 {k}={s[k]} 不是 HH:MM")
+        if i and not leg_of(v["stops"][i-1]["id"], s["id"], s.get("via", "drive")):
+            W(f"{d}：{v['stops'][i-1]['id']}→{s['id']} 沒有路段快取，網站先用直線估算（在編輯器儲存一次會自動補）")
+    for mode in ("normal", "snow"):
+        for x in schedule(d, mode):
+            if x["late"]: W(f"{d}：{'下雪' if mode=='snow' else '一般'}路況下「{PLAN['places'].get(x['id'],{}).get('name',x['id'])}」會晚 {x['late']} 分（{hm(x['arr'])} 到）")
+
 # 1. 三份資料的日期要一致
 for d in days:
-    if d not in dayplan: E(f"{d}：trip.js 有這天，dayplan.js 沒有站點")
+    if d not in dayplan: E(f"{d}：trip.js 有這天，plan.json 沒有站點")
     if d not in scenes: W(f"{d}：scenes.js 沒有海報，首頁會顯示空白海報")
 for d in dayplan:
-    if d not in days: E(f"{d}：dayplan.js 有站點，但 trip.js 已經沒有這天")
+    if d not in days: E(f"{d}：plan.json 有站點，但 trip.js 已經沒有這天")
 for d in scenes:
     if d not in days: E(f"{d}：scenes.js 有腳本，但 trip.js 已經沒有這天")
 
@@ -92,7 +133,7 @@ else:
     W(f"找不到照片資料夾 {photo_root}，略過照片檢查")
 
 print("=== 行程一致性檢查 ===")
-print(f"trip.js {len(days)} 天 · dayplan.js {len(dayplan)} 天 · scenes.js {len(scenes)} 天 · 完整序幕 {sum(1 for v in scenes.values() if v.get('scenes'))} 天")
+print(f"trip.js {len(days)} 天 · plan.json {len(dayplan)} 天 · scenes.js {len(scenes)} 天 · 完整序幕 {sum(1 for v in scenes.values() if v.get('scenes'))} 天")
 for e in errors: print("✗", e)
 for w in warns: print("△", w)
 print(f"錯誤 {len(errors)}，警告 {len(warns)}")

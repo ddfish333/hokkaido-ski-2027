@@ -4,11 +4,13 @@
   var T = window.TRIP, S = window.SCENES || {};
   var date = window.DAY; if (!T || !date) return;
   var day = T.days.filter(function (d) { return d.date === date; })[0]; if (!day) return;
+  (window.Plan ? Plan.ready : Promise.resolve()).catch(function () { }).then(function () { run(); });
+  function run() {
   var IMG = (window.BASE || "") + "assets/img/";
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var dayIdx = T.days.indexOf(day);
   var def = S[date] || {};
-  var plan = (window.DAYPLAN || {})[date] || { stops: [] };
+  var plan = (window.Plan && Plan.plan) ? Plan.schedule(date, Plan.mode()) : { stops: [] };
   function stopOf(id) { return plan.stops.filter(function (x) { return x.id === id; })[0]; }
   var scenes = def.scenes;
   if (scenes) {
@@ -183,4 +185,5 @@
   addEventListener("keydown", function (e) { if (!started || ended) return; if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); show(cur + 1); } if (e.key === "ArrowLeft") show(cur - 1); if (e.key === "Escape") finish(); });
   document.addEventListener("visibilitychange", function () { if (AC) { document.hidden ? AC.suspend() : AC.resume(); } });
   scenes.forEach(function (sc) { if (sc.img) { var im = new Image(); im.src = IMG + sc.img; } });
+  }
 })();
