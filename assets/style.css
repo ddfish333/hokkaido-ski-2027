@@ -146,7 +146,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .day-sub { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
 .alert { margin: 16px 0 0; padding: 10px 14px; border-radius: 10px; background: rgba(240,164,58,.1); color: var(--ink); border-left: 2px solid var(--warn); font-size: 14px; }
 .timeline { list-style: none; margin: 20px 0 0; padding: 0; display: grid; }
-.timeline li { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14.5px; }
+.timeline li { position: relative; display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 12px; padding: 12px 0 12px 20px; font-size: 14.5px; }
+/* 左側一條連續的線，把 A 點和 B 點串起來；站點是一顆點，移動段是線上的一段 */
+.timeline li::before { content: ""; position: absolute; left: 4px; top: 0; bottom: 0; border-left: 1.5px solid var(--line); }
+.timeline li:first-child::before { top: 18px; }
+.timeline li:last-child::before { bottom: auto; height: 18px; }
+.timeline li:not(.tl-leg)::after { content: ""; position: absolute; left: 0; top: 14px; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px var(--paper); }
+.timeline li.is-late::after { background: var(--accent); }
 .timeline time { color: var(--gold); font-size: 13px; letter-spacing: .06em; padding-top: 2px; }
 .side { display: grid; gap: 20px; align-content: start; }
 .sunrow { display: flex; gap: 22px; flex-wrap: wrap; font-size: 14px; }
@@ -404,8 +410,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* 時間表：停留／移動／遲到 */
 .modeseg { display: inline-flex; margin: 18px 0 4px; }
 .modeseg button { flex: none; padding: 8px 14px; }
-.timeline .tl-leg { padding: 6px 0; border-top: 0; font: 400 12px/1.6 var(--f-mono); color: var(--muted); }
-.timeline .tl-leg time { display: block; border-left: 1px dashed var(--line); height: 100%; margin-left: 20px; }
+.timeline .tl-leg { padding: 2px 0 2px 20px; font: 400 12.5px/1.6 var(--f-display); letter-spacing: .06em; color: var(--muted); }
+.timeline .tl-leg::before { border-left-style: solid; border-left-color: rgba(244,241,234,.35); }
+.timeline .tl-leg.walk::before, .timeline .tl-leg.shuttle::before { border-left-style: dashed; }
+.timeline .tl-leg time { display: block; }
+.timeline .tl-leg small { color: var(--muted); font-size: 11px; }
 .timeline time small { display: block; font-size: 11px; color: var(--muted); letter-spacing: .04em; }
 .stay { display: inline-block; font: 400 11.5px/1 var(--f-display); letter-spacing: .08em; padding: 4px 8px; border-radius: 6px; margin-left: 8px; vertical-align: 1px; background: rgba(106,164,255,.16); color: var(--glacier); border: 1px solid rgba(106,164,255,.35); }
 .sc-top .stay { margin-left: 0; }

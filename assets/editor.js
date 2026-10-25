@@ -86,7 +86,7 @@
       html += '<li class="stopcard' + (s.late ? " is-late" : "") + '" data-i="' + i + '">' +
         '<button type="button" class="handle" aria-label="拖拉改順序" data-i="' + i + '">⋮⋮</button>' +
         '<div class="sc-body">' +
-          '<div class="sc-top"><span class="sc-time">' + s.time + (last || !s.stay ? "" : ' <small>– ' + s.timeDep + '</small>') + '</span><span class="sc-name">' + esc(s.name) + '</span>' +
+          '<div class="sc-top"><span class="sc-time">' + s.time + (last || !s.stay ? "" : ' <small>– ' + s.timeDep + '</small>') + '</span><span class="sc-name">' + esc(s.name) + '</span>' + (last || !s.stay ? "" : '<span class="stay">停 ' + fmtMin(s.stay) + '</span>') +
             (s.late ? '<span class="late">晚 ' + s.late + ' 分</span>' : s.wait ? '<span class="wait">早到，等 ' + s.wait + ' 分</span>' : "") +
             '<span class="sc-menu"><select data-move="' + i + '" aria-label="搬到別天"><option value="">⋯</option>' + dates.filter(function (x) { return x !== state.date; }).map(function (x) { return '<option value="' + x + '">搬到 ' + md(x) + '</option>'; }).join("") + '<option value="__del">刪除這站</option></select></span></div>' +
           (last ? '<p class="sc-hint">最後一站：到了就結束，不算停留。</p>' :

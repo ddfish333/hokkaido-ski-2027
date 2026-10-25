@@ -205,9 +205,9 @@
       '<div class="modeseg seg" role="tablist" aria-label="路況"></div>' +
       '<ol class="timeline">' + sch.stops.map(function (s, i) {
         var row = "";
-        if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg"><time></time><span>' + (l.mode === "walk" ? "步行 " : l.mode === "shuttle" ? "接駁 " : "開車 ") + fmtMin(l.min) + ' · ' + l.km + ' km' + (l.est ? '（直線估算）' : '') + '</span></li>'; }
+        if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg ' + l.mode + '"><time></time><span>' + (l.mode === "walk" ? "步行" : l.mode === "shuttle" ? "接駁車" : "開車") + ' ' + fmtMin(l.min) + ' <small>· ' + l.km + ' km' + (l.est ? ' · 直線估算' : '') + '</small></span></li>'; }
         var last = i === sch.stops.length - 1;
-        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + (s.stay && !last ? ' <small class="stay">停 ' + fmtMin(s.stay) + '</small>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(s.note) + '</span>' : "") + '</span></li>';
+        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(s.note) + '</span>' : "") + '</span></li>';
         return row;
       }).join("") + '</ol></div>';
     html += '<div class="side">';
@@ -451,7 +451,7 @@
           : '<a href="' + navUrl(s.lat, s.lon, prev) + '" target="_blank" rel="noopener">導航</a>';
         html += '<li class="hop"><span>' + (l.mode === "walk" ? "步行 " : l.mode === "shuttle" ? "接駁 " : "") + l.km + ' km · ' + fmtMin(l.min) + (l.mode === "drive" ? '<em>' + (state.mode === "snow" ? "一般 " + fmtMin(l.normal) : "雪 " + fmtMin(l.snow)) + '</em>' : "") + '</span>' + nav + '</li>';
       }
-      html += '<li class="stop' + role + (s.late ? " late" : "") + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + '</div><div class="sn">' + (s.stay && i < plan.stops.length - 1 ? '停 ' + fmtMin(s.stay) + ' → ' + s.timeDep + '　' : "") + lateTag(s) + em(s.note) + '</div></div></li>';
+      html += '<li class="stop' + role + (s.late ? " late" : "") + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + '</div><div class="sn">' + (s.stay && i < plan.stops.length - 1 ? '<span class="stay" style="margin:0 8px 4px 0">停 ' + fmtMin(s.stay) + ' → ' + s.timeDep + '</span>' : "") + lateTag(s) + em(s.note) + '</div></div></li>';
     });
     html += '</ol>';
     $("#stoppanel").innerHTML = html;
