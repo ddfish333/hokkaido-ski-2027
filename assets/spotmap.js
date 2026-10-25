@@ -7,6 +7,7 @@
 
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function em(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
   function nf(n) { return Number(n).toLocaleString("zh-Hant-TW"); }
   function r5(x) { return Math.max(5, Math.round(x / 5) * 5); }
   var DOW = ["日", "一", "二", "三", "四", "五", "六"];
@@ -77,11 +78,13 @@
       '<div class="fp-rating">' + stars + '</div>' +
       '<p class="fp-what">' + esc(s.what) + '</p>' +
       (s.caution ? '<p class="fp-caution">⚠ ' + esc(s.caution) + '</p>' : "") +
+      (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(s.photo) + (s.photoAt ? ' <button type="button" class="fp-photoat" data-photo="' + s.id + '">在地圖上看拍攝點</button>' : "") + '</p>' : "") +
       (s.parking ? '<p class="fp-meta">停車：' + esc(s.parking) + '</p>' : "") +
       '<p class="fp-meta">' + meta.join(" · ") + '</p>' +
       '<div class="fp-act">' + (g && g.q ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") +
       '<a href="' + mapsUrl + '" target="_blank" rel="noopener">Google Maps →</a>' +
       '<a href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + s.lat + ',' + s.lon + (c.b ? '&origin=' + c.b.lat + ',' + c.b.lon : "") + '" target="_blank" rel="noopener">導航 →</a>' +
+      (s.photoAt ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + s.photoAt[0] + ',' + s.photoAt[1] + '" target="_blank" rel="noopener">📷 走到拍攝點 →</a>' : "") +
       (s.status !== "plan" ? '<a class="fp-add" href="' + addUrl(s, c) + '">加入行程 ＋</a>' : (s.day ? '<a href="' + (window.BASE || "../") + 'day/' + s.day.slice(5).replace("-", "") + '/">看 ' + md(s.day) + ' 行程 →</a>' : "")) +
       (s.src ? s.src.map(function (x) { return '<a class="src" href="' + esc(x[1]) + '" target="_blank" rel="noopener">' + esc(x[0]) + ' ↗</a>'; }).join("") : "") + '</div>' +
       '<div class="fp-embed" hidden></div></li>';
@@ -96,6 +99,8 @@
     }
     var go = e.target.closest("[data-go]");
     if (go) focusSpot(go.dataset.go, true);
+    var ph = e.target.closest("[data-photo]");
+    if (ph) { focusSpot(ph.dataset.photo, true); showPhotoPin(ph.dataset.photo, true); }
   });
 
   /* ---------- 工具列 ---------- */
@@ -126,7 +131,16 @@
   }
 
   /* ---------- 地圖 ---------- */
-  var map, markers = {}, popup, mapReady = false;
+  var map, markers = {}, popup, mapReady = false, photoPin = null;
+  function showPhotoPin(id, fly) {
+    var s = SPOTS.filter(function (x) { return x.id === id; })[0];
+    if (photoPin) { photoPin.remove(); photoPin = null; }
+    if (!map || !s || !s.photoAt) return;
+    var el = document.createElement("div"); el.className = "fm-cam";
+    el.innerHTML = '<span class="fm-cam-i">📷</span><span class="fm-cam-l">' + esc(s.photoName || "拍攝點") + '</span>';
+    photoPin = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([s.photoAt[1], s.photoAt[0]]).addTo(map);
+    if (fly) { var b = new maplibregl.LngLatBounds([s.lon, s.lat], [s.lon, s.lat]); b.extend([s.photoAt[1], s.photoAt[0]]); map.fitBounds(b, { padding: 120, maxZoom: 16.5, duration: 700 }); }
+  }
   function routeGeo() {
     var feats = [];
     if (!window.Plan || !Plan.plan) return { type: "FeatureCollection", features: feats };
@@ -198,10 +212,12 @@
     syncPins(visible());
     if (!map) return;
     if (fly) map.flyTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 13), duration: 800 });
+    showPhotoPin(id, false);
     var g = s.g;
     popup.setLngLat([s.lon, s.lat]).setHTML('<b>' + esc(s.name) + '</b><span>' + esc(s.kind) + ' · ' + esc(s.area) + (g && g.rating ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
       '<em class="' + (s.status === "plan" ? "gold" : "blue") + '">' + st[0] + (s.day ? " " + md(s.day) : "") + '</em>' +
       '<small>' + esc(s.what).slice(0, 70) + (s.what.length > 70 ? "…" : "") + '</small>' +
+      (s.photoAt ? '<small class="cam">📷 拍攝點：' + esc(s.photoName) + '（地圖上的相機）</small>' : "") +
       (s.status !== "plan" ? '<a href="' + addUrl(s, c) + '">加入行程 ＋</a>' : "")).addTo(map);
   }
   function scrollToCard(id) { var li = document.getElementById(id); if (!li) return; li.scrollIntoView({ behavior: "smooth", block: window.innerWidth > 900 ? "center" : "start" }); }

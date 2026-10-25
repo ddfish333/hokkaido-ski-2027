@@ -737,7 +737,7 @@
       html += '<li class="fp ' + (s.kids === "best" ? "best" : s.kids === "warn" ? "warn" : "ok") + (closed ? " closed" : "") + '">' +
         '<div class="fp-top"><b>' + esc(s.name) + '</b><span class="kind">' + esc(s.kind) + '</span><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (closed ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
         (g && g.rating ? '<div class="fp-rating"><span class="stars"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small></div>' : "") +
-        '<p class="fp-what">' + esc(s.what) + '</p>' + (s.caution ? '<p class="fp-caution">⚠ ' + esc(s.caution) + '</p>' : "") +
+        '<p class="fp-what">' + esc(s.what) + '</p>' + (s.caution ? '<p class="fp-caution">⚠ ' + esc(s.caution) + '</p>' : "") + (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(s.photo) + '</p>' : "") +
         '<p class="fp-meta">' + esc(s.hours || "") + (s.fee ? ' · ' + esc(s.fee) : "") + (s.time ? ' · 約 ' + s.time + ' 分' : "") + ' · 離今天路線最近約 ' + min + ' 分車程</p>' +
         '<div class="fp-act">' + (g && g.q ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") +
         '<a href="' + (g && g.pid ? 'https://www.google.com/maps/place/?q=place_id:' + g.pid : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((s.ja || s.name) + " " + s.area)) + '" target="_blank" rel="noopener">Google Maps →</a>' +
