@@ -407,7 +407,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .timeline .tl-leg { padding: 6px 0; border-top: 0; font: 400 12px/1.6 var(--f-mono); color: var(--muted); }
 .timeline .tl-leg time { display: block; border-left: 1px dashed var(--line); height: 100%; margin-left: 20px; }
 .timeline time small { display: block; font-size: 11px; color: var(--muted); letter-spacing: .04em; }
-.timeline .stay { color: var(--muted); font-size: 12px; margin-left: 6px; }
+.stay { display: inline-block; font: 400 11.5px/1 var(--f-display); letter-spacing: .08em; padding: 4px 8px; border-radius: 6px; margin-left: 8px; vertical-align: 1px; background: rgba(106,164,255,.16); color: var(--glacier); border: 1px solid rgba(106,164,255,.35); }
+.sc-top .stay { margin-left: 0; }
 .timeline .tl-note { color: var(--muted); font-size: 13px; }
 .timeline li.is-late time { color: var(--accent); }
 .late, .wait { display: inline-block; font: 400 11px/1 var(--f-display); letter-spacing: .08em; padding: 4px 7px; border-radius: 999px; margin-left: 8px; vertical-align: 1px; }
