@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>1/8 Kiroro 滑雪 · 北海道・雪上的大小腳印</title>
+<meta name="description" content="北海道・雪上的大小腳印 DAY 02：Kiroro 滑雪。上午請教練認識雪場；晚上 Onze 夜滑">
+<meta name="theme-color" content="#05080F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>window.DAY = "2027-01-08"; window.BASE = "../../";</script>
+</head>
+<body class="daypage">
+
+<div class="film" id="film" aria-label="序幕"></div>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="../../" aria-label="回首頁">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">北海道・雪上的大小腳印</span>
+    </a>
+    <nav class="nav" aria-label="主要區塊">
+      <a href="../../#days">13 天</a>
+      <a href="#plan">行程</a>
+      <a href="#map">地圖</a>
+      <a href="../../#weather">天氣</a>
+      <a href="../../#food">吃喝</a>
+    </nav>
+    <button type="button" class="curbtn" id="curbtn" aria-label="切換金額顯示">¥＋NT$</button>
+  </div>
+</header>
+
+<main>
+  <section class="band dayhead-band" id="plan">
+    <div class="wrap">
+      <div class="dayhead" id="dayhead"></div>
+      <article class="day" id="dayview"></article>
+    </div>
+  </section>
+
+  <section class="band band-alt" id="map" aria-label="當天地圖">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>今天的路</h2>
+        <p class="sec-note">地圖只顯示當天的行程點與路線。車程為一般／下雪（概估），出發當天以 Google Maps 為準。</p>
+      </div>
+    </div>
+    <div class="wrap mapgrid">
+      <div class="mapbox">
+        <div id="mapcanvas" class="mapcanvas" role="region" aria-label="地圖"></div>
+        <p class="map-fallback" id="mapfallback" hidden>地圖載入失敗，請確認網路連線後重新整理。</p>
+      </div>
+      <aside class="panel"><div id="stoppanel"></div></aside>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap"><nav class="daynav" id="daynav" aria-label="前後一天"></nav></div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p>資料整理：<span id="updated"></span>。車程、營業時間與天氣都可能變動，出發前請以官方公告與即時導航為準。</p>
+    <p id="fxnote"></p>
+    <p>地圖 © OpenStreetMap contributors · OpenFreeMap｜天氣 Open-Meteo｜路線 OSRM｜序幕音樂為網頁即時生成，照片出處見首頁。</p>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="../../data/trip.js"></script>
+<script src="../../data/dayplan.js"></script>
+<script src="../../data/scenes.js"></script>
+<script src="../../assets/film.js"></script>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

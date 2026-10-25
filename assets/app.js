@@ -2,6 +2,8 @@
   "use strict";
   var T = window.TRIP;
   if (!T) return;
+  var PAGE = window.DAY ? "day" : "home", BASE = window.BASE || "", SC = window.SCENES || {};
+  function has(id) { return !!document.getElementById(id); }
 
   /* ---------- 小工具 ---------- */
   function $(s, r) { return (r || document).querySelector(s); }
@@ -53,11 +55,14 @@
   }
   function em(s) { return esc(money(s)); }
 
+  /* 今天／下一天：出發前指向 1/7，旅程中指向當天，結束後停在最後一天 */
+  function focusDayIndex() { var i = T.days.findIndex(function (d) { return d.date === TODAY; }); return i >= 0 ? i : (TODAY > T.end ? T.days.length - 1 : 0); }
   (function initDay() {
-    var i = T.days.findIndex(function (d) { return d.date === TODAY; });
-    state.day = i >= 0 ? i : (TODAY > T.end ? T.days.length - 1 : 0);
+    var i = window.DAY ? T.days.findIndex(function (d) { return d.date === window.DAY; }) : -1;
+    state.day = i >= 0 ? i : focusDayIndex();
     state.origin = T.days[state.day].base;
   })();
+  function dayHref(d) { return BASE + "day/" + d.date.slice(5).replace("-", "") + "/"; }
 
   /* ---------- 天氣圖示 ---------- */
   var ICON = {
@@ -88,7 +93,8 @@
 
   /* ---------- 主視覺 ---------- */
   function renderHero() {
-    var c = $("#countdown");
+    if (has("updated")) $("#updated").textContent = T.updated;
+    var c = $("#countdown"); if (!c) return;
     if (TODAY < T.start) {
       c.innerHTML = '<span class="big">' + dayDiff(TODAY, T.start) + '</span><span class="lbl">天後出發</span>';
     } else if (TODAY <= T.end) {
@@ -100,12 +106,50 @@
       var on = TODAY >= b.from && TODAY < b.to;
       return '<li style="--n:' + b.nights + '" class="' + (on ? "on" : "") + '"><b>' + esc(b.short) + ' ' + b.nights + ' 晚</b><span>' + md(b.from) + '–' + md(b.to) + '</span></li>';
     }).join("");
-    $("#updated").textContent = T.updated;
+    var f = T.days[focusDayIndex()], cta = $("#herocta");
+    if (cta) cta.innerHTML = '<a class="cta" href="' + dayHref(f) + '"><span>' + (TODAY < T.start ? "從第一天開始看" : TODAY <= T.end ? "今天 " + md(f.date) : "最後一天") + '</span><b>' + esc(f.title) + '</b></a>';
+  }
+
+  /* ---------- 首頁：13 天海報牆與三章 ---------- */
+  function renderPosters() {
+    var box = $("#posters"); if (!box) return;
+    var focus = focusDayIndex();
+    box.innerHTML = T.days.map(function (d, i) {
+      var sc = SC[d.date] || {}, p = sc.poster || {}, b = baseById[d.base];
+      var badge = d.date === TODAY ? "今天" : (TODAY < T.start && i === 0 ? "第一天" : "");
+      return '<a class="poster' + (i === focus ? " focus" : "") + '" href="' + dayHref(d) + '" style="--seg:' + BASE_COLOR[d.base] + '">' +
+        (p.img ? '<img src="' + BASE + 'assets/img/' + p.img + '" alt="" loading="lazy">' : '<span class="poster-blank"></span>') +
+        '<span class="poster-top"><span class="pd">' + md(d.date) + '<small>週' + dow(d.date) + '</small></span>' + (badge ? '<span class="badge">' + badge + '</span>' : "") + '</span>' +
+        '<span class="poster-body"><span class="pn">DAY ' + (i < 9 ? "0" : "") + (i + 1) + ' · ' + esc(b.area) + '</span><span class="pt">' + esc(d.title) + '</span><span class="pl">' + esc(p.line || d.sub) + '</span></span></a>';
+    }).join("");
+    var f = box.children[focus];
+    if (f) box.scrollLeft = Math.max(0, f.offsetLeft - 24);
+  }
+  var CHAPTER_IMG = { villa: "otaru", furano: "furano", sapporo: "sapporo" };
+  var CHAPTER_LINE = {
+    villa: "前段先安頓。山裡的房子，走路五分鐘就是 Onze，開車 40 分鐘上 Kiroro。",
+    furano: "主戰場。小木屋開車五分鐘到北之峰纜車，平日的壓雪寬坡留給 carving；美瑛和動物園在滑雪的空檔。",
+    sapporo: "最後三晚回到城市，節奏放鬆一點。手稻就在 40 分鐘外，最後一次滑雪。"
+  };
+  function renderChapters() {
+    var box = $("#chapterlist"); if (!box) return;
+    box.innerHTML = T.bases.map(function (b, i) {
+      var k = CHAPTER_IMG[b.id], days = T.days.filter(function (d) { return d.base === b.id; });
+      return '<article class="chapter">' +
+        '<div class="ch-img"><img src="' + BASE + 'assets/img/chapter/' + k + '.jpg" alt="" loading="lazy"></div>' +
+        '<div class="ch-body"><p class="ch-k">第 ' + ["一", "二", "三"][i] + ' 章 · ' + md(b.from) + ' – ' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
+        '<h3 class="ch-h">' + esc(b.short) + '</h3><p class="ch-line">' + esc(CHAPTER_LINE[b.id]) + '</p>' +
+        '<p class="ch-stay">住 ' + esc(b.name) + (b.checkin ? ' · 入住 ' + b.checkin : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
+        '<ul class="ch-notes">' + b.notes.map(function (n) { return '<li>' + em(n) + '</li>'; }).join("") + '</ul>' +
+        '<div class="ch-days">' + days.map(function (d) { return '<a href="' + dayHref(d) + '">' + md(d.date) + ' ' + esc(d.title) + '</a>'; }).join("") + '</div>' +
+        '<div class="ch-gal">' + [1, 2, 3, 4].map(function (n) { return '<img src="' + BASE + 'assets/img/stay/' + b.id + '-' + n + '.jpg" alt="" loading="lazy">'; }).join("") + '</div>' +
+        '</div></article>';
+    }).join("");
   }
 
   /* ---------- 每日 ---------- */
   function renderDayStrip() {
-    var s = $("#daystrip");
+    var s = $("#daystrip"); if (!s) return;
     s.innerHTML = T.days.map(function (d, i) {
       var b = baseById[d.base];
       return '<button type="button" role="tab" class="dchip' + (d.date === TODAY ? " today" : "") + '" style="--seg:' + BASE_COLOR[d.base] + '" aria-selected="' + (i === state.day) + '" data-i="' + i + '">' +
@@ -139,9 +183,10 @@
     return '<div class="wxday"><span class="ico">' + ICON.snow + '</span><div><div class="tt">' + c.tmax + '° / ' + c.tmin + '°</div><div class="ss">' + esc(c.label) + ' 歷年平均・每日新雪約 ' + c.snow + ' cm（進入 16 天預報後改顯示即時）</div></div></div>';
   }
   function renderDay() {
+    if (!has("dayview")) return;
     var d = T.days[state.day], b = baseById[d.base];
-    var html = '<div class="card"><p class="day-date">' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p>' +
-      '<h3 class="day-title">' + esc(d.title) + '</h3><p class="day-sub">' + esc(d.sub) + '</p>' +
+    var html = '<div class="card">' + (has("dayhead") ? '<p class="panel-label">今天的安排</p><p class="day-sub" style="margin:0 0 4px">' + esc(d.sub) + '</p>' : '<p class="day-date">' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p>' +
+      '<h3 class="day-title">' + esc(d.title) + '</h3><p class="day-sub">' + esc(d.sub) + '</p>') +
       (d.alert ? '<p class="alert">' + esc(d.alert) + '</p>' : "") +
       '<ol class="timeline">' + d.plan.map(function (p) { return '<li><time>' + esc(p[0]) + '</time><span>' + em(p[1]) + '</span></li>'; }).join("") + '</ol></div>';
     html += '<div class="side">';
@@ -153,6 +198,15 @@
     html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(d.meals[0]) + '</li><li><span>晚</span>' + esc(d.meals[1]) + '</li></ul></div>';
     html += '</div>';
     $("#dayview").innerHTML = html;
+    var nav = $("#daynav");
+    if (nav) {
+      var prev = T.days[state.day - 1], next = T.days[state.day + 1];
+      nav.innerHTML = (prev ? '<a class="dn prev" href="' + dayHref(prev) + '"><small>← ' + md(prev.date) + '</small>' + esc(prev.title) + '</a>' : '<span></span>') +
+        '<a class="dn home" href="' + BASE + '">全部 13 天</a>' +
+        (next ? '<a class="dn next" href="' + dayHref(next) + '"><small>' + md(next.date) + ' →</small>' + esc(next.title) + '</a>' : '<span></span>');
+    }
+    var hd = $("#dayhead");
+    if (hd) hd.innerHTML = '<p class="dh-k">DAY ' + (state.day < 9 ? "0" : "") + (state.day + 1) + ' · ' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p><h1 class="dh-h">' + esc(d.title) + '</h1><p class="dh-s">' + esc(((SC[d.date] || {}).poster || {}).line || d.sub) + '</p>';
   }
 
   /* ---------- 地圖：預設跟著日期走；地區按鈕切到探索模式 ---------- */
@@ -171,8 +225,9 @@
   var SKI_LABEL = { onze: "Onze", kiroro: "Kiroro", furano_kita: "富良野（北之峰）", teine: "Teine", asari: "朝里川" };
   var CIRCLED = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨"];
   var map = null, gpsMarker = null, mapReady = false, KEYS = [], POIS = [], STOPS = [];
-  state.area = "day";
-  var isDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  if (PAGE === "day") AREAS = AREAS.slice(0, 1); else AREAS = AREAS.slice(1);
+  state.area = PAGE === "day" ? "day" : "all";
+  var isDark = true;
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#5A687A"; }
   function dayPlan() { return (window.DAYPLAN || {})[T.days[state.day].date] || { stops: [], legs: [] }; }
 
@@ -221,6 +276,7 @@
   }
 
   function initMap() {
+    if (!has("mapcanvas")) return;
     renderLayers(); renderAreas(); renderStops(); applyMode();
     KEYS = keyPoints(); POIS = T.places.slice();
     if (!window.maplibregl) { $("#mapfallback").hidden = false; return; }
@@ -294,23 +350,25 @@
         map.on("mouseleave", id, function () { map.getCanvas().style.cursor = ""; });
       });
       mapReady = true;
-      fetch("data/dayroutes.geojson").then(function (r) { return r.json(); }).then(function (gj) { state.routes = gj; updateRoute(false); })
-        .catch(function () { updateRoute(false); });
+      if (PAGE === "day") {
+        fetch(BASE + "data/dayroutes.geojson").then(function (r) { return r.json(); }).then(function (gj) { state.routes = gj; updateRoute(false); })
+          .catch(function () { updateRoute(false); });
+      } else { applyMode(); fitArea(false); }
     });
   }
   var EXPLORE_LAYERS = ["poi-cluster", "poi-count", "poi-dot", "poi-label", "key-dot", "key-label"];
   var DAY_LAYERS = ["dayroute-casing", "dayroute-line", "dayroute-walk", "stop-dot", "stop-num", "stop-label"];
   function applyMode() {
     var day = state.area === "day";
-    $("#layers").hidden = day;
-    $("#stoppanel").hidden = !day;
-    $("#explorepanel").hidden = day;
+    if (has("layers")) $("#layers").hidden = day;
+    if (has("stoppanel")) $("#stoppanel").hidden = !day;
+    if (has("explorepanel")) $("#explorepanel").hidden = day;
     if (!map || !mapReady) return;
     EXPLORE_LAYERS.forEach(function (id) { map.setLayoutProperty(id, "visibility", day ? "none" : "visible"); });
     DAY_LAYERS.forEach(function (id) { map.setLayoutProperty(id, "visibility", day ? "visible" : "none"); });
   }
   function renderLayers() {
-    var box = $("#layers");
+    var box = $("#layers"); if (!box) return;
     box.innerHTML = CATS.map(function (c) {
       return '<button type="button" class="chip" aria-pressed="' + catOn[c[0]] + '" data-cat="' + c[0] + '" style="--mc:var(' + c[2] + ')"><i></i>' + c[1] + '</button>';
     }).join("");
@@ -323,7 +381,7 @@
     };
   }
   function renderAreas() {
-    var box = $("#areas");
+    var box = $("#areas"); if (!box) return;
     box.innerHTML = AREAS.map(function (a) {
       var label = a[0] === "day" ? md(T.days[state.day].date) + " 行程" : a[1];
       return '<button type="button" role="tab" aria-selected="' + (state.area === a[0]) + '" data-area="' + a[0] + '">' + esc(label) + '</button>';
@@ -357,6 +415,7 @@
     fitArea(animate);
   }
   function renderStops() {
+    if (!has("stoppanel")) return;
     var d = T.days[state.day], plan = dayPlan(), o = null;
     var html = '<h3 class="panel-h">' + md(d.date) + '（' + dow(d.date) + '）行程點</h3><ol class="stops">';
     plan.stops.forEach(function (s, i) {
@@ -373,7 +432,7 @@
     html += '</ol>';
     $("#stoppanel").innerHTML = html;
   }
-  $("#stoppanel").addEventListener("click", function (e) {
+  if (has("stoppanel")) $("#stoppanel").addEventListener("click", function (e) {
     var li = e.target.closest("[data-s]"); if (!li || !map) return;
     var s = dayPlan().stops[+li.dataset.s];
     map.flyTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 13), duration: 700 });
@@ -381,13 +440,14 @@
 
   /* ---------- 出發地與車程 ---------- */
   function renderOrigin() {
+    if (!has("origin")) return;
     var opts = T.bases.map(function (b) { return [b.id, b.short]; });
     if (state.gps) opts.push(["gps", "我的位置"]);
     $("#origin").innerHTML = opts.map(function (o) {
       return '<button type="button" role="radio" aria-checked="' + (state.origin === o[0]) + '" data-o="' + o[0] + '">' + esc(o[1]) + '</button>';
     }).join("");
   }
-  $("#origin").addEventListener("click", function (e) {
+  if (has("origin")) $("#origin").addEventListener("click", function (e) {
     var b = e.target.closest("[data-o]"); if (!b) return;
     state.origin = b.dataset.o; state.originManual = true; renderOrigin(); renderDrive();
   });
@@ -396,6 +456,7 @@
     var b = baseById[state.origin]; return { lat: b.lat, lon: b.lon };
   }
   function renderDrive() {
+    if (!has("drivelist")) return;
     var o = originPoint(), rows;
     if (state.origin === "gps") {
       rows = T.resorts.map(function (r) {
@@ -415,7 +476,7 @@
         '<a href="' + navUrl(x.r.lat, x.r.lon, o) + '" target="_blank" rel="noopener">開 Google Maps 導航 →</a></li>';
     }).join("");
   }
-  $("#gpsbtn").addEventListener("click", function () {
+  if (has("gpsbtn")) $("#gpsbtn").addEventListener("click", function () {
     var msg = $("#gpsmsg");
     if (!navigator.geolocation) { msg.textContent = "這個瀏覽器不支援定位，請改選住宿。"; return; }
     msg.textContent = "定位中…";
@@ -468,6 +529,7 @@
     return h ? '<div class="r-wx">' + h + '</div>' : "";
   }
   function renderResorts() {
+    if (!has("resorts")) return;
     $("#resorts").innerHTML = T.resorts.map(function (r) {
       var minor = r.id === "teine" || r.id === "asari";
       var d = T.drive;
@@ -523,6 +585,7 @@
     get(B, true);
   }
   function renderWxTabs() {
+    if (!has("wxtabs")) return;
     $("#wxtabs").innerHTML = WX_TABS.map(function (t) {
       return '<button type="button" role="tab" aria-selected="' + (state.wxTab === t.id) + '" data-t="' + t.id + '">' + esc(t.label) + '</button>';
     }).join("");
@@ -532,7 +595,7 @@
     };
   }
   function renderWxStrip() {
-    var w = state.wx[state.wxTab], box = $("#wxstrip");
+    var w = state.wx[state.wxTab], box = $("#wxstrip"); if (!box) return;
     if (!w || !w.daily) { box.innerHTML = '<div class="wxmsg">' + (state.wxFail ? "暫時連不上天氣服務，請稍後重新整理。" : "天氣資料載入中…") + '</div>'; return; }
     var dd = w.daily;
     box.innerHTML = dd.time.map(function (t, k) {
@@ -547,6 +610,7 @@
       : "即時預報（Open-Meteo）。紅框是旅程日期。陣風單位 km/h。";
   }
   function renderClimate() {
+    if (!has("climate")) return;
     var rows = Object.keys(T.climate).map(function (k) {
       var c = T.climate[k]; return '<tr><td>' + esc(c.label) + '</td><td>' + c.tmax + '°</td><td>' + c.tmin + '°</td><td>' + c.snow + ' cm</td></tr>';
     }).join("");
@@ -556,6 +620,7 @@
 
   /* ---------- 吃喝 ---------- */
   function renderFood() {
+    if (!has("foodlist")) return;
     var foods = T.places.filter(function (p) { return p.type === "food"; });
     var areas = ["全部"]; foods.forEach(function (f) { if (areas.indexOf(f.area) < 0) areas.push(f.area); });
     $("#foodfilter").innerHTML = areas.map(function (a) {
@@ -571,6 +636,7 @@
 
   /* ---------- 準備 ---------- */
   function renderPrep() {
+    if (!has("todo")) return;
     var done = store("snow13-todo") || [];
     $("#todo").innerHTML = T.todo.map(function (t, i) {
       return '<li><label><input type="checkbox" id="todo-' + i + '" data-i="' + i + '"' + (done.indexOf(i) >= 0 ? " checked" : "") + '><span class="when">' + esc(t[0]) + '</span><span class="what">' + esc(t[1]) + '</span></label></li>';
@@ -591,14 +657,13 @@
 
   /* ---------- 幣別切換與即時匯率 ---------- */
   function renderFx() {
-    $("#curbtn").textContent = CUR_LABEL[state.cur];
-    $("#curbtn").title = "目前顯示：" + { both: "日圓＋台幣", twd: "台幣", jpy: "日圓" }[state.cur] + "（點一下切換）";
-    $("#fxnote").textContent = "匯率：1 日圓 ≈ NT$" + state.rate.toFixed(4) + "（" + state.rateDate + "）。台幣金額為概算，刷卡或換匯實際約再高 1.5–3%。";
+    if (has("curbtn")) { $("#curbtn").textContent = CUR_LABEL[state.cur]; $("#curbtn").title = "目前顯示：" + { both: "日圓＋台幣", twd: "台幣", jpy: "日圓" }[state.cur] + "（點一下切換）"; }
+    if (has("fxnote")) $("#fxnote").textContent = "匯率：1 日圓 ≈ NT$" + state.rate.toFixed(4) + "（" + state.rateDate + "）。台幣金額為概算，刷卡或換匯實際約再高 1.5–3%。";
   }
   function rerenderMoney() {
-    renderFx(); renderDay(); renderResorts(); renderFood(); renderPrep();
+    renderFx(); renderDay(); renderResorts(); renderFood(); renderPrep(); renderChapters(); renderStops();
   }
-  $("#curbtn").addEventListener("click", function () {
+  if (has("curbtn")) $("#curbtn").addEventListener("click", function () {
     state.cur = CUR_MODES[(CUR_MODES.indexOf(state.cur) + 1) % CUR_MODES.length];
     store("snow13-cur", state.cur);
     rerenderMoney();
@@ -646,6 +711,8 @@
   renderFx();
   initSnow();
   renderHero();
+  renderPosters();
+  renderChapters();
   renderDayStrip();
   renderDay();
   renderOrigin();

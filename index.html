@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>北海道・雪上的大小腳印</title>
-<meta name="description" content="北海道・雪上的大小腳印｜2027 年 1 月兩家人北海道親子滑雪：小樽 Kiroro、富良野、札幌。每日行程、雪場、車程、即時天氣與地圖。">
-<meta name="theme-color" content="#0B1626">
+<meta name="description" content="北海道・雪上的大小腳印｜2027 年 1 月兩家人北海道親子滑雪：小樽 Kiroro、富良野、札幌。13 天的序幕、每日行程、雪場、車程、即時天氣與地圖。">
+<meta name="theme-color" content="#070B12">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -21,7 +21,8 @@
       <span class="brand-name">北海道・雪上的大小腳印</span>
     </a>
     <nav class="nav" aria-label="主要區塊">
-      <a href="#day">每日</a>
+      <a href="#days">13 天</a>
+      <a href="#chapters">三章</a>
       <a href="#ski">雪場</a>
       <a href="#weather">天氣</a>
       <a href="#food">吃喝</a>
@@ -32,29 +33,52 @@
 </header>
 
 <section class="hero" id="top">
+  <div class="hero-ph" aria-hidden="true"></div>
   <canvas class="hero-snow" id="snow" aria-hidden="true"></canvas>
   <div class="wrap hero-in">
-    <p class="eyebrow">北海道 · HOKKAIDO WINTER 2027</p>
-    <h1 class="hero-title"><span class="ht-a">雪上的</span><span class="ht-b">大小腳印</span></h1>
-    <p class="hero-sub">2027.01.07 — 01.19<span class="dot">·</span>13 天 12 晚<span class="dot">·</span>兩台 Delica<span class="dot">·</span>4 大 4 小</p>
-    <div class="hero-count" id="countdown" aria-live="polite"></div>
+    <p class="eyebrow">HOKKAIDO · 2027.01.07 — 01.19</p>
+    <h1 class="hero-title"><span class="ht-a">北海道</span><span class="ht-b">雪上的大小腳印</span></h1>
+    <p class="hero-sub">兩家人 · 兩台 Delica · 4 大 4 小 · 13 天 12 晚 · 小樽、富良野、札幌</p>
+    <div class="hero-row">
+      <div class="hero-count" id="countdown" aria-live="polite"></div>
+      <div id="herocta"></div>
+    </div>
     <ol class="route" id="route" aria-label="三段住宿"></ol>
   </div>
 </section>
 
 <main>
 
-  <section class="band" id="day" aria-labelledby="day-h">
+  <section class="band band-dark" id="days" aria-labelledby="days-h">
     <div class="wrap">
       <div class="sec-head">
-        <h2 id="day-h">每日行程</h2>
-        <p class="sec-note">點日期，地圖只顯示當天的行程點與路線。車程為一般／下雪（概估），出發當天以 Google Maps 為準。</p>
+        <h2 id="days-h">十三天</h2>
+        <p class="sec-note">每一天都有自己的序幕。點進去，先看一分鐘那天會發生什麼，再看行程、地圖和天氣。</p>
       </div>
-      <div class="daystrip" id="daystrip" role="tablist" aria-label="選擇日期"></div>
+    </div>
+    <div class="posters" id="posters"></div>
+  </section>
+
+  <section class="band" id="chapters" aria-labelledby="ch-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="ch-h">三章</h2>
+        <p class="sec-note">三個住的地方，三種節奏。</p>
+      </div>
+      <div class="chapters" id="chapterlist"></div>
+    </div>
+  </section>
+
+  <section class="band band-alt" id="ski" aria-labelledby="ski-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="ski-h">雪場與車程</h2>
+        <p class="sec-note">選一個出發點，或用現在的位置，看到各雪場的車程。小孩：Kiroro 5 歲以下、富良野小學生以下纜車免費。票價為 2026-27 季官方公告。</p>
+      </div>
     </div>
     <div class="wrap maptools" id="map">
-      <div class="seg seg-areas" id="areas" role="tablist" aria-label="地圖模式"></div>
-      <div class="chips layers" id="layers" aria-label="圖層" hidden></div>
+      <div class="seg seg-areas" id="areas" role="tablist" aria-label="地圖範圍"></div>
+      <div class="chips layers" id="layers" aria-label="圖層"></div>
     </div>
     <div class="wrap mapgrid">
       <div class="mapbox">
@@ -62,8 +86,7 @@
         <p class="map-fallback" id="mapfallback" hidden>地圖載入失敗，請確認網路連線後重新整理。</p>
       </div>
       <aside class="panel">
-        <div id="stoppanel"></div>
-        <div id="explorepanel" hidden>
+        <div id="explorepanel">
           <h3 class="panel-h">從哪裡出發</h3>
           <div class="seg" id="origin" role="radiogroup" aria-label="出發地"></div>
           <button class="btn btn-ghost" id="gpsbtn" type="button">用我現在的位置</button>
@@ -73,21 +96,11 @@
       </aside>
     </div>
     <div class="wrap">
-      <article class="day" id="dayview"></article>
-    </div>
-  </section>
-
-  <section class="band" id="ski" aria-labelledby="ski-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2 id="ski-h">雪場</h2>
-        <p class="sec-note">小孩：Kiroro 5 歲以下、富良野小學生以下纜車免費。票價為 2026-27 季官方公告。</p>
-      </div>
       <div class="resorts" id="resorts"></div>
     </div>
   </section>
 
-  <section class="band band-alt" id="weather" aria-labelledby="wx-h">
+  <section class="band" id="weather" aria-labelledby="wx-h">
     <div class="wrap">
       <div class="sec-head">
         <h2 id="wx-h">天氣</h2>
@@ -102,7 +115,7 @@
     </div>
   </section>
 
-  <section class="band" id="food" aria-labelledby="food-h">
+  <section class="band band-alt" id="food" aria-labelledby="food-h">
     <div class="wrap">
       <div class="sec-head">
         <h2 id="food-h">吃喝</h2>
@@ -113,7 +126,7 @@
     </div>
   </section>
 
-  <section class="band band-alt" id="prep" aria-labelledby="prep-h">
+  <section class="band" id="prep" aria-labelledby="prep-h">
     <div class="wrap">
       <div class="sec-head">
         <h2 id="prep-h">出發前準備</h2>
@@ -145,7 +158,7 @@
   <div class="wrap foot-in">
     <p>資料整理：<span id="updated"></span>。車程、營業時間與天氣都可能變動，出發前請以官方公告與即時導航為準。</p>
     <p id="fxnote"></p>
-    <p>首頁照片：<a href="https://commons.wikimedia.org/wiki/File:Blue_Sky_And_White_World_(131608635).jpeg" target="_blank" rel="noopener">Yascolo〈Blue Sky And White World〉</a>，北海道美瑛，<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>，經裁切壓縮</p>
+    <p>照片：Wikimedia Commons（Yascolo、T DMY、Haha169、欅、wakimasa、Nkns、Chiranthi W.、MIKI Yoshihito、663highland 等，CC BY／CC BY-SA）、新千歲機場、各住宿官方照片。完整出處見 <a href="https://github.com/ddfish333/hokkaido-ski-2027/blob/main/CREDITS.md" target="_blank" rel="noopener">CREDITS</a>。</p>
     <p>地圖 © OpenStreetMap contributors · OpenFreeMap｜天氣 Open-Meteo｜路線 OSRM｜匯率 open.er-api.com</p>
   </div>
 </footer>
@@ -153,6 +166,7 @@
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="data/trip.js"></script>
 <script src="data/dayplan.js"></script>
+<script src="data/scenes.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>
