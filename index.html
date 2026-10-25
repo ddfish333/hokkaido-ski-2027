@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>雪國十三日 · 北海道 2027</title>
+<meta name="description" content="2027 年 1 月北海道親子滑雪：小樽 Kiroro、富良野、札幌。每日行程、雪場、車程、即時天氣與地圖。">
+<meta name="theme-color" content="#0B1626">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#top" aria-label="回到頂端">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">雪國十三日</span>
+    </a>
+    <nav class="nav" aria-label="主要區塊">
+      <a href="#day">每日</a>
+      <a href="#map">地圖</a>
+      <a href="#ski">雪場</a>
+      <a href="#weather">天氣</a>
+      <a href="#food">吃喝</a>
+      <a href="#prep">準備</a>
+    </nav>
+    <button type="button" class="curbtn" id="curbtn" aria-label="切換金額顯示">¥＋NT$</button>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="wrap hero-in">
+    <p class="eyebrow">HOKKAIDO · WINTER 2027</p>
+    <h1 class="hero-title">雪國<br>十三日</h1>
+    <p class="hero-sub">2027.01.07 — 01.19<span class="dot">·</span>13 天 12 晚<span class="dot">·</span>兩台 Delica<span class="dot">·</span>4 大 4 小</p>
+    <div class="hero-count" id="countdown" aria-live="polite"></div>
+    <ol class="route" id="route" aria-label="三段住宿"></ol>
+  </div>
+</section>
+
+<main>
+
+  <section class="band" id="day" aria-labelledby="day-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="day-h">每日行程</h2>
+        <p class="sec-note">車程：一般／下雪結冰（概估）。出發當天以 Google Maps 為準。</p>
+      </div>
+      <div class="daystrip" id="daystrip" role="tablist" aria-label="選擇日期"></div>
+      <article class="day" id="dayview"></article>
+    </div>
+  </section>
+
+  <section class="band band-map" id="map" aria-labelledby="map-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="map-h">地圖與車程</h2>
+        <p class="sec-note">選當天住宿或用目前位置，算到每個雪場要開多久。</p>
+      </div>
+    </div>
+    <div class="wrap mapgrid">
+      <div class="mapbox">
+        <div id="mapcanvas" class="mapcanvas" role="region" aria-label="地圖"></div>
+        <div class="chips map-layers" id="layers" aria-label="圖層"></div>
+        <p class="map-fallback" id="mapfallback" hidden>地圖載入失敗，請確認網路連線後重新整理。</p>
+      </div>
+      <aside class="panel" aria-labelledby="origin-h">
+        <h3 id="origin-h" class="panel-h">從哪裡出發</h3>
+        <div class="seg" id="origin" role="radiogroup" aria-label="出發地"></div>
+        <button class="btn btn-ghost" id="gpsbtn" type="button">用我現在的位置</button>
+        <p class="gps-msg" id="gpsmsg" aria-live="polite"></p>
+        <ul class="drivelist" id="drivelist"></ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="band" id="ski" aria-labelledby="ski-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="ski-h">雪場</h2>
+        <p class="sec-note">小孩：Kiroro 5 歲以下、富良野小學生以下纜車免費。票價為 2026-27 季官方公告。</p>
+      </div>
+      <div class="resorts" id="resorts"></div>
+    </div>
+  </section>
+
+  <section class="band band-alt" id="weather" aria-labelledby="wx-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="wx-h">天氣</h2>
+        <p class="sec-note" id="wxnote">即時預報 16 天（Open-Meteo）；旅程日期還沒進入預報範圍時，顯示 1/7–1/19 歷年平均。</p>
+      </div>
+      <div class="seg seg-wide" id="wxtabs" role="tablist" aria-label="地點"></div>
+      <div class="wxstrip" id="wxstrip"></div>
+      <div class="wxfoot">
+        <div class="climate" id="climate"></div>
+        <ul class="linklist" id="roadlinks"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="food" aria-labelledby="food-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="food-h">吃喝</h2>
+        <p class="sec-note">9 人（4 位 3–4 歲小孩）優先：有座敷或包廂、可訂位、停車方便。</p>
+      </div>
+      <div class="chips" id="foodfilter" aria-label="地區"></div>
+      <ul class="foodlist" id="foodlist"></ul>
+    </div>
+  </section>
+
+  <section class="band band-alt" id="prep" aria-labelledby="prep-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="prep-h">出發前準備</h2>
+        <p class="sec-note">勾選只存在這支手機或電腦上。</p>
+      </div>
+      <div class="prepgrid">
+        <div class="prep-col">
+          <h3 class="h3">待辦</h3>
+          <ul class="todo" id="todo"></ul>
+        </div>
+        <div class="prep-col">
+          <h3 class="h3">航班</h3>
+          <ul class="kv" id="flights"></ul>
+          <h3 class="h3">取車</h3>
+          <ol class="steps" id="pickup"></ol>
+          <h3 class="h3">還車</h3>
+          <ul class="bullets" id="return"></ul>
+          <ul class="kv" id="rentalcontact"></ul>
+          <h3 class="h3">緊急電話</h3>
+          <ul class="kv" id="emergency"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p>資料整理：<span id="updated"></span>。車程、營業時間與天氣都可能變動，出發前請以官方公告與即時導航為準。</p>
+    <p id="fxnote"></p>
+    <p>地圖 © OpenStreetMap contributors · OpenFreeMap｜天氣 Open-Meteo｜路線 OSRM｜匯率 open.er-api.com</p>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="data/trip.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
