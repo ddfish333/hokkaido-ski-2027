@@ -27,7 +27,6 @@
 html { scroll-behavior: smooth; scroll-padding-top: 72px; -webkit-text-size-adjust: 100%; background: var(--bg); }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 300 15px/1.7 var(--f-body); -webkit-font-smoothing: antialiased; }
-body.film-open { overflow: hidden; }
 img { max-width: 100%; display: block; }
 a { color: inherit; }
 b, strong { font-weight: 500; }
@@ -334,7 +333,16 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hop a:hover { border-color: var(--glacier); }
 
 /* ===== 序幕（單日頁開場短片） ===== */
-.film { position: fixed; inset: 0; z-index: 50; background: #05080F; color: var(--hero-ink); overflow: hidden; transition: opacity 1.4s ease; }
+.film { position: relative; height: 100svh; min-height: 520px; background: #05080F; color: var(--hero-ink); overflow: hidden; }
+@media (min-width: 901px) { .film { height: min(100svh, 920px); } }
+.film .fdown { position: absolute; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: grid; justify-items: center; gap: 2px; background: none; border: 0; color: rgba(244,241,234,.55); font: 400 10px/1 var(--f-display); letter-spacing: .25em; cursor: pointer; pointer-events: auto; padding: 8px 12px; }
+.film .fdown svg { width: 18px; height: 18px; animation: fdownBob 2.2s ease-in-out infinite; }
+.film .fdown:hover { color: var(--hero-ink); }
+.film .chrome.last .fdown { display: none; }
+@keyframes fdownBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+.film .endbtns { display: flex; gap: 10px; flex-wrap: wrap; }
+.film .fbtn.ghost { background: none; border-color: rgba(244,241,234,.2); }
+.film.paused .scene.on .ph, .film.paused .prog i.live::after { animation-play-state: paused; }
 .film.off { opacity: 0; pointer-events: none; }
 .film .stage { position: absolute; inset: 0; overflow: hidden; }
 .film .scene { position: absolute; inset: 0; opacity: 0; transition: opacity 1.6s ease; pointer-events: none; }

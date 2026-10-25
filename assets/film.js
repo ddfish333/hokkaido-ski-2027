@@ -35,11 +35,6 @@
   var root = document.getElementById("film"); if (!root) return;
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-  var gate = el("div", "gate");
-  if (def.poster && def.poster.img) { var gph = el("div", "gate-ph"); bg(gph, def.poster.img); gate.appendChild(gph); gate.appendChild(el("div", "gate-veil")); }
-  gate.innerHTML += '<div class="gate-in"><p class="k">' + esc(date.replace(/-/g, " · ")) + ' · 星期' + "日一二三四五六"[new Date(date + "T00:00:00").getDay()] + '</p><h1>' + esc(day.title) + '</h1><p>' + esc((def.poster && def.poster.line) || day.sub) + '</p>' +
-    '<button class="go" type="button" aria-label="開始"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>' +
-    '<div><button class="mute" type="button">不要聲音，直接看</button><span class="sep">·</span><button class="mute skipgate" type="button">跳過序幕</button></div></div>';
   var stage = el("div", "stage");
   var secs = scenes.map(function (sc, i) {
     var s = el("section", "scene" + (sc.warm ? " warm" : "") + (sc.type === "title" || sc.type === "drive" ? " cold" : ""));
@@ -68,7 +63,7 @@
       s.appendChild(el("div", "title", '<div><p class="eyebrow">' + esc(sc.eyebrow || "") + '</p><h2 class="big">' + esc(sc.h) + '</h2><p class="sub">' + esc(sc.s || "") + '</p></div>'));
     } else if (sc.type === "end") {
       s.appendChild(el("div", "endcard", '<div><p class="t">' + esc(sc.t || "") + '</p><h2 class="h">' + sc.h + '</h2>' + (sc.s ? '<p class="s">' + esc(sc.s) + '</p>' : "") +
-        '<button class="fbtn" id="toplan" type="button">看今天的行程 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button></div>'));
+        '<div class="endbtns"><button class="fbtn" id="toplan" type="button">看今天的行程 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button><button class="fbtn ghost" id="freplay" type="button">再看一次</button></div></div>'));
     } else {
       s.appendChild(el("div", "cap", '<p class="t">' + esc(sc.t || "") + '</p><h2 class="h">' + sc.h + '</h2>' + (sc.s ? '<p class="s">' + esc(sc.s) + '</p>' : "")));
     }
@@ -243,11 +238,10 @@
   chrome.innerHTML = '<div class="prog">' + scenes.map(function () { return "<i></i>"; }).join("") + '</div><p class="fbrand">北海道 · 雪上的大小腳印</p>' +
     '<div class="tools"><button class="ic" id="fmute" aria-label="靜音"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" hidden><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg></button>' +
     '<button class="ic" id="frmap" aria-label="路線圖濃淡"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3z"/><path d="M9 4v13M15 7v13"/></svg></button><button class="ic" id="fskip" aria-label="跳過"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 5l10 7-10 7zM19 5v14"/></svg></button></div>' +
-    '<div class="tap"><button id="fprev" aria-label="上一幕"></button><button id="fnext" aria-label="下一幕"></button></div><p class="hint">點右邊下一幕 · 左邊上一幕</p>';
+    '<div class="tap"><button id="fprev" aria-label="上一幕"></button><button id="fnext" aria-label="下一幕"></button></div><p class="hint">點右邊下一幕 · 左邊上一幕</p><button class="fdown" id="fdown" type="button" aria-label="往下看行程"><span>往下看行程</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 10l6 6 6-6"/></svg></button>';
   chrome.hidden = true;
-  root.appendChild(gate); root.appendChild(stage); root.appendChild(chrome);
+  root.appendChild(stage); root.appendChild(chrome);
   var bars = chrome.querySelectorAll(".prog i"), hint = chrome.querySelector(".hint");
-  document.body.classList.add("film-open");
 
   /* ---------- 飄雪 ---------- */
   var sx = snow.getContext("2d"), flakes = [], W = 0, H = 0, snowAmt = 1, wind = 0.15, DPR = Math.min(devicePixelRatio || 1, 2);
@@ -324,7 +318,7 @@
   /* ---------- 播放控制 ---------- */
   var cur = -1, timer = null, started = false, cycleT = null;
   function show(i) {
-    if (i < 0) i = 0; if (i >= secs.length) { finish(); return; }
+    if (i < 0) i = 0; if (i >= secs.length) i = secs.length - 1;
     clearTimeout(timer);
     secs.forEach(function (s, k) { s.classList.toggle("on", k === i); });
     bars.forEach(function (b, k) { b.classList.toggle("done", k < i); b.classList.toggle("live", k === i); b.style.setProperty("--dur", secs[i].dataset.dur + "ms"); });
@@ -343,32 +337,52 @@
       layers.forEach(function (l, j) { l.classList.toggle("cur", j === 0); l.style.animation = "none"; void l.offsetWidth; l.style.animation = ""; });
       cycleT = setInterval(function () { k = (k + 1) % layers.length; layers.forEach(function (l, j) { l.classList.toggle("cur", j === k); if (j === k) { l.style.animation = "none"; void l.offsetWidth; l.style.animation = ""; } }); if (k === layers.length - 1) clearInterval(cycleT); }, step);
     }
-    if (i < secs.length - 1) timer = setTimeout(function () { show(i + 1); }, dur);
+    pausedAt = performance.now();
+    if (i < secs.length - 1) timer = setTimeout(function () { show(i + 1); }, dur); else finish();
     if (i > 0) hint.style.opacity = 0;
   }
   function start(withSound) {
     if (started) return; started = true;
     if (withSound) { try { startMusic(); } catch (e) { } }
-    gate.classList.add("off"); chrome.hidden = false;
+    chrome.hidden = false;
     raf = requestAnimationFrame(loop);
     setTimeout(function () { show(0); }, 300);
     setTimeout(function () { hint.style.opacity = 0; }, 6000);
   }
+  /* 序幕放在頁面最上面，不擋頁面：結束就停在結尾卡，「看今天的行程」只是往下捲 */
   function finish() {
-    if (ended) return; ended = true; clearTimeout(timer); clearInterval(cycleT); cancelAnimationFrame(RM.raf);
+    if (ended) return; ended = true; clearTimeout(timer); clearInterval(cycleT);
     if (music) music.fadeOut();
-    chrome.hidden = true; root.classList.add("off");
-    document.body.classList.remove("film-open"); window.scrollTo(0, 0);
     document.dispatchEvent(new CustomEvent("film:end"));
-    setTimeout(function () { cancelAnimationFrame(raf); root.remove(); }, 1600);
+  }
+  function toPlan() { var t = document.getElementById("dayhead") || root.nextElementSibling; if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  function replay() { ended = false; if (RM.svg) { RM.pos = 0; RM.target = 0; RM.drawn = -1; } show(0); }
+  /* 捲離畫面就暫停（影片、計時、雪、地圖），捲回來再從這一幕繼續 */
+  var paused = false, pausedAt = 0, pausedLeft = 0;
+  function pauseFilm() {
+    if (paused || !started || ended) return; paused = true;
+    pausedLeft = Math.max(800, (+secs[cur].dataset.dur) - (performance.now() - pausedAt)); clearTimeout(timer); clearInterval(cycleT);
+    secs.forEach(function (sec) { var v = sec.querySelector("video.ph"); if (v && !v.paused) try { v.pause(); } catch (e) { } });
+    cancelAnimationFrame(raf); cancelAnimationFrame(RM.raf); RM.raf = null;
+    if (AC) try { AC.suspend(); } catch (e) { }
+    root.classList.add("paused");
+  }
+  function resumeFilm() {
+    if (!paused) return; paused = false; root.classList.remove("paused");
+    var v = secs[cur] && secs[cur].querySelector("video.ph"); if (v) { try { var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } }
+    raf = requestAnimationFrame(loop); if (RM.svg && !RM.raf) { RM.lastT = performance.now(); RM.raf = requestAnimationFrame(rmTick); }
+    if (AC && !muted) try { AC.resume(); } catch (e) { }
+    pausedAt = performance.now() - ((+secs[cur].dataset.dur) - pausedLeft);
+    if (cur < secs.length - 1) timer = setTimeout(function () { show(cur + 1); }, pausedLeft);
+  }
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) resumeFilm(); else pauseFilm(); }); }, { threshold: 0.15 }).observe(root);
   }
   function updMute() { chrome.querySelector(".on").hidden = muted; chrome.querySelector(".off").hidden = !muted; }
-  gate.querySelector(".go").addEventListener("click", function () { start(true); });
-  gate.querySelector(".mute").addEventListener("click", function () { muted = true; start(false); updMute(); });
-  gate.querySelector(".skipgate").addEventListener("click", function () { started = true; finish(); });
-  chrome.querySelector("#fnext").addEventListener("click", function () { show(cur + 1); });
-  chrome.querySelector("#fprev").addEventListener("click", function () { show(cur - 1); });
-  chrome.querySelector("#fskip").addEventListener("click", finish);
+  chrome.querySelector("#fnext").addEventListener("click", function () { if (ended && cur >= secs.length - 1) return; show(cur + 1); });
+  chrome.querySelector("#fprev").addEventListener("click", function () { if (ended) ended = false; show(cur - 1); });
+  chrome.querySelector("#fskip").addEventListener("click", toPlan);
+  chrome.querySelector("#fdown").addEventListener("click", toPlan);
   chrome.querySelector("#frmap").addEventListener("click", function () {
     var order = ["mid", "strong", "off", "light"]; RM.level = order[(order.indexOf(RM.level) + 1) % order.length];
     try { localStorage.setItem("snow13-rmap", RM.level); } catch (e) { }
@@ -376,12 +390,13 @@
     order.forEach(function (l) { root.classList.remove("rm-" + l); }); root.classList.add("rm-" + RM.level);
     hint.textContent = "路線圖：" + { light: "淡", mid: "中", strong: "濃", off: "關" }[RM.level]; hint.style.opacity = 1; setTimeout(function () { hint.style.opacity = 0; }, 1500);
   });
-  stage.addEventListener("click", function (e) { if (e.target.closest("#toplan")) finish(); });
+  stage.addEventListener("click", function (e) { if (e.target.closest("#toplan")) toPlan(); if (e.target.closest("#freplay")) replay(); });
   chrome.querySelector("#fmute").addEventListener("click", function () { muted = !muted; if (!music && !muted) { try { startMusic(); music.setAmb(secs[cur] ? secs[cur].dataset.amb : "snow"); } catch (e) { } } else if (music) music.setMuted(muted); updMute(); });
-  addEventListener("keydown", function (e) { if (!started || ended) return; if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); show(cur + 1); } if (e.key === "ArrowLeft") show(cur - 1); if (e.key === "Escape") finish(); });
+  addEventListener("keydown", function (e) { if (!started || ended || paused) return; if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; if (e.key === "ArrowRight") { e.preventDefault(); show(cur + 1); } if (e.key === "ArrowLeft") show(cur - 1); });
   document.addEventListener("visibilitychange", function () { if (AC) { document.hidden ? AC.suspend() : AC.resume(); } });
   scenes.forEach(function (sc) { (sc.imgs || (sc.img ? [sc.img] : [])).forEach(function (u) { var im = new Image(); im.src = IMG + String(u).split("@")[0]; }); });
   /* 序幕結束時停掉所有影片 */
   document.addEventListener("film:end", function () { secs.forEach(function (sec) { var v = sec.querySelector("video.ph"); if (v) try { v.pause(); } catch (e) { } }); });
+  muted = true; updMute(); start(false);
   }
 })();
