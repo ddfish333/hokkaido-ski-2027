@@ -31,7 +31,7 @@
     ["甜點・咖啡", /甜點|咖啡|下午茶|美食街/]
   ];
   function groupOf(f) { if (f.area === "Kiroro") return "雪場裡"; for (var i = 0; i < KIND_GROUP.length; i++) if (KIND_GROUP[i][1].test(f.kind)) return KIND_GROUP[i][0]; return "其他"; }
-  var FIT = { best: ["很適合 9 人帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
+  var FIT = { best: ["很適合 8 人帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
   var baseById = {}; T.bases.forEach(function (b) { baseById[b.id] = b; });
 
   var qs = new URLSearchParams(location.search);

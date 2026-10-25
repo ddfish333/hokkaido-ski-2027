@@ -657,7 +657,7 @@
 
   /* ---------- 吃喝：清單在 data/food.js ---------- */
   var FOOD = window.FOOD || [], FOOD_AREAS = window.FOOD_AREAS || {};
-  var FIT = { best: ["很適合 9 人帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
+  var FIT = { best: ["很適合 8 人帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
   function foodItem(f, d, b) {
     var wd = d ? new Date(d.date + "T00:00:00").getDay() : -1, closedToday = f.closed && f.closed.indexOf(wd) >= 0;
     var planned = !!(d && f.key && d.meals.join("").indexOf(f.key) >= 0);
