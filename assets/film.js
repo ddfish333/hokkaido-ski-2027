@@ -133,6 +133,7 @@
     RM.trail = mk("path", "rm-trail", { d: rd, pathLength: 1000, "stroke-dasharray": "1000 1000", "stroke-dashoffset": 1000 }); gRoute.appendChild(RM.trail);
     markers.forEach(function (mi) { gPts.appendChild(mk("circle", "rm-stop", { cx: pts[mi][0], cy: pts[mi][1] })); });
     RM.glow = mk("circle", "rm-glow", {}); gPts.appendChild(RM.glow);
+    RM.glowAnim = mk("animate", null, { attributeName: "r", values: "0;0", dur: "2.4s", repeatCount: "indefinite", calcMode: "spline", keySplines: "0.4 0 0.6 1;0.4 0 0.6 1" }); RM.glow.appendChild(RM.glowAnim);
     RM.dot = mk("circle", "rm-dot", {}); gPts.appendChild(RM.dot);
     /* 地名：城鎮、當天站點、其他地點 */
     function label(name, lon, lat, cls, dy) { var q = proj(lon, lat); var t = mk("text", "rm-label " + cls, { x: q[0], y: q[1] }); t.textContent = name; t.dataset.dy = dy || 0; gLab.appendChild(t); }
@@ -179,7 +180,7 @@
     RM.svg.querySelectorAll(".rm-route").forEach(function (e) { e.setAttribute("stroke-width", u * 2.4); });
     RM.trail.setAttribute("stroke-width", u * 3.2);
     RM.svg.querySelectorAll(".rm-stop").forEach(function (e) { e.setAttribute("r", u * 3.2); e.setAttribute("stroke-width", u * 1.2); });
-    RM.dot.setAttribute("r", u * 4.5); RM.dot.setAttribute("stroke-width", u * 1.5); RM.glow.setAttribute("r", u * 12);
+    RM.dot.setAttribute("r", u * 4.5); RM.dot.setAttribute("stroke-width", u * 1.5); RM.glow.setAttribute("r", u * 12); RM.glowAnim.setAttribute("values", (u * 9) + ";" + (u * 15) + ";" + (u * 9));
     var zoomIn = w < (innerWidth < 760 ? 0.36 : 0.5); /* 拉近時才顯示小地點 */
     for (var i = 0; i < RM.labels.length; i++) {
       var t = RM.labels[i], cls = t.getAttribute("class");
@@ -200,14 +201,16 @@
     var dt = Math.min(0.1, (now - RM.lastT) / 1000); RM.lastT = now;
     /* 光點：均速走向目標 */
     if (RM.pos !== RM.target) { var step = RM.speed * dt; RM.pos = RM.pos < RM.target ? Math.min(RM.target, RM.pos + step) : Math.max(RM.target, RM.pos - step); }
-    var q = setDot(RM.pos);
+    var q;
+    if (RM.pos !== RM.drawn) { q = setDot(RM.pos); RM.drawn = RM.pos; } else { q = pointAt(RM.pos); }
     /* 鏡頭：跟著光點，平滑追上 */
     if (RM.follow && q) { RM.camT.cx = q[0]; RM.camT.cy = q[1]; }
     var k = 1 - Math.pow(0.001, dt); /* 每秒追近 99.9%…的指數平滑 */
     RM.cam.cx += (RM.camT.cx - RM.cam.cx) * k * 0.6; RM.cam.cy += (RM.camT.cy - RM.cam.cy) * k * 0.6; RM.cam.w += (RM.camT.w - RM.cam.w) * k * 0.5;
     var eps = RM.cam.w * 1e-4;
     if (Math.abs(RM.camT.cx - RM.cam.cx) < eps) RM.cam.cx = RM.camT.cx; if (Math.abs(RM.camT.cy - RM.cam.cy) < eps) RM.cam.cy = RM.camT.cy; if (Math.abs(RM.camT.w - RM.cam.w) < eps) RM.cam.w = RM.camT.w;
-    renderCam();
+    var key = RM.cam.cx + "," + RM.cam.cy + "," + RM.cam.w;
+    if (key !== RM.camKey) { RM.camKey = key; renderCam(); }
   }
   /* 均速：這一趟的距離除以可用秒數，中途不加速不減速；時間到剛好抵達 */
   function goStop(stopIdx, zoomW, secs) {
