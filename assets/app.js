@@ -693,29 +693,27 @@
     return html;
   }
   function renderFood() {
-    if (!has("foodlist")) return;
-    if (FOOD.length) {
-      var areas = ["全部"]; FOOD.forEach(function (f) { if (areas.indexOf(f.area) < 0) areas.push(f.area); });
-      $("#foodfilter").innerHTML = areas.map(function (a) { return '<button type="button" class="chip solid" aria-pressed="' + (state.foodArea === a) + '" data-a="' + esc(a) + '">' + esc(a) + '</button>'; }).join("");
-      $("#foodfilter").onclick = function (e) { var b = e.target.closest("[data-a]"); if (!b) return; state.foodArea = b.dataset.a; renderFood(); };
-      $("#foodlist").innerHTML = '<ul class="foodpick">' + FOOD.filter(function (f) { return state.foodArea === "全部" || f.area === state.foodArea; }).slice().sort(function (x, y) { return (x.rec || 99) - (y.rec || 99); }).map(function (f) { return foodItem(f, null, null); }).join("") + '</ul>';
-      return;
-    }
-    renderFoodLegacy();
+    if (!has("foodstats") || !FOOD.length) return;
+    var order = ["Kiroro", "銭函", "小樽", "富良野", "美瑛・旭川", "札幌"], col = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
+    var n = {}; FOOD.forEach(function (f) { n[f.area] = (n[f.area] || 0) + 1; });
+    var rated = FOOD.filter(function (f) { return f.g; }).length;
+    $("#foodstats").innerHTML = '<span class="fs-total"><b>' + FOOD.length + '</b> 家 · ' + rated + ' 家有 Google 評價</span>' +
+      order.filter(function (a) { return n[a]; }).map(function (a) { return '<span class="fs-area" style="--mc:' + col[a] + '"><i></i>' + esc(a) + ' <b>' + n[a] + '</b></span>'; }).join("");
   }
-  function renderFoodLegacy() {
-    if (!has("foodlist")) return;
-    var foods = T.places.filter(function (p) { return p.type === "food"; });
-    var areas = ["全部"]; foods.forEach(function (f) { if (areas.indexOf(f.area) < 0) areas.push(f.area); });
-    $("#foodfilter").innerHTML = areas.map(function (a) {
-      return '<button type="button" class="chip solid" aria-pressed="' + (state.foodArea === a) + '" data-a="' + esc(a) + '">' + esc(a) + '</button>';
-    }).join("");
-    $("#foodfilter").onclick = function (e) { var b = e.target.closest("[data-a]"); if (!b) return; state.foodArea = b.dataset.a; renderFood(); };
-    $("#foodlist").innerHTML = foods.filter(function (f) { return state.foodArea === "全部" || f.area === state.foodArea; }).map(function (f) {
-      return '<li><div class="food-top"><b>' + esc(f.name) + '</b><span>' + esc(f.area) + '</span></div><p class="food-note">' + em(f.note) + '</p>' +
-        '<div class="tags">' + (f.tags || []).map(function (t) { return '<span class="tag' + (/現金|休/.test(t) ? " warn" : "") + '">' + esc(t) + '</span>'; }).join("") + '</div>' +
-        '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(f.name.replace(/（.*?）/g, "") + " " + f.area) + '" target="_blank" rel="noopener">在 Google Maps 看 →</a></li>';
-    }).join("");
+  /* 首頁：美食地圖縮圖（不可操作，點整塊進入 food/） */
+  function initFoodTile() {
+    if (!has("foodtilemap") || !window.maplibregl || !FOOD.length) return;
+    var col = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
+    var m;
+    try { m = new maplibregl.Map({ container: "foodtilemap", style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 6.6, interactive: false, attributionControl: false }); } catch (e) { return; }
+    m.on("load", function () {
+      var feats = FOOD.map(function (f) { return { type: "Feature", properties: { c: col[f.area] || "#fff" }, geometry: { type: "Point", coordinates: [f.lon, f.lat] } }; });
+      m.addSource("ft", { type: "geojson", data: { type: "FeatureCollection", features: feats } });
+      m.addLayer({ id: "ft-glow", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 9, "circle-opacity": 0.25, "circle-blur": 0.8 } });
+      m.addLayer({ id: "ft-dot", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 4, "circle-stroke-width": 1.5, "circle-stroke-color": "#070B12" } });
+      var bb = new maplibregl.LngLatBounds(); FOOD.forEach(function (f) { bb.extend([f.lon, f.lat]); }); T.bases.forEach(function (b) { bb.extend([b.lon, b.lat]); });
+      m.fitBounds(bb, { padding: 36, duration: 0 });
+    });
   }
 
   /* ---------- 準備 ---------- */
@@ -806,7 +804,7 @@
   renderWxTabs();
   renderWxStrip();
   renderClimate();
-  renderFood();
+  renderFood(); initFoodTile();
   renderPrep();
   initMap();
   loadWeather();

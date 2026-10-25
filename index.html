@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-<link rel="stylesheet" href="assets/style.css?v=042fdd1d">
+<link rel="stylesheet" href="assets/style.css?v=175796a2">
 </head>
 <body>
 
@@ -120,11 +120,17 @@
     <div class="wrap">
       <div class="sec-head">
         <h2 id="food-h">吃喝</h2>
-        <p class="sec-note">9 人（4 位 3–4 歲小孩）優先：有座敷或包廂、可訂位、停車方便。</p>
+        <p class="sec-note">9 人（4 位 3–4 歲小孩）優先：有座敷或包廂、可訂位、停車方便。全部整理在美食地圖裡。</p>
       </div>
-      <a class="btn fm-cta" href="food/">打開美食地圖 →<small>選一天，看預計吃的店、公休、從住宿開過去幾分鐘</small></a>
-      <div class="chips" id="foodfilter" aria-label="地區"></div>
-      <ul class="foodlist" id="foodlist"></ul>
+      <a class="fm-tile" href="food/" id="foodtile">
+        <div class="fm-tile-map" id="foodtilemap" aria-hidden="true"></div>
+        <div class="fm-tile-in">
+          <p class="eyebrow">FOOD MAP</p>
+          <h3>美食地圖 →</h3>
+          <p class="fm-tile-sub">選一天，看那天預計吃的店、當天公休、從住宿開過去幾分鐘；Google 評價和照片都在裡面。</p>
+          <div class="fm-tile-stats" id="foodstats"></div>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -170,6 +176,6 @@
 <script src="data/scenes.js?v=b38031d2"></script>
 <script src="data/food.js?v=267fbebf"></script>
 <script src="assets/plan.js?v=5437128b"></script>
-<script src="assets/app.js?v=88968907"></script>
+<script src="assets/app.js?v=826cf7ab"></script>
 </body>
 </html>
