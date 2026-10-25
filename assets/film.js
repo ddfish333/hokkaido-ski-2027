@@ -108,7 +108,6 @@
     var cum = [0]; for (var i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
     RM.pts = pts; RM.cum = cum; RM.markers = markers; RM.total = cum[cum.length - 1] || 1;
     /* 均速：一整天的路線在 22 秒內走完，所以長的腿跑得久、短的腿一下就到 */
-    RM.speed = 0;
     var NS = "http://www.w3.org/2000/svg";
     var svg = document.createElementNS(NS, "svg"); svg.setAttribute("class", "rmap"); svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
     function mk(tag, cls, attrs) { var e = document.createElementNS(NS, tag); if (cls) e.setAttribute("class", cls); Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); }); return e; }
@@ -127,8 +126,8 @@
     gRoute.appendChild(mk("path", "rm-casing", { d: rd })); gRoute.appendChild(mk("path", "rm-route", { d: rd }));
     RM.trail = mk("path", "rm-trail", { d: rd, pathLength: 1000, "stroke-dasharray": "1000 1000", "stroke-dashoffset": 1000 }); gRoute.appendChild(RM.trail);
     markers.forEach(function (mi) { gPts.appendChild(mk("circle", "rm-stop", { cx: pts[mi][0], cy: pts[mi][1] })); });
+    /* 光點和光暈：大小全部由 CSS 的 --u 決定（見 style.css），這裡只搬位置；光暈的呼吸用 CSS transform，不再每格改 SVG 屬性 */
     RM.glow = mk("circle", "rm-glow", {}); gPts.appendChild(RM.glow);
-    RM.glowAnim = mk("animate", null, { attributeName: "r", values: "0;0", dur: "2.4s", repeatCount: "indefinite", calcMode: "spline", keySplines: "0.4 0 0.6 1;0.4 0 0.6 1" }); RM.glow.appendChild(RM.glowAnim);
     RM.dot = mk("circle", "rm-dot", {}); gPts.appendChild(RM.dot);
     /* 地名：城鎮、當天站點、其他地點 */
     function label(name, lon, lat, cls, dy) { var q = proj(lon, lat); var t = mk("text", "rm-label " + cls, { x: q[0], y: q[1] }); t.textContent = name; t.dataset.dy = dy || 0; gLab.appendChild(t); }
@@ -145,7 +144,7 @@
     var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
     RM.fit = { cx: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, cy: (Math.min.apply(null, ys) + Math.max.apply(null, ys)) / 2, w: Math.max(Math.max.apply(null, xs) - Math.min.apply(null, xs), Math.max.apply(null, ys) - Math.min.apply(null, ys)) * 1.9 + 0.08 };
     RM.cam = { cx: RM.fit.cx, cy: RM.fit.cy, w: RM.fit.w }; RM.camT = { cx: RM.fit.cx, cy: RM.fit.cy, w: RM.fit.w };
-    RM.pos = 0; RM.target = 0; RM.lastT = performance.now();
+    RM.pos = 0; RM.target = 0; RM.moveFrom = 0; RM.moveDur = 0; RM.lastT = performance.now();
     renderCam(); RM.raf = requestAnimationFrame(rmTick);
   }
   function pointAt(dist) {
@@ -163,39 +162,29 @@
     var oy = innerWidth < 760 ? h * 0.12 : 0;
     var vb = [(c.cx - w / 2).toFixed(5), (c.cy - h / 2 + oy).toFixed(5), w.toFixed(5), h.toFixed(5)].join(" ");
     if (vb !== RM.lastVB) { RM.svg.setAttribute("viewBox", vb); RM.lastVB = vb; }
-    /* 1 單位 = 1 CSS 像素：線寬、字級在手機和大螢幕上看起來一樣，不會跟著螢幕寬放大 */
+    /* 1 單位 = 1 CSS 像素：線寬、字級、點的大小都寫在 CSS 裡乘上 --u，所以每格只改一個變數，不碰幾十個元素 */
     var u = w / innerWidth * (innerWidth < 760 ? 1 : 1.15);
-    if (Math.abs(u - lastU) < lastU * 0.004) return; /* 縮放幾乎沒變就不碰 DOM，避免每格重排造成抖動 */
+    if (Math.abs(u - lastU) < lastU * 0.004) return;
     lastU = u;
-    RM.svg.style.setProperty("--u", u);
-    RM.groups.forEach(function (g) { g.setAttribute("stroke-width", u); });
-    RM.svg.querySelectorAll(".rm-land").forEach(function (e) { e.setAttribute("stroke-width", u * 1.1); });
-    RM.svg.querySelectorAll(".rm-other").forEach(function (e) { e.setAttribute("stroke-width", u * 1.2); });
-    RM.svg.querySelectorAll(".rm-casing").forEach(function (e) { e.setAttribute("stroke-width", u * 6); });
-    RM.svg.querySelectorAll(".rm-route").forEach(function (e) { e.setAttribute("stroke-width", u * 2.4); });
-    RM.trail.setAttribute("stroke-width", u * 3.2);
-    RM.svg.querySelectorAll(".rm-stop").forEach(function (e) { e.setAttribute("r", u * 3.2); e.setAttribute("stroke-width", u * 1.2); });
-    RM.dot.setAttribute("r", u * 4.5); RM.dot.setAttribute("stroke-width", u * 1.5); RM.glow.setAttribute("r", u * 12); RM.glowAnim.setAttribute("values", (u * 9) + ";" + (u * 15) + ";" + (u * 9));
+    RM.svg.style.setProperty("--u", u.toFixed(7));
     var zoomIn = w < (innerWidth < 760 ? 0.36 : 0.5); /* 拉近時才顯示小地點 */
-    for (var i = 0; i < RM.labels.length; i++) {
-      var t = RM.labels[i], cls = t.getAttribute("class");
-      var fs = /town t2/.test(cls) ? 13 : /town t0/.test(cls) ? 12 : /town/.test(cls) ? 10.5 : /stop/.test(cls) ? 11.5 : 9;
-      t.setAttribute("font-size", u * fs); t.setAttribute("stroke-width", u * 2.2); t.setAttribute("dx", u * (/stop/.test(cls) ? 6 : 4)); t.setAttribute("dy", u * (/stop/.test(cls) ? -6 : 3.5));
-      t.style.display = (/poi/.test(cls) && !zoomIn) ? "none" : "";
-    }
+    if (zoomIn !== RM.zoomIn) { RM.zoomIn = zoomIn; RM.svg.classList.toggle("zoomin", zoomIn); }
   }
   function setDot(dist) {
     RM.pos = dist; var q = pointAt(dist); if (!q) return;
     RM.dot.setAttribute("cx", q[0]); RM.dot.setAttribute("cy", q[1]); RM.glow.setAttribute("cx", q[0]); RM.glow.setAttribute("cy", q[1]);
     RM.trail.setAttribute("stroke-dashoffset", (1000 * (1 - dist / RM.total)).toFixed(2));
-    var resting = Math.abs(RM.target - dist) < 1e-9; RM.svg.classList.toggle("resting", resting);
     return q;
   }
   function rmTick(now) {
     RM.raf = requestAnimationFrame(rmTick);
     var dt = Math.min(0.1, (now - RM.lastT) / 1000); RM.lastT = now;
-    /* 光點：均速走向目標 */
-    if (RM.pos !== RM.target) { var step = RM.speed * dt; RM.pos = RM.pos < RM.target ? Math.min(RM.target, RM.pos + step) : Math.max(RM.target, RM.pos - step); }
+    /* 光點：照牆上時鐘走（起點、終點、幾秒到），不是一格一格累加；畫面掉格或分頁被降速，時間到還是剛好抵達 */
+    if (RM.pos !== RM.target) {
+      var k0 = RM.moveDur > 0 ? Math.min(1, (now - RM.moveT0) / 1000 / RM.moveDur) : 1;
+      RM.pos = RM.moveFrom + (RM.target - RM.moveFrom) * k0;
+      if (k0 >= 1) RM.pos = RM.target;
+    }
     var q;
     if (RM.pos !== RM.drawn) { q = setDot(RM.pos); RM.drawn = RM.pos; } else { q = pointAt(RM.pos); }
     /* 鏡頭：跟著光點，平滑追上 */
@@ -211,7 +200,7 @@
   function goStop(stopIdx, zoomW, secs) {
     if (!RM.svg) return;
     RM.target = RM.cum[RM.markers[Math.max(0, Math.min(stopIdx, RM.markers.length - 1))]];
-    var d = Math.abs(RM.target - RM.pos); RM.speed = d > 0 ? d / Math.max(0.8, secs || 3) : 0;
+    RM.moveFrom = RM.pos; RM.moveT0 = performance.now(); RM.moveDur = RM.target === RM.pos ? 0 : Math.max(0.8, secs || 3);
     RM.follow = true; RM.camT.w = zoomW;
   }
   /* 每一幕對應到時間表上的第幾站（同一地點重複時依序往後找） */
@@ -226,7 +215,7 @@
   function syncDot(i) {
     if (!RM.svg) return;
     var sc = scenes[i], idx = sceneStop[i];
-    if (sc.type === "title") { RM.follow = false; RM.camT.cx = RM.fit.cx; RM.camT.cy = RM.fit.cy; RM.camT.w = RM.fit.w; RM.target = 0; return; }
+    if (sc.type === "title") { RM.follow = false; RM.camT.cx = RM.fit.cx; RM.camT.cy = RM.fit.cy; RM.camT.w = RM.fit.w; RM.target = 0; RM.moveFrom = RM.pos; RM.moveT0 = performance.now(); RM.moveDur = RM.pos ? 1.2 : 0; return; }
     var dur = (sc.dur || 9000) / 1000;
     if (idx != null) { goStop(idx, ZOOM_REST, Math.min(5, Math.max(1.8, dur * 0.55))); return; }
     if (sc.type === "drive") { var nx = nextStopAfter(i); if (nx != null) goStop(nx, ZOOM_MOVE, Math.max(2, dur - 1.2)); return; }
@@ -356,21 +345,21 @@
     document.dispatchEvent(new CustomEvent("film:end"));
   }
   function toPlan() { var t = document.getElementById("dayhead") || root.nextElementSibling; if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }
-  function replay() { ended = false; if (RM.svg) { RM.pos = 0; RM.target = 0; RM.drawn = -1; } show(0); }
+  function replay() { ended = false; if (RM.svg) { RM.pos = 0; RM.target = 0; RM.moveFrom = 0; RM.moveDur = 0; RM.drawn = -1; } show(0); }
   /* 捲離畫面就暫停（影片、計時、雪、地圖），捲回來再從這一幕繼續 */
   var paused = false, pausedAt = 0, pausedLeft = 0;
   function pauseFilm() {
     if (paused || !started || ended) return; paused = true;
     pausedLeft = Math.max(800, (+secs[cur].dataset.dur) - (performance.now() - pausedAt)); clearTimeout(timer); clearInterval(cycleT);
     secs.forEach(function (sec) { var v = sec.querySelector("video.ph"); if (v && !v.paused) try { v.pause(); } catch (e) { } });
-    cancelAnimationFrame(raf); cancelAnimationFrame(RM.raf); RM.raf = null;
+    cancelAnimationFrame(raf); cancelAnimationFrame(RM.raf); RM.raf = null; RM.pausedAt = performance.now();
     if (AC) try { AC.suspend(); } catch (e) { }
     root.classList.add("paused");
   }
   function resumeFilm() {
     if (!paused) return; paused = false; root.classList.remove("paused");
     var v = secs[cur] && secs[cur].querySelector("video.ph"); if (v) { try { var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } }
-    raf = requestAnimationFrame(loop); if (RM.svg && !RM.raf) { RM.lastT = performance.now(); RM.raf = requestAnimationFrame(rmTick); }
+    raf = requestAnimationFrame(loop); if (RM.svg && !RM.raf) { RM.lastT = performance.now(); if (RM.pausedAt) RM.moveT0 += performance.now() - RM.pausedAt; RM.pausedAt = 0; RM.raf = requestAnimationFrame(rmTick); }
     if (AC && !muted) try { AC.resume(); } catch (e) { }
     pausedAt = performance.now() - ((+secs[cur].dataset.dur) - pausedLeft);
     if (cur < secs.length - 1) timer = setTimeout(function () { show(cur + 1); }, pausedLeft);

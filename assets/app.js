@@ -53,7 +53,7 @@
       return state.cur === "twd" ? "約 " + t : m + "（約 " + t + "）";
     });
   }
-  function em(s) { return esc(money(s)); }
+  function em(s) { return esc(money(s)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
 
   /* 今天／下一天：出發前指向 1/7，旅程中指向當天，結束後停在最後一天 */
   function focusDayIndex() { var i = T.days.findIndex(function (d) { return d.date === TODAY; }); return i >= 0 ? i : (TODAY > T.end ? T.days.length - 1 : 0); }
@@ -153,19 +153,23 @@
   function refreshPosterWx() { document.querySelectorAll("[data-pw]").forEach(function (el) { var d = T.days.filter(function (x) { return x.date === el.dataset.pw; })[0]; if (d) el.innerHTML = posterWx(d); }); }
   var CHAPTER_IMG = { villa: "otaru", furano: "furano", sapporo: "sapporo" };
   var CHAPTER_LINE = {
-    villa: "前段先安頓。山裡的房子，走路五分鐘就是 Onze，開車 40 分鐘上 Kiroro。",
-    furano: "主戰場。小木屋開車五分鐘到北之峰纜車，平日的壓雪寬坡留給 carving；美瑛和動物園在滑雪的空檔。",
-    sapporo: "最後三晚回到城市，節奏放鬆一點。手稻就在 40 分鐘外，最後一次滑雪。"
+    villa: "旅程從一棟很美的房子開始。山郷的春 Villa 一棟包，挑高的大窗整面對著森林，泡的是檜木浴缸；走出門五分鐘就是 Onze 雪場，面著海滑雪——到北海道的第一天就能上雪，是個很好的開始。",
+    furano: "主戰場。北之峰的小木屋，住過的人都在誇：一進門是木頭的香味、乾淨得像新的、老闆自己也滑雪，屋裡到處是雪板的小細節。開車五分鐘到纜車，平日早上的壓雪寬坡留給 carving；美瑛和動物園在滑雪的空檔。",
+    sapporo: "最後三晚回到城市。FAV LUX 是 2025 年才開的新飯店，上下舖的家庭房、房內就有洗衣機、還有住客專用的大浴場和三溫暖——滑了十天雪，最後三晚好好泡一泡。札幌盡量走路：街很美、什麼都在十分鐘內，車停好就三晚不動。"
   };
   function renderChapters() {
     var box = $("#chapterlist"); if (!box) return;
     box.innerHTML = T.bases.map(function (b, i) {
       var k = CHAPTER_IMG[b.id], days = T.days.filter(function (d) { return d.base === b.id; });
+      var links = (b.links || []).map(function (l) { return '<a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a>'; }).join("") +
+        (b.g && b.g.pid ? '<a href="https://www.google.com/maps/place/?q=place_id:' + b.g.pid + '" target="_blank" rel="noopener">Google 評論' + (b.g.rating ? ' ★ ' + b.g.rating.toFixed(1) + '（' + b.g.n + ' 則）' : "") + ' ↗</a>' : "") +
+        '<a class="nav" href="' + navUrl(b.lat, b.lon) + '" target="_blank" rel="noopener">開車導航 ↗</a>';
       return '<article class="chapter">' +
         '<div class="ch-img"><img src="' + BASE + 'assets/img/chapter/' + k + '.jpg" alt="" loading="lazy"></div>' +
         '<div class="ch-body"><p class="ch-k">第 ' + ["一", "二", "三"][i] + ' 章 · ' + md(b.from) + ' – ' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
         '<h3 class="ch-h">' + esc(b.short) + '</h3><p class="ch-line">' + esc(CHAPTER_LINE[b.id]) + '</p>' +
         '<p class="ch-stay">住 ' + esc(b.name) + (b.checkin ? ' · 入住 ' + b.checkin : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
+        '<div class="ch-links">' + links + '</div>' +
         '<ul class="ch-notes">' + b.notes.map(function (n) { return '<li>' + em(n) + '</li>'; }).join("") + '</ul>' +
         '<div class="ch-days">' + days.map(function (d) { return '<a href="' + dayHref(d) + '">' + md(d.date) + ' ' + esc(d.title) + '</a>'; }).join("") + '</div>' +
         '<div class="ch-gal">' + [1, 2, 3, 4].map(function (n) { return '<img src="' + BASE + 'assets/img/stay/' + b.id + '-' + n + '.jpg" alt="" loading="lazy">'; }).join("") + '</div>' +
@@ -240,13 +244,24 @@
     if (has("dayfood") && !document.querySelector("#dayfood .fp-embed:not([hidden])")) $("#dayfood").innerHTML = foodBlock(d, b);
     if (has("dayspots") && !document.querySelector("#dayspots .fp-embed:not([hidden])")) $("#dayspots").innerHTML = spotBlock(d, b);
     renderModeSeg();
-    var nav = $("#daynav");
+    var nav = $("#daynav"), prev = T.days[state.day - 1], next = T.days[state.day + 1];
     if (nav) {
-      var prev = T.days[state.day - 1], next = T.days[state.day + 1];
       nav.innerHTML = (prev ? '<a class="dn prev" href="' + dayHref(prev) + '"><small>← ' + md(prev.date) + '</small>' + esc(prev.title) + '</a>' : '<span></span>') +
-        '<a class="dn home" href="' + BASE + '">全部 13 天</a>' +
+        '<a class="dn home" href="' + BASE + '">回首頁</a>' +
         (next ? '<a class="dn next" href="' + dayHref(next) + '"><small>' + md(next.date) + ' →</small>' + esc(next.title) + '</a>' : '<span></span>');
     }
+    /* 頁面最上面（貼在頂欄下方）的換日列：前一天、下一天，中間可以直接選 13 天裡的任何一天 */
+    var sw = $("#dayswitch");
+    if (sw && !sw.dataset.ready) {
+      sw.dataset.ready = "1";
+      sw.innerHTML = '<div class="wrap ds-in">' +
+        (prev ? '<a class="ds-btn prev" href="' + dayHref(prev) + '" aria-label="前一天 ' + md(prev.date) + '"><span class="ar">‹</span><span>' + md(prev.date) + '</span></a>' : '<span class="ds-btn off"></span>') +
+        '<label class="ds-mid"><span class="ds-now">DAY ' + (state.day < 9 ? "0" : "") + (state.day + 1) + ' · ' + md(d.date) + '（' + dow(d.date) + '）· ' + esc(b.area) + '</span><select class="ds-sel" aria-label="換一天">' +
+        T.days.map(function (x, i) { return '<option value="' + dayHref(x) + '"' + (i === state.day ? " selected" : "") + '>DAY ' + (i < 9 ? "0" : "") + (i + 1) + ' · ' + md(x.date) + '（' + dow(x.date) + '）' + esc(x.title) + '</option>'; }).join("") + '</select></label>' +
+        (next ? '<a class="ds-btn next" href="' + dayHref(next) + '" aria-label="下一天 ' + md(next.date) + '"><span>' + md(next.date) + '</span><span class="ar">›</span></a>' : '<span class="ds-btn off"></span>') + '</div>';
+      sw.querySelector(".ds-sel").addEventListener("change", function () { if (this.value) location.href = this.value; });
+    }
+    if (!renderDay.hashDone) { renderDay.hashDone = true; openFoldFor(location.hash); }
     var hd = $("#dayhead");
     if (hd) hd.innerHTML = '<p class="dh-k">DAY ' + (state.day < 9 ? "0" : "") + (state.day + 1) + ' · ' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p><h1 class="dh-h">' + esc(d.title) + '</h1><p class="dh-s">' + esc(((SC[d.date] || {}).poster || {}).line || d.sub) + '</p>';
   }
@@ -264,7 +279,7 @@
     ["sapporo", "札幌", [[141.15, 42.88], [141.50, 43.13]]],
     ["all", "全區", [[140.90, 42.74], [142.72, 43.84]]]
   ];
-  var SKI_LABEL = { onze: "Onze", kiroro: "Kiroro", furano_kita: "富良野（北之峰）", teine: "Teine", asari: "朝里川" };
+  var SKI_LABEL = { onze: "Onze", kiroro: "Kiroro", furano_kita: "富良野（北之峰）", teine: "Teine", asari: "朝里川", kokusai: "札幌国際", bankei: "ばんけい", moiwa: "藻岩山", fus: "Fu's" };
   var CIRCLED = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨"];
   var map = null, gpsMarker = null, mapReady = false, KEYS = [], POIS = [], STOPS = [];
   if (PAGE === "day") AREAS = AREAS.slice(0, 1); else AREAS = AREAS.slice(1);
@@ -588,22 +603,39 @@
     var h = cell("山腳" + (r.base ? " " + r.base + " m" : ""), base) + (r.summit ? cell("山頂 " + r.summit + " m", top) : "");
     return h ? '<div class="r-wx">' + h + '</div>' : "";
   }
+  var RESORT_GROUPS = [
+    ["main", "正式行程的三座", "Onze 走路到、Kiroro 一天、富良野四天。票價是 2026-27 季官方公告。"],
+    ["sapporo", "札幌近郊・1/16–1/18 的彈性選擇", "沒有排進任何一天。如果兩夫妻想自己帶女兒去滑、或兩家分組，到時看雪況、風速和大人怎麼分再挑一天。標「2026-27」的是官網本季公告；標「2025-26 參考」的是上一季票價，出發前再查。Teine 以外的車程是地圖估算。"],
+    ["otaru", "小樽近郊備案", "回程順路泡湯的小雪場。"]
+  ];
+  function resortCard(r) {
+    var minor = r.group !== "main" && r.group !== "sapporo" || r.id === "fus" || r.id === "asari";
+    var d = T.drive, est = r.est ? '<small class="est">（估算）</small>' : "";
+    var dist = "山鄉 " + fmtMin(d.villa[r.id][1]) + "｜富良野 " + fmtMin(d.furano[r.id][1]) + "｜札幌 " + fmtMin(d.sapporo[r.id][1]) + est;
+    var gates = r.gates && r.gates.length ? '<div class="gates"><p class="g-k">入口・停車（兩邊不相通）</p><ul>' + r.gates.map(function (g) {
+      var url = g.pid ? 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(g.ja || g.name) + '&destination_place_id=' + g.pid : navUrl(g.lat, g.lon);
+      return '<li><div><b>' + esc(g.name) + '</b>' + (g.sub ? '<span class="g-sub">' + esc(g.sub) + '</span>' : "") + (g.note ? '<span class="g-note">' + em(g.note) + (g.approx ? "（位置概略）" : "") + '</span>' : "") + '</div><a href="' + url + '" target="_blank" rel="noopener">導航 ↗</a></li>';
+    }).join("") + '</ul></div>' : "";
+    return '<article class="card resort' + (minor ? " minor" : "") + '" id="resort-' + r.id + '">' +
+      '<div class="r-top"><div><h3 class="r-name">' + esc(r.name) + '</h3><p class="r-ja">' + esc(r.ja) + '・' + esc(r.tier) + '</p></div>' + seasonPill(r) + '</div>' +
+      (r.rec ? '<p class="r-rec">' + esc(r.rec) + '</p>' : "") +
+      '<p class="r-meta">' + esc(r.scale) + '<br>' + esc(r.hours) + '<br><span class="num">' + dist + '</span></p>' +
+      '<div data-rwx="' + r.id + '">' + resortWx(r) + '</div>' +
+      (r.tixSeason ? '<p class="tix-season">票價：' + esc(r.tixSeason) + '</p>' : "") +
+      '<table class="tix"><tbody>' + r.tickets.map(function (t) { return '<tr><td>' + esc(t[0]) + '</td><td>' + money(esc(t[1])).replace("（", "<br><small>").replace("）", "</small>") + (t[2] ? '<br><small class="alt">' + money(esc(t[2])) + '</small>' : "") + '</td></tr>'; }).join("") + '</tbody></table>' +
+      gates +
+      '<dl class="r-dl"><div><dt>小孩</dt><dd>' + em(r.kids) + '</dd></div><div><dt>雪具</dt><dd>' + em(r.gear) + '</dd></div>' + (r.lessons !== "—" ? '<div><dt>課程</dt><dd>' + em(r.lessons) + '</dd></div>' : "") + '</dl>' +
+      (r.tips.length ? '<ul class="bullets">' + r.tips.map(function (t) { return '<li>' + em(t) + '</li>'; }).join("") + '</ul>' : "") +
+      '<div class="linkrow">' + r.links.map(function (l) { return '<a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a>'; }).join("") +
+      (r.gates && r.gates.length ? "" : '<a href="' + navUrl(r.lat, r.lon) + '" target="_blank" rel="noopener">導航 ↗</a>') + '</div>' +
+      '</article>';
+  }
   function renderResorts() {
     if (!has("resorts")) return;
-    $("#resorts").innerHTML = T.resorts.map(function (r) {
-      var minor = r.id === "teine" || r.id === "asari";
-      var d = T.drive;
-      var dist = "山鄉 " + fmtMin(d.villa[r.id][1]) + "｜富良野 " + fmtMin(d.furano[r.id][1]) + "｜札幌 " + fmtMin(d.sapporo[r.id][1]);
-      return '<article class="card resort' + (minor ? " minor" : "") + '">' +
-        '<div class="r-top"><div><h3 class="r-name">' + esc(r.name) + '</h3><p class="r-ja">' + esc(r.ja) + '・' + esc(r.tier) + '</p></div>' + seasonPill(r) + '</div>' +
-        '<p class="r-meta">' + esc(r.scale) + '<br>' + esc(r.hours) + '<br><span class="num">' + dist + '</span></p>' +
-        '<div data-rwx="' + r.id + '">' + resortWx(r) + '</div>' +
-        '<table class="tix"><tbody>' + r.tickets.map(function (t) { return '<tr><td>' + esc(t[0]) + '</td><td>' + money(esc(t[1])).replace("（", "<br><small>").replace("）", "</small>") + '</td></tr>'; }).join("") + '</tbody></table>' +
-        '<dl class="r-dl"><div><dt>小孩</dt><dd>' + em(r.kids) + '</dd></div><div><dt>雪具</dt><dd>' + em(r.gear) + '</dd></div>' + (r.lessons !== "—" ? '<div><dt>課程</dt><dd>' + em(r.lessons) + '</dd></div>' : "") + '</dl>' +
-        (r.tips.length ? '<ul class="bullets">' + r.tips.map(function (t) { return '<li>' + em(t) + '</li>'; }).join("") + '</ul>' : "") +
-        '<div class="linkrow">' + r.links.map(function (l) { return '<a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a>'; }).join("") +
-        '<a href="' + navUrl(r.lat, r.lon) + '" target="_blank" rel="noopener">導航 ↗</a></div>' +
-        '</article>';
+    $("#resorts").innerHTML = RESORT_GROUPS.map(function (g) {
+      var list = T.resorts.filter(function (r) { return (r.group || "main") === g[0]; });
+      if (!list.length) return "";
+      return '<div class="r-group" id="ski-' + g[0] + '"><div class="r-group-h"><h3 class="h3">' + esc(g[1]) + '</h3><p>' + esc(g[2]) + '</p></div><div class="resorts-grid">' + list.map(resortCard).join("") + '</div></div>';
     }).join("");
   }
   function refreshResortWx() {
@@ -619,11 +651,13 @@
     var daily = "weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum,precipitation_probability_max,wind_gusts_10m_max";
     var A = [
       ["villa", 43.1468, 141.1355], ["furano", 43.3325, 142.3632], ["sapporo", 43.0524, 141.3486],
-      ["r_onze", 43.1439, 141.1278], ["r_teine", 43.0933, 141.2116], ["r_asari", 43.1385, 141.0293]
+      ["r_onze", 43.1439, 141.1278], ["r_teine", 43.0944, 141.2112], ["r_asari", 43.1385, 141.0293],
+      ["r_kokusai", 43.0722, 141.0828], ["r_bankei", 43.0305, 141.2781], ["r_moiwa", 43.0110, 141.3346], ["r_fus", 42.9542, 141.2794]
     ];
     var B = [
       ["r_kiroro", 43.0674, 140.9904, 570], ["t_kiroro", 43.0790, 140.9670, 1180],
-      ["r_furano_kita", 43.3404, 142.3433, 250], ["t_furano_kita", 43.3280, 142.3150, 900]
+      ["r_furano_kita", 43.3404, 142.3433, 250], ["t_furano_kita", 43.3280, 142.3150, 900],
+      ["t_teine", 43.0800, 141.1994, 1023], ["t_kokusai", 43.0640, 141.0700, 1100]
     ];
     function url(list, elev) {
       var u = "https://api.open-meteo.com/v1/forecast?latitude=" + list.map(function (x) { return x[1]; }).join(",") +
@@ -716,16 +750,32 @@
         '<p class="pick-why">' + em(p.why) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(p.book) + '</p>' : "") + '</li>';
     }).join("") + '</ul></div>';
   }
+  /* 可收合的長清單：標題列永遠看得到，內容預設收起；打開狀態在重新渲染後保留 */
+  function fold(id, head, sub, body) {
+    var open = FOLD_OPEN[id];
+    return '<details class="fold" id="' + id + '"' + (open ? " open" : "") + '><summary><span class="fold-h">' + head + '</span>' + (sub ? '<span class="fold-s">' + sub + '</span>' : "") + '<i class="fold-chev" aria-hidden="true"></i></summary><div class="fold-body">' + body + '</div></details>';
+  }
+  var FOLD_OPEN = {};
+  document.addEventListener("toggle", function (e) { var d = e.target; if (d && d.classList && d.classList.contains("fold")) FOLD_OPEN[d.id] = d.open; }, true);
+  function openFoldFor(hash) {
+    var id = hash === "#dayfood" ? "foldfood" : hash === "#dayspots" ? "foldspots" : null; if (!id) return;
+    var d = document.getElementById(id); if (d && !d.open) { d.open = true; FOLD_OPEN[id] = true; }
+  }
+  addEventListener("hashchange", function () { openFoldFor(location.hash); });
+  document.addEventListener("click", function (e) { var a = e.target.closest('a[href="#dayfood"],a[href="#dayspots"]'); if (a) openFoldFor(a.getAttribute("href")); });
   function foodBlock(d, b) {
     var areas = FOOD_AREAS[d.base] || [], list = FOOD.filter(function (f) { return areas.indexOf(f.area) >= 0; });
     var byArea = {}; list.forEach(function (f) { (byArea[f.area] = byArea[f.area] || []).push(f); });
-    var html = '<div class="sec-head"><h2>今天可以吃什麼</h2><p class="sec-note">午餐 ' + esc(d.meals[0]) + '；晚餐預計 ' + esc(d.meals[1]) + '。下面是住在' + esc(b.short.split("・").pop()) + '這幾天附近的店，按地區分；公休日已經對到當天。</p></div>' +
-      '<a class="btn btn-ghost fm-link" href="' + BASE + 'food/?day=' + d.date + '">在美食地圖上看這些店 →</a>' + picksBlock(d, BASE + "food/?day=" + d.date);
+    var wd = new Date(d.date + "T00:00:00").getDay();
+    var nClosed = list.filter(function (f) { return f.closed && f.closed.indexOf(wd) >= 0; }).length, nPlanned = list.filter(function (f) { return f.key && d.meals.join("").indexOf(f.key) >= 0; }).length;
+    var html = '<div class="sec-head"><h2>今天可以吃什麼</h2><p class="sec-note">午餐 ' + esc(d.meals[0]) + '；晚餐預計 ' + esc(d.meals[1]) + '。</p></div>' + picksBlock(d, BASE + "food/?day=" + d.date);
+    var body = '<a class="btn btn-ghost fm-link" href="' + BASE + 'food/?day=' + d.date + '">在美食地圖上看這些店 →</a>';
     areas.forEach(function (ar) {
       if (!byArea[ar]) return;
-      var items = byArea[ar].slice().sort(function (x, y) { var wd = new Date(d.date + "T00:00:00").getDay(); var px = !!(x.key && d.meals.join("").indexOf(x.key) >= 0), py = !!(y.key && d.meals.join("").indexOf(y.key) >= 0); if (px !== py) return px ? -1 : 1; var cx = x.closed && x.closed.indexOf(wd) >= 0, cy = y.closed && y.closed.indexOf(wd) >= 0; if (cx !== cy) return cx ? 1 : -1; if ((x.rec || 99) !== (y.rec || 99)) return (x.rec || 99) - (y.rec || 99); var o = { best: 0, ok: 1, unknown: 2, warn: 3 }; return (o[x.fit] || 1) - (o[y.fit] || 1); });
-      html += '<h3 class="h3">' + esc(ar) + (ar === "Kiroro" ? "（雪場內，午餐；2025-26 雪季資訊）" : "") + '</h3><ul class="foodpick">' + items.map(function (f) { return foodItem(f, d, b); }).join("") + '</ul>';
+      var items = byArea[ar].slice().sort(function (x, y) { var px = !!(x.key && d.meals.join("").indexOf(x.key) >= 0), py = !!(y.key && d.meals.join("").indexOf(y.key) >= 0); if (px !== py) return px ? -1 : 1; var cx = x.closed && x.closed.indexOf(wd) >= 0, cy = y.closed && y.closed.indexOf(wd) >= 0; if (cx !== cy) return cx ? 1 : -1; if ((x.rec || 99) !== (y.rec || 99)) return (x.rec || 99) - (y.rec || 99); var o = { best: 0, ok: 1, unknown: 2, warn: 3 }; return (o[x.fit] || 1) - (o[y.fit] || 1); });
+      body += '<h3 class="h3">' + esc(ar) + (ar === "Kiroro" ? "（雪場內，午餐；2025-26 雪季資訊）" : "") + ' · ' + items.length + ' 家</h3><ul class="foodpick">' + items.map(function (f) { return foodItem(f, d, b); }).join("") + '</ul>';
     });
+    html += fold("foldfood", '附近所有的店 <b>' + list.length + '</b> 家', '住在' + esc(b.short.split("・").pop()) + '這幾天附近的店，按地區分' + (nPlanned ? ' · 今天預計 ' + nPlanned : "") + (nClosed ? ' · 今天公休 ' + nClosed : "") + ' · 點開看', body);
     return html;
   }
   function renderFood() {
@@ -744,26 +794,30 @@
     var wd = new Date(d.date + "T00:00:00").getDay();
     var todayIds = (window.Plan && Plan.plan ? Plan.schedule(d.date, state.mode).stops : []).map(function (s) { return s.id; });
     var areas = SPOT_AREAS[d.base] || [];
-    var list = SPOTS.filter(function (s) { return s.status !== "plan" && areas.indexOf(s.area) >= 0; }).map(function (s) {
+    /* 停車場有自己的「車停哪裡」卡；雪場在首頁「雪場」比較，不混進景點清單 */
+    var list = SPOTS.filter(function (s) { return s.status !== "plan" && areas.indexOf(s.area) >= 0 && s.kind !== "停車" && s.kind !== "雪場"; }).map(function (s) {
       var near = Math.min.apply(null, [haversine(b, s)].concat(todayIds.map(function (id) { var p = Plan.plan.places[id]; return p ? haversine(p, s) : 99; })));
       return { s: s, near: near };
     }).filter(function (x) { return x.near < 30; }).sort(function (x, y) { return x.near - y.near; }).slice(0, 8);
     if (!list.length) return "";
-    var html = '<div class="sec-head"><h2>附近還可以去</h2><p class="sec-note">還沒排進今天、但離今天路線 30 公里內的收藏景點。天氣不好、小孩狀況不對、或提早結束時的備案；點「加入行程」會帶進編輯器。</p></div>' +
-      '<a class="btn btn-ghost fm-link" href="' + BASE + 'spots/?day=' + d.date + '">在景點地圖上看 →</a><ul class="foodpick">';
+    var skiNear = d.base === "sapporo" ? T.resorts.filter(function (r) { return r.group === "sapporo"; }) : [];
+    var html = '<div class="sec-head"><h2>附近還可以去</h2><p class="sec-note">還沒排進今天、但離今天路線 30 公里內的收藏景點：天氣不好、小孩狀況不對、或提早結束時的備案。點「加入行程」會帶進編輯器。</p></div>';
+    if (skiNear.length) html += '<p class="ski-hint">大人想滑雪？札幌近郊 ' + skiNear.length + ' 座雪場（' + skiNear.map(function (r) { return esc(r.name.replace(/（.*?）|滑雪場|雪場/g, "")) + ' ' + fmtMin(T.drive.sapporo[r.id][1]); }).join("、") + '）的票價、入口和建議在 <a href="' + BASE + '#ski-sapporo">首頁「雪場」→</a></p>';
+    var body = '<a class="btn btn-ghost fm-link" href="' + BASE + 'spots/?day=' + d.date + '">在景點地圖上看 →</a><ul class="foodpick">';
     list.forEach(function (x) {
       var s = x.s, st = SPOT_STATUS[s.status] || SPOT_STATUS.saved, closed = s.closed && s.closed.indexOf(wd) >= 0, g = s.g;
       var km = x.near * 1.35, min = r5(km / 40 * 60);
-      html += '<li class="fp ' + (s.kids === "best" ? "best" : s.kids === "warn" ? "warn" : "ok") + (closed ? " closed" : "") + '">' +
+      body += '<li class="fp ' + (s.kids === "best" ? "best" : s.kids === "warn" ? "warn" : "ok") + (closed ? " closed" : "") + '">' +
         '<div class="fp-top"><b>' + esc(s.name) + '</b><span class="kind">' + esc(s.kind) + '</span><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (closed ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
         (g && g.rating ? '<div class="fp-rating"><span class="stars"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small></div>' : "") +
-        '<p class="fp-what">' + esc(s.what) + '</p>' + (s.caution ? '<p class="fp-caution">⚠ ' + esc(s.caution) + '</p>' : "") + (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(s.photo) + '</p>' : "") +
+        '<p class="fp-what">' + em(s.what) + '</p>' + (s.caution ? '<p class="fp-caution">⚠ ' + em(s.caution) + '</p>' : "") + (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(s.photo) + '</p>' : "") +
         '<p class="fp-meta">' + esc(s.hours || "") + (s.fee ? ' · ' + esc(s.fee) : "") + (s.time ? ' · 約 ' + s.time + ' 分' : "") + ' · 離今天路線最近約 ' + min + ' 分車程</p>' +
         '<div class="fp-act">' + (g && g.q ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") +
         '<a href="' + (g && g.pid ? 'https://www.google.com/maps/place/?q=place_id:' + g.pid : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((s.ja || s.name) + " " + s.area)) + '" target="_blank" rel="noopener">Google Maps →</a>' +
         '<a class="fp-add" href="' + BASE + 'plan/?add=' + s.id + '#' + d.date + '">加入行程 ＋</a></div><div class="fp-embed" hidden></div></li>';
     });
-    return html + '</ul>';
+    var nBest = list.filter(function (x) { return x.s.kids === "best"; }).length, nPhoto = list.filter(function (x) { return x.s.photo; }).length;
+    return html + fold("foldspots", '離今天路線最近的 <b>' + list.length + '</b> 個收藏景點', (nBest ? '很適合小孩 ' + nBest + ' · ' : "") + (nPhoto ? '有拍攝點 ' + nPhoto + ' · ' : "") + '點開看', body + '</ul>');
   }
   function renderSpotStats() {
     if (!has("spotstats") || !SPOTS.length) return;
@@ -818,6 +872,8 @@
   }
   function rerenderMoney() {
     renderFx(); renderDay(); renderResorts(); renderFood(); renderPrep(); renderChapters(); renderStops();
+    /* 從單日頁連到 #ski-sapporo 之類的錨點：內容是 JS 畫出來的，畫完再捲一次才會對位 */
+    if (PAGE === "home" && location.hash && location.hash.length > 1) { try { var tgt = document.querySelector(location.hash); if (tgt) setTimeout(function () { tgt.scrollIntoView({ block: "start" }); }, 400); } catch (e) { } }
   }
   if (has("curbtn")) $("#curbtn").addEventListener("click", function () {
     state.cur = CUR_MODES[(CUR_MODES.indexOf(state.cur) + 1) % CUR_MODES.length];

@@ -50,6 +50,7 @@ No freely licensed photos found on Wikimedia Commons for these hotels; no images
 - 首頁主視覺、海報 1/15、1/7 序幕第 2 幕：Yascolo〈Blue Sky And White World〉（美瑛，CC BY 3.0），經裁切、壓縮、模糊。
 - 1/7 序幕第 3 幕：T DMY〈Direction of Zenibako from ONZE ski resort〉（CC BY 3.0），經調色。
 - 海報與章節：上表所列 Commons 照片，經裁切壓縮。
+- 海報 1/18（2026-10-26 起）：改用 1/16、1/18 序幕同一張札幌大通俯瞰（assets/img/scene/sapporo-3.jpg 的來源），裁成 3:4；原本的手稻山照片不再使用，因為 1/18 已不是滑雪日。
 - 住宿照片（山郷 春 Villa -SHUN-、BEST DAY EVER FURANO LODGES、FAV LUX 札幌薄野）：各住宿官方網站／訂房頁，僅供同行家人行前參考，版權屬原業者。
 - 序幕音樂：網頁以 Web Audio 即時生成，無外部音檔。
 

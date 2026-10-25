@@ -94,42 +94,42 @@ window.SCENES = {
     ]
   },
   "2027-01-15": {
-    poster: { img: "poster/0115.jpg", line: "不滑雪的一天。美瑛的牧場、炸蝦丼、瀑布，和點了燈的青池。" },
+    poster: { img: "poster/0115.jpg", line: "不滑雪的一天。美瑛的炸蝦丼、雪上樂園的羊駝、瀑布，和點了燈的青池。" },
     scenes: [
       { type: "title", eyebrow: "DAY 09 · BIEI", h: "美瑛親子日", s: "不滑雪的一天。", imgs: ["scene/biei-1.jpg", "scene/aoiike-1.jpg", "scene/shirahige-1.jpg"], amb: "snow", dur: 5500 },
       { stop: "junpei", label: "美瑛", imgs: ["scene/biei-1.jpg", "scene/biei-2.jpg", "scene/biei-3.jpg"], h: "不滑雪的一天。", s: "美瑛的丘，一棵樹。先去吃炸蝦丼，早到避開旅行團。", amb: "quiet", dur: 8000 },
-      { stop: "chiyoda", imgs: ["scene/road-1.jpg", "scene/biei-2.jpg"], h: "牧場。", s: "餵動物、玩雪，讓小孩把電放完。", amb: "quiet", dur: 6000 },
+      { stop: "shikisai", imgs: ["scene/biei-2.jpg", "scene/road-1.jpg", "scene/biei-3.jpg"], h: "雪上樂園。", s: "滑胎、雪上泛舟、餵羊駝，讓小孩把電放完。", amb: "quiet", dur: 7000 },
       { stop: "shirahige", img: "scene/shirahige-1.jpg", h: "白鬚瀑布，結冰的。", s: "橋上很冷，看一下就好。", amb: "snow", kb: "in", dur: 6000 },
       { stop: "aoiike", img: "scene/aoiike-1.jpg", h: "青池，17:00 點燈。", s: "早到就等，燈亮了再走。", amb: "quiet", kb: "in", dur: 7000 },
-      { type: "end", t: "17:30 前", img: "scene/biei-4.jpg", h: "出發回小木屋。<br>天黑的山路，慢慢開。", amb: "drive", kb: "out", dur: 7000 }
+      { type: "end", t: "17:30 前", img: "scene/biei-4.jpg", h: "出發回小木屋。<br>天黑的山路，慢慢開。最後一晚。", amb: "drive", kb: "out", dur: 7000 }
     ]
   },
   "2027-01-16": {
-    poster: { img: "poster/0116.jpg", line: "離開山，回到城市。晚上在啤酒園吃成吉思汗。" },
+    poster: { img: "poster/0116.jpg", line: "離開山，回到城市。停好車就用走的；晚上在啤酒園吃成吉思汗。" },
     scenes: [
       { type: "title", eyebrow: "DAY 10 · FURANO → SAPPORO", h: "富良野・札幌", s: "離開山，回到城市。", imgs: ["scene/lodge-1.jpg", "scene/sapporo-1.jpg", "scene/sapporo-4.jpg"], amb: "snow", dur: 5500 },
-      { stop: "lodge", imgs: ["scene/lodge-1.jpg", "scene/lodge-3.jpg", "scene/furano-4.jpg"], h: "退房。再見，富良野。", s: "五個晚上。雪板綁好，直接開札幌。", amb: "quiet", dur: 7500 },
-      { stop: "favlux", imgs: ["scene/sapporo-1.jpg", "scene/sapporo-2.jpg", "scene/sapporo-3.jpg"], h: "回到城市。", s: "先找平面停車場，市區吃午餐，15:00 入住。", amb: "quiet", dur: 7500 },
-      { stop: "favlux", label: "FAV LUX", imgs: ["scene/favlux-1.jpg", "scene/favlux-2.jpg", "scene/favlux-3.jpg", "scene/favlux-4.jpg"], h: "最後三晚的房間。", s: "有廚房、有洗衣機，雪具可以慢慢晾。", amb: "quiet", dur: 8000 },
-      { type: "end", stop: "beer", imgs: ["scene/beer-1.jpg", "scene/sapporo-4.jpg", "scene/sapporo-5.jpg"], h: "晚上，啤酒園的成吉思汗。", amb: "snow", warm: true, dur: 8000 }
+      { stop: "lodge", imgs: ["scene/lodge-1.jpg", "scene/lodge-3.jpg", "scene/furano-4.jpg"], h: "退房。再見，富良野。", s: "五個晚上。雪板綁好，中途在砂川吃個泡芙。", amb: "quiet", dur: 7500 },
+      { stop: "tanuki", label: "回到城市", imgs: ["scene/sapporo-1.jpg", "scene/sapporo-2.jpg", "scene/sapporo-3.jpg"], h: "回到城市。", s: "車停好就三晚不動。拉麵、狸小路，15:00 入住。", amb: "quiet", dur: 7500 },
+      { stop: "tvtower", imgs: ["scene/sapporo-5.jpg", "scene/sapporo-6.jpg", "scene/sapporo-4.jpg"], h: "電視塔，看城市變藍。", s: "16:25 日落。大通公園的雪地走一段。", amb: "snow", dur: 7000 },
+      { type: "end", stop: "beer", imgs: ["scene/beer-1.jpg", "scene/susukino-1.jpg", "scene/sapporo-4.jpg"], h: "晚上，啤酒園的成吉思汗。<br>早點休息。", amb: "snow", warm: true, dur: 8000 }
     ]
   },
   "2027-01-17": {
-    poster: { img: "poster/0117.jpg", line: "週日，小孩的札幌：雪世界、水族館、湯咖哩。" },
+    poster: { img: "poster/0117.jpg", line: "週日，小孩的札幌：羊之丘滑胎、回轉壽司、白色戀人的巧克力工廠。" },
     scenes: [
-      { type: "title", eyebrow: "DAY 11 · SAPPORO", h: "札幌親子日", s: "週日，觀光，不滑雪。", imgs: ["scene/sapporo-2.jpg", "scene/sapporo-4.jpg", "scene/susukino-1.jpg"], amb: "snow", dur: 5500 },
-      { stop: "takino", label: "札幌", imgs: ["scene/sapporo-2.jpg", "scene/sapporo-3.jpg", "scene/road-1.jpg"], h: "週日，小孩的札幌。", s: "瀧野雪世界滑圈、玩雪，玩到中午。", amb: "quiet", dur: 7500 },
-      { stop: "aoao", video: "city-snow.mp4", img: "video/city-snow.jpg", h: "下午，水族館走路就到。", s: "雪在城市裡落下來的樣子，跟山裡不一樣。", amb: "snow", dur: 7000 },
-      { type: "end", stop: "soul", imgs: ["scene/sapporo-5.jpg", "scene/susukino-1.jpg", "scene/susukino-2.jpg"], h: "晚上，湯咖哩。", amb: "snow", warm: true, dur: 8000 }
+      { type: "title", eyebrow: "DAY 11 · SAPPORO", h: "羊之丘・白色戀人", s: "週日，玩雪和巧克力，不滑雪。", imgs: ["scene/sapporo-2.jpg", "scene/sapporo-4.jpg", "scene/susukino-1.jpg"], amb: "snow", dur: 5500 },
+      { stop: "hitsujigaoka", label: "羊之丘", imgs: ["scene/road-1.jpg", "scene/sapporo-3.jpg", "scene/sapporo-2.jpg"], h: "羊之丘的雪上樂園。", s: "滑胎、雪屋、2–5 歲的滑步車道，玩到中午。克拉克像前拍一張。", amb: "quiet", dur: 7500 },
+      { stop: "shiroi", video: "city-snow.mp4", img: "video/city-snow.jpg", h: "下午，白色戀人公園。", s: "英式紅磚樓、巧克力工廠、伴手禮一次買齊。", amb: "snow", dur: 7000 },
+      { type: "end", stop: "kujira", imgs: ["scene/sapporo-5.jpg", "scene/susukino-1.jpg", "scene/susukino-2.jpg"], h: "晚上，義大利菜。<br>回飯店泡大浴場，早點睡。", amb: "snow", warm: true, dur: 8000 }
     ]
   },
   "2027-01-18": {
-    poster: { img: "poster/0118.jpg", line: "最後一次滑雪。一家上山、一家顧小孩，中午交換。晚上吃螃蟹。" },
+    poster: { img: "poster/0118.jpg", line: "最後一個整天。車不開，走路逛札幌：紅磚廳舍、豚丼、六花亭、狸小路；晚上吃螃蟹。" },
     scenes: [
-      { type: "title", eyebrow: "DAY 12 · TEINE", h: "手稻 Teine", s: "最後一次滑雪。", imgs: ["scene/teine-1.jpg", "scene/teine-2.jpg", "scene/susukino-1.jpg"], amb: "snow", dur: 5500 },
-      { stop: "teine", imgs: ["scene/teine-1.jpg", "scene/teine-2.jpg", "scene/teine-3.jpg"], h: "最後一次滑雪。", s: "手稻就在城市旁邊，山上看得到海。", amb: "quiet", dur: 7500 },
-      { t: "輪流", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "一家上山、一家顧小孩，中午交換。", s: "把這趟學到的 carving 全部用掉。", amb: "quiet", dur: 7000 },
-      { type: "end", stop: "kani", imgs: ["scene/susukino-1.jpg", "scene/susukino-2.jpg", "scene/susukino-3.jpg"], h: "晚上吃螃蟹。<br>雪具今晚要弄乾、打包。", amb: "snow", warm: true, dur: 8000 }
+      { type: "title", eyebrow: "DAY 12 · SAPPORO", h: "札幌散步", s: "最後一個整天。車不開，用走的。", imgs: ["scene/sapporo-3.jpg", "scene/susukino-2.jpg", "scene/sapporo-1.jpg"], amb: "snow", dur: 5500 },
+      { stop: "akarenga", imgs: ["scene/sapporo-3.jpg", "scene/sapporo-2.jpg", "scene/susukino-2.jpg"], h: "走路逛札幌。", s: "紅磚廳舍、時計台、JR 塔上看一圈。中午吃豚丼，下午六花亭。", amb: "quiet", dur: 7500 },
+      { stop: "tanuki", imgs: ["scene/susukino-1.jpg", "scene/susukino-3.jpg", "scene/sapporo-6.jpg"], h: "狸小路，最後採購。", s: "想滑雪的大人，今天也可以自己去 Teine 半天——那不是行程，是選項。", amb: "snow", dur: 7000 },
+      { type: "end", stop: "hyosetsu", imgs: ["scene/susukino-3.jpg", "scene/susukino-1.jpg", "scene/sapporo-5.jpg"], h: "晚上吃螃蟹。<br>雪具今晚要弄乾、打包，早點睡。", amb: "snow", warm: true, dur: 8000 }
     ]
   },
   "2027-01-19": {
@@ -148,5 +148,7 @@ window.PLACE_OF_STOP = {
   cts: "new-chitose", rental: null, kiroro_onsen: "kiroro", waraku: null, aeon: "aeon-hassamu", villa: "hotels/shun-villa", kiroro: "kiroro", onze: "onze", asari: "asari",
   canal: "otaru-canal", naruto: null, zoo: "asahiyama-zoo", lodge: "hotels/furano-lodge", kumagera: null, kita: "furano-ski", fzone: "furano-ski",
   ningle: "ningle-terrace", fstn: "furano-station", yuiga: null, junpei: null, chiyoda: "chiyoda-farm", shirahige: "shirahige-falls", aoiike: "blue-pond",
-  favlux: "hotels/fav-lux", beer: "sapporo-beer-garden", takino: "takino", aoao: "aoao", soul: null, teine: "teine", kani: null
+  favlux: "hotels/fav-lux", beer: "sapporo-beer-garden", takino: "takino", aoao: "aoao", soul: null, teine: "teine", kani: null,
+  shikisai: null, senka: null, kitakaro: null, ichigen: null, tanuki: "susukino", odori: null, tvtower: "sapporo", hitsujigaoka: null, toriton: null, shiroi: null, kujira: null,
+  akarenga: null, clocktower: null, t38: null, ippin: null, rokkatei: null, hyosetsu: null
 };

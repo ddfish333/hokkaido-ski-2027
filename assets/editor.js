@@ -143,7 +143,9 @@
       .then(function (r) { return r.json(); }).then(function (j) {
         if (j.code !== "Ok") throw new Error("route");
         var rt = j.routes[0], m = rt.duration / 60, coords = rt.geometry.coordinates.map(function (c) { return [Math.round(c[0] * 1e5) / 1e5, Math.round(c[1] * 1e5) / 1e5]; });
-        P.legs[key] = via === "walk" ? { km: Math.round(rt.distance / 100) / 10, normal: P.r5(m), snow: P.r5(m * 1.2), mode: "walk", geom: coords }
+        /* 公開的 OSRM 只有汽車路網：步行段的距離照路網、時間用 4 km/h 自己算 */
+        var wm = rt.distance / 1000 / 4 * 60;
+        P.legs[key] = via === "walk" ? { km: Math.round(rt.distance / 100) / 10, normal: P.r5(wm), snow: P.r5(wm * 1.2), mode: "walk", geom: coords }
           : { km: Math.round(rt.distance / 100) / 10, normal: P.r5(m * 1.15), snow: P.r5(m * 1.5), mode: "drive", geom: coords };
         state.legsDirty = true; return true;
       }).catch(function () { msg("路網服務暫時連不上，這段先用直線估算，之後再試。", true); return false; });
