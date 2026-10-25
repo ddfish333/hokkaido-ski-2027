@@ -134,11 +134,23 @@
       return '<a class="poster' + (i === focus ? " focus" : "") + '" href="' + dayHref(d) + '" style="--seg:' + BASE_COLOR[d.base] + '">' +
         (p.img ? '<img src="' + BASE + 'assets/img/' + p.img + '" alt="" loading="lazy">' : '<span class="poster-blank"></span>') +
         '<span class="poster-top"><span class="pd">' + md(d.date) + '<small>週' + dow(d.date) + '</small></span>' + (badge ? '<span class="badge">' + badge + '</span>' : "") + '</span>' +
+        '<span class="pw" data-pw="' + d.date + '">' + posterWx(d) + '</span>' +
         '<span class="poster-body"><span class="pn">DAY ' + (i < 9 ? "0" : "") + (i + 1) + ' · ' + esc(b.area) + '</span><span class="pt">' + esc(d.title) + '</span><span class="pl">' + esc(p.line || d.sub) + '</span></span></a>';
     }).join("");
     var f = box.children[focus];
     if (f) box.scrollLeft = Math.max(0, f.offsetLeft - 24);
   }
+  /* 海報上的天氣：有 16 天預報就用預報，沒有就先放歷年平均 */
+  function posterWx(d) {
+    var w = state.wx[d.base];
+    if (w && w.daily) {
+      var k = w.daily.time.indexOf(d.date);
+      if (k >= 0) { var m = wmo(w.daily.weather_code[k]); return '<i class="ico">' + ICON[m[1]] + '</i><b>' + Math.round(w.daily.temperature_2m_max[k]) + '°</b><small>' + Math.round(w.daily.temperature_2m_min[k]) + '°</small><em>' + m[0] + (w.daily.snowfall_sum[k] >= 1 ? ' · 雪 ' + Math.round(w.daily.snowfall_sum[k]) + ' cm' : "") + '</em>'; }
+    }
+    var c = T.climate[d.base]; if (!c) return "";
+    return '<i class="ico">' + ICON.snow + '</i><b>' + c.tmax + '°</b><small>' + c.tmin + '°</small><em>歷年平均</em>';
+  }
+  function refreshPosterWx() { document.querySelectorAll("[data-pw]").forEach(function (el) { var d = T.days.filter(function (x) { return x.date === el.dataset.pw; })[0]; if (d) el.innerHTML = posterWx(d); }); }
   var CHAPTER_IMG = { villa: "otaru", furano: "furano", sapporo: "sapporo" };
   var CHAPTER_LINE = {
     villa: "前段先安頓。山裡的房子，走路五分鐘就是 Onze，開車 40 分鐘上 Kiroro。",
@@ -597,7 +609,7 @@
       return u;
     }
     function take(list, j) { (Array.isArray(j) ? j : [j]).forEach(function (o, k) { if (list[k]) state.wx[list[k][0]] = o; }); }
-    function done() { renderWxStrip(); renderDay(); refreshResortWx(); }
+    function done() { renderWxStrip(); renderDay(); refreshResortWx(); refreshPosterWx(); }
     function get(list, elev, retry) {
       return fetch(url(list, elev)).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (j) { take(list, j); done(); })
