@@ -666,7 +666,7 @@
     var g = f.g, stars = g ? '<span class="stars" aria-label="Google 評價 ' + g.rating + '"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small>' : '<small class="nog">Google 評價待查</small>';
     var mapsUrl = g ? 'https://www.google.com/maps/place/?q=place_id:' + g.pid : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(f.name.replace(/（.*?）/g, "") + " " + (f.area === "Kiroro" ? "キロロ" : f.area));
     return '<li class="fp ' + fit[1] + (closedToday ? " closed" : "") + (planned ? " planned" : "") + '" data-fid="' + f.id + '">' +
-      '<div class="fp-top"><b>' + esc(f.name) + '</b><span class="kind">' + esc(f.kind) + '</span>' + (planned ? '<span class="badge gold">今天預計</span>' : "") + (closedToday ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
+      '<div class="fp-top"><b>' + esc(f.name) + '</b><span class="kind">' + esc(f.kind) + '</span>' + (f.rec ? '<span class="badge rec">推薦 ' + f.rec + '</span>' : "") + (planned ? '<span class="badge gold">今天預計</span>' : "") + (closedToday ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
       '<div class="fp-rating">' + stars + '</div>' +
       '<p class="fp-what">' + em(f.what) + '</p>' +
       '<p class="fp-meta">' + esc(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (b ? ' · 從' + esc(b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span></p>' +
@@ -683,11 +683,12 @@
   function foodBlock(d, b) {
     var areas = FOOD_AREAS[d.base] || [], list = FOOD.filter(function (f) { return areas.indexOf(f.area) >= 0; });
     var byArea = {}; list.forEach(function (f) { (byArea[f.area] = byArea[f.area] || []).push(f); });
-    var html = '<div class="sec-head"><h2>今天可以吃什麼</h2><p class="sec-note">午餐 ' + esc(d.meals[0]) + '；晚餐預計 ' + esc(d.meals[1]) + '。下面是住在' + esc(b.short.split("・").pop()) + '這幾天附近的店，按地區分；公休日已經對到當天。</p></div>';
+    var html = '<div class="sec-head"><h2>今天可以吃什麼</h2><p class="sec-note">午餐 ' + esc(d.meals[0]) + '；晚餐預計 ' + esc(d.meals[1]) + '。下面是住在' + esc(b.short.split("・").pop()) + '這幾天附近的店，按地區分；公休日已經對到當天。</p></div>' +
+      '<a class="btn btn-ghost fm-link" href="' + BASE + 'food/?day=' + d.date + '">在美食地圖上看這些店 →</a>';
     areas.forEach(function (ar) {
       if (!byArea[ar]) return;
-      var items = byArea[ar].slice().sort(function (x, y) { var wd = new Date(d.date + "T00:00:00").getDay(); var cx = x.closed && x.closed.indexOf(wd) >= 0, cy = y.closed && y.closed.indexOf(wd) >= 0; if (cx !== cy) return cx ? 1 : -1; var o = { best: 0, ok: 1, unknown: 2, warn: 3 }; return (o[x.fit] || 1) - (o[y.fit] || 1); });
-      html += '<h3 class="h3">' + esc(ar) + (ar === "Kiroro" ? "（雪場內，午餐）" : "") + '</h3><ul class="foodpick">' + items.map(function (f) { return foodItem(f, d, b); }).join("") + '</ul>';
+      var items = byArea[ar].slice().sort(function (x, y) { var wd = new Date(d.date + "T00:00:00").getDay(); var px = !!(x.key && d.meals.join("").indexOf(x.key) >= 0), py = !!(y.key && d.meals.join("").indexOf(y.key) >= 0); if (px !== py) return px ? -1 : 1; var cx = x.closed && x.closed.indexOf(wd) >= 0, cy = y.closed && y.closed.indexOf(wd) >= 0; if (cx !== cy) return cx ? 1 : -1; if ((x.rec || 99) !== (y.rec || 99)) return (x.rec || 99) - (y.rec || 99); var o = { best: 0, ok: 1, unknown: 2, warn: 3 }; return (o[x.fit] || 1) - (o[y.fit] || 1); });
+      html += '<h3 class="h3">' + esc(ar) + (ar === "Kiroro" ? "（雪場內，午餐；2025-26 雪季資訊）" : "") + '</h3><ul class="foodpick">' + items.map(function (f) { return foodItem(f, d, b); }).join("") + '</ul>';
     });
     return html;
   }
@@ -697,7 +698,7 @@
       var areas = ["全部"]; FOOD.forEach(function (f) { if (areas.indexOf(f.area) < 0) areas.push(f.area); });
       $("#foodfilter").innerHTML = areas.map(function (a) { return '<button type="button" class="chip solid" aria-pressed="' + (state.foodArea === a) + '" data-a="' + esc(a) + '">' + esc(a) + '</button>'; }).join("");
       $("#foodfilter").onclick = function (e) { var b = e.target.closest("[data-a]"); if (!b) return; state.foodArea = b.dataset.a; renderFood(); };
-      $("#foodlist").innerHTML = '<ul class="foodpick">' + FOOD.filter(function (f) { return state.foodArea === "全部" || f.area === state.foodArea; }).map(function (f) { return foodItem(f, null, null); }).join("") + '</ul>';
+      $("#foodlist").innerHTML = '<ul class="foodpick">' + FOOD.filter(function (f) { return state.foodArea === "全部" || f.area === state.foodArea; }).slice().sort(function (x, y) { return (x.rec || 99) - (y.rec || 99); }).map(function (f) { return foodItem(f, null, null); }).join("") + '</ul>';
       return;
     }
     renderFoodLegacy();

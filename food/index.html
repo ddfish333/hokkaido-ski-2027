@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>美食地圖 · 北海道・雪上的大小腳印</title>
+<meta name="description" content="北海道親子滑雪 13 天的美食地圖：小樽、銭函、Kiroro 雪場、富良野、美瑛、札幌。帶 4 個小孩也能坐下來吃的店，Google 評價、公休日、從住宿開過去的時間。">
+<meta name="theme-color" content="#070B12">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="../assets/style.css?v=042fdd1d">
+<link rel="stylesheet" href="../assets/foodmap.css?v=490c3017">
+<script>window.BASE = "../";</script>
+</head>
+<body class="foodpage">
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="../" aria-label="回首頁"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">北海道・雪上的大小腳印</span></a>
+    <nav class="nav" aria-label="主要區塊">
+      <a href="../#days">13 天</a>
+      <a href="../#ski">雪場</a>
+      <a href="./" aria-current="page">美食地圖</a>
+      <a href="../plan/" class="nav-edit">編輯</a>
+    </nav>
+  </div>
+</header>
+
+<main class="fm">
+  <div class="fm-map">
+    <div id="fmcanvas" class="mapcanvas" role="region" aria-label="美食地圖"></div>
+    <p class="map-fallback" id="fmfallback" hidden>地圖載入失敗，請確認網路連線後重新整理。</p>
+    <div class="fm-legend" id="fmlegend" aria-hidden="true"></div>
+  </div>
+
+  <section class="fm-side">
+    <div class="fm-head">
+      <p class="eyebrow">FOOD MAP</p>
+      <h1>美食地圖</h1>
+      <p class="fm-sub">帶 4 個 3–4 歲小孩，9 個人：先看有沒有座位、能不能訂、停車方不方便。選一天，就會標出那天預計吃的店、當天公休的店，和從住宿開過去的時間。</p>
+    </div>
+
+    <div class="fm-tools">
+      <label class="fm-day"><span>哪一天</span><select id="fmday"></select></label>
+      <div class="chips" id="fmarea" aria-label="地區"></div>
+      <div class="chips fm-kinds" id="fmkind" aria-label="類型"></div>
+      <label class="fm-check"><input type="checkbox" id="fmkids"> 只看適合帶小孩的</label>
+    </div>
+
+    <p class="fm-count" id="fmcount" aria-live="polite"></p>
+    <ul class="foodpick fm-list" id="fmlist"></ul>
+
+    <p class="fm-foot">Google 評價為 2026-10-25 快照，出發前會再更新；Kiroro 山上的店是 2025-26 雪季資訊，菜單與價格要等新雪季公告。營業時間與公休日可能變動，當天請以 Google Maps「目前營業」為準。</p>
+  </section>
+</main>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="../data/trip.js?v=2fff855f"></script>
+<script src="../data/food.js?v=267fbebf"></script>
+<script src="../assets/plan.js?v=5437128b"></script>
+<script src="../assets/foodmap.js?v=0c970c91"></script>
+</body>
+</html>

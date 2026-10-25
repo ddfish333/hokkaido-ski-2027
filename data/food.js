@@ -1,13 +1,17 @@
 /* 餐廳清單（整理自 12_餐廳.md；時間多為 2025–26 資料，出發前一週再確認）。
    area：小樽／Kiroro／銭函／富良野／美瑛・旭川／札幌。closed：公休星期（0=日…6=六）。fit：9 人帶 4 個幼兒 ok？ */
 window.FOOD = [
-  /* Kiroro 山上（午餐） */
-  { id: "lumiere", name: "Cafeteria Lumière", area: "Kiroro", kind: "自助午餐", what: "焗烤、中華、赤井川豬，Mountain Center 1F", hours: "11:00–15:00 LO", fit: "ok", lat: 43.0674, lon: 140.9904, meal: "lunch" },
-  { id: "pizzeria", name: "Pizzeria Akaigawa", area: "Kiroro", kind: "披薩", what: "可外帶，Mountain Center 1F", hours: "11:00–16:30 LO", fit: "ok", lat: 43.0674, lon: 140.9904, meal: "lunch" },
-  { id: "lelift", name: "Cafe Le Lift", area: "Kiroro", kind: "輕食", what: "熱湯、甜點，Mountain Center 1F", hours: "11:00–15:00 LO", fit: "ok", lat: 43.0674, lon: 140.9904, meal: "lunch" },
-  { id: "brasserie", name: "Brasserie Akaigawa", area: "Kiroro", kind: "麵食", what: "在地蔬菜與肉，纜車站 1F", hours: "11:00–15:00 LO", fit: "ok", lat: 43.0674, lon: 140.9904, meal: "lunch" },
-  { id: "lounge", name: "The Lounge Premium", area: "Kiroro", kind: "付費包廂", what: "沙拉吧、湯、飲料；8 人包廂 ¥18,000，只有 4 間要預約 0135-34-7176。帶 4 個小孩有固定座位最省力", hours: "午餐時段", fit: "best", lat: 43.0674, lon: 140.9904, meal: "lunch" },
-  { id: "yukashi", g: {"rating": 4.2, "n": 42, "pid": "ChIJdaUstjXdCl8RXmVD_EJ4q9w", "q": "YUKASHI Alpine Bistro Yu Kiroro", "date": "2026-10-25"}, name: "Yukashi Alpine Bistro", area: "Kiroro", kind: "北海道料理", what: "Yu Kiroro 飯店內，滑完直接吃晚餐不用下山；預約 0135-48-6785", hours: "晚餐 17:30–21:30 LO", fit: "ok", lat: 43.0699, lon: 140.9889, meal: "dinner" },
+  /* Kiroro 山上（午餐；官網與食客評論核對 2026-10，菜單與價格要等 2026-27 新雪季更新） */
+  { id: "brasserie", rec: 1, name: "Brasserie Akaigawa", area: "Kiroro", kind: "麵食", what: "優先選這家：赤井川番茄擔擔麵、赤井川豬肉角煮醬油拉麵（食客實際點餐紀錄，官方也主推麵類），用當地蔬菜與肉；Kiroro Gondola 山麓站 1F", hours: "11:00–15:00 LO（2025-26）", fit: "ok", lat: 43.0668, lon: 140.9918, meal: "lunch" },
+  { id: "waffle", rec: 2, name: "WDC Waffle Shop", area: "Kiroro", kind: "鬆餅", what: "現烤比利時鬆餅，焦糖香；下午滑累了補充體力，Mountain Center 1F", hours: "11:00–18:00（2025-26）", fit: "ok", lat: 43.0674, lon: 140.9904, meal: "snack" },
+  { id: "lumiere", rec: 3, name: "Cafeteria Lumière", area: "Kiroro", kind: "自助午餐", what: "烤箱熱料理或主廚中華套餐，附沙拉、湯與飲料吧；想坐下來吃完整一餐選這裡。Mountain Center 1F", hours: "11:00–15:00 LO（2025-26）", fit: "ok", lat: 43.0674, lon: 140.9904, meal: "lunch" },
+  { id: "pizzeria", rec: 4, name: "Pizzeria Akaigawa", area: "Kiroro", kind: "披薩", what: "熱披薩，幾個人分食，也有外帶；跟 Brasserie 是不同店。Mountain Center 1F", hours: "11:00–16:30 LO（2025-26）", fit: "ok", lat: 43.0674, lon: 140.9904, meal: "lunch" },
+  { id: "lelift", name: "Café Le Lift", area: "Kiroro", kind: "輕食", what: "輕食、熱湯、蛋糕；想簡單吃、休息一下。Mountain Center 1F", hours: "11:00–15:00 LO（2025-26）", fit: "ok", lat: 43.0674, lon: 140.9904, meal: "lunch" },
+  { id: "crest", name: "Café Crest（長峰山腰）", area: "Kiroro", kind: "山屋", what: "長峰第一高速纜車下車後的山腰小屋，熱食熱飲；整天滑長峰區時就近休息，沒有特別必吃", hours: "11:00–14:00 LO（2025-26）", fit: "ok", lat: 43.0745, lon: 140.9790, approx: true, meal: "lunch" },
+  { id: "lounge", name: "The Lounge Premium", area: "Kiroro", kind: "付費包廂", what: "沙拉吧、湯、飲料；8 人包廂 ¥18,000（2025-26），只有 4 間要預約 0135-34-7176。帶 4 個小孩有固定座位最省力", hours: "午餐時段", fit: "best", lat: 43.0674, lon: 140.9904, meal: "lunch" },
+  { id: "yukashi", g: {"rating": 4.2, "n": 42, "pid": "ChIJdaUstjXdCl8RXmVD_EJ4q9w", "q": "YUKASHI Alpine Bistro Yu Kiroro", "date": "2026-10-25"}, name: "Yukashi Alpine Bistro", area: "Kiroro", kind: "北海道料理", what: "Yu Kiroro 飯店內，日式、西式與亞洲料理，有早午晚餐與訂位；想好好坐下來吃一餐可以。評價兩極。預約 0135-48-6785", hours: "07:00–21:30", fit: "ok", lat: 43.0746, lon: 140.9853, meal: "dinner" },
+  { id: "yukilounge", name: "Yuki Lounge", area: "Kiroro", kind: "下午茶", what: "Yu Kiroro 飯店內，甜點、咖啡、飲料", hours: "🔎", fit: "ok", lat: 43.0746, lon: 140.9853, meal: "snack" },
+  { id: "asariview", name: "Asari View（山頂景觀餐廳）", area: "Kiroro", kind: "未確認", what: "舊版地圖有這間山頂景觀餐廳，目前官網餐飲頁沒列，2026-27 是否營業未確認；Club Med 飯店餐廳屬度假方案，外客能否付費用餐也未確認，先不列", hours: "🔎", fit: "unknown", lat: 43.0790, lon: 140.9670, approx: true, meal: "lunch" },
   /* 山鄉附近 */
   { id: "aozora", g: {"rating": 4.1, "n": 1375, "pid": "ChIJp2QFZUonC18RudgohVgQKsE", "q": "あおぞら銭函3丁め", "date": "2026-10-25"}, key: "あおぞら", name: "餃子茶屋 あおぞら 銭函3丁め", area: "銭函", kind: "餃子定食", what: "看得到石狩灣海景，份量大；山鄉 10 分", hours: "11:00–19:00", closed: [1, 2], fit: "ok", lat: 43.139, lon: 141.149, approx: true },
   { id: "aeonfood", g: {"rating": 4.0, "n": 5869, "pid": "ChIJN85n33AoC18RhEt9DPc6lDs", "q": "AEON MALL Sapporo-Hassamu", "date": "2026-10-25"}, key: "AEON", name: "イオンモール札幌発寒 美食街", area: "銭函", kind: "美食街", what: "快、不用等位、順便採買；山鄉 15／25 分。下大雪的備案", hours: "依各店", fit: "ok", lat: 43.0962, lon: 141.2768 },

@@ -134,8 +134,26 @@ if os.path.isdir(photo_root):
 else:
     W(f"找不到照片資料夾 {photo_root}，略過照片檢查")
 
+# 餐廳資料（data/food.js）：有座標、地區對得上住宿、「預計」關鍵字真的對到某一天
+food = load_js("data/food.js", "FOOD") or []
+food_areas = load_js("data/food.js", "FOOD_AREAS") or {}
+all_areas = {a for v in food_areas.values() for a in v}
+all_meals = "".join("".join(d.get("meals", [])) for d in trip["days"])
+seen = set()
+for f in food:
+    if f["id"] in seen: E(f"food.js：id {f['id']} 重複")
+    seen.add(f["id"])
+    if not (41 < f.get("lat", 0) < 46 and 139 < f.get("lon", 0) < 146): E(f"food.js：{f['name']} 座標不在北海道")
+    if f.get("area") not in all_areas: E(f"food.js：{f['name']} 地區「{f.get('area')}」不在 FOOD_AREAS 裡，日頁不會顯示")
+    if f.get("key") and f["key"] not in all_meals: W(f"food.js：{f['name']} 的 key「{f['key']}」沒有對到任何一天的餐點，「今天預計」不會亮")
+for d in trip["days"]:
+    for i, m in enumerate(d.get("meals", [])):
+        if i == 0 and "山上" in m: continue
+        if not any(f.get("key") and f["key"] in m for f in food) and not re.search(r"自理|便利商店|超市|飯店|民宿|機場|機上|飛機|Villa|簡單|自己煮|路上|途中|雪場|附近|市區|^回", m):
+            W(f"{d['date']}：餐點「{m}」在 food.js 沒有對應的店（美食地圖不會標「預計」）")
+
 print("=== 行程一致性檢查 ===")
-print(f"trip.js {len(days)} 天 · plan.json {len(dayplan)} 天 · scenes.js {len(scenes)} 天 · 完整序幕 {sum(1 for v in scenes.values() if v.get('scenes'))} 天")
+print(f"trip.js {len(days)} 天 · plan.json {len(dayplan)} 天 · scenes.js {len(scenes)} 天 · 完整序幕 {sum(1 for v in scenes.values() if v.get('scenes'))} 天 · food.js {len(food)} 家")
 for e in errors: print("✗", e)
 for w in warns: print("△", w)
 print(f"錯誤 {len(errors)}，警告 {len(warns)}")
