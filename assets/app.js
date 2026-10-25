@@ -230,7 +230,7 @@
     html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(d.meals[0]) + '</li><li><span>晚</span>' + esc(d.meals[1]) + '</li></ul><a class="jump" href="#dayfood">看附近有哪些店 ↓</a></div>';
     html += '</div>';
     $("#dayview").innerHTML = html;
-    if (has("dayfood")) $("#dayfood").innerHTML = foodBlock(d, b);
+    if (has("dayfood") && !document.querySelector("#dayfood .fp-embed:not([hidden])")) $("#dayfood").innerHTML = foodBlock(d, b);
     renderModeSeg();
     var nav = $("#daynav");
     if (nav) {
@@ -663,12 +663,23 @@
     var planned = !!(d && f.key && d.meals.join("").indexOf(f.key) >= 0);
     var km = b ? haversine(b, f) * 1.35 : 0, min = b ? r5(km / 40 * 60) : 0;
     var fit = FIT[f.fit] || FIT.ok;
-    return '<li class="fp ' + fit[1] + (closedToday ? " closed" : "") + (planned ? " planned" : "") + '">' +
+    var g = f.g, stars = g ? '<span class="stars" aria-label="Google 評價 ' + g.rating + '"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small>' : '<small class="nog">Google 評價待查</small>';
+    var mapsUrl = g ? 'https://www.google.com/maps/place/?q=place_id:' + g.pid : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(f.name.replace(/（.*?）/g, "") + " " + (f.area === "Kiroro" ? "キロロ" : f.area));
+    return '<li class="fp ' + fit[1] + (closedToday ? " closed" : "") + (planned ? " planned" : "") + '" data-fid="' + f.id + '">' +
       '<div class="fp-top"><b>' + esc(f.name) + '</b><span class="kind">' + esc(f.kind) + '</span>' + (planned ? '<span class="badge gold">今天預計</span>' : "") + (closedToday ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
+      '<div class="fp-rating">' + stars + '</div>' +
       '<p class="fp-what">' + em(f.what) + '</p>' +
-      '<p class="fp-meta">' + esc(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (b ? ' · 從' + esc(b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span>' +
-      ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(f.name.replace(/（.*?）/g, "") + " " + (f.area === "Kiroro" ? "キロロ" : f.area)) + '" target="_blank" rel="noopener">地圖 →</a></p></li>';
+      '<p class="fp-meta">' + esc(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (b ? ' · 從' + esc(b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span></p>' +
+      '<div class="fp-act">' + (g ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") + '<a href="' + mapsUrl + '" target="_blank" rel="noopener">在 Google Maps 開啟 →</a></div>' +
+      '<div class="fp-embed" hidden></div></li>';
   }
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest(".fp-more"); if (!btn) return;
+    var li = btn.closest(".fp"), box = li.querySelector(".fp-embed");
+    if (!box.hidden) { box.hidden = true; box.innerHTML = ""; btn.textContent = "照片與評論 ▾"; return; }
+    box.innerHTML = '<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Maps" src="https://maps.google.com/maps?hl=zh-TW&q=' + encodeURIComponent(btn.dataset.q) + '&z=16&output=embed"></iframe><p class="fp-embedhint">Google 的照片、評論與目前營業狀態；點左上角店名可以在 Google Maps 開大圖。</p>';
+    box.hidden = false; btn.textContent = "收起 ▴";
+  });
   function foodBlock(d, b) {
     var areas = FOOD_AREAS[d.base] || [], list = FOOD.filter(function (f) { return areas.indexOf(f.area) >= 0; });
     var byArea = {}; list.forEach(function (f) { (byArea[f.area] = byArea[f.area] || []).push(f); });

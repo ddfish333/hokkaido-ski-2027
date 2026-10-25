@@ -476,3 +476,16 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .poster .pw b { font: 400 17px/1 var(--f-display); }
 .poster .pw small { font: 300 12px/1 var(--f-display); color: var(--hero-muted); }
 .poster .pw em { font-style: normal; font: 400 10px/1 var(--f-display); letter-spacing: .14em; color: var(--hero-muted); margin-left: 4px; }
+
+.fp-rating { display: flex; align-items: center; gap: 8px; }
+.fp-rating b { font: 500 15px/1 var(--f-display); }
+.fp-rating small { font-size: 11.5px; color: var(--muted); }
+.fp-rating .nog { color: var(--muted); font-size: 12px; }
+.stars { position: relative; display: inline-block; width: 78px; height: 14px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><g fill='%23324052'><polygon points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/><polygon transform='translate(20)' points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/><polygon transform='translate(40)' points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/><polygon transform='translate(60)' points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/><polygon transform='translate(80)' points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/></g></svg>") 0 0 / 100% 100% no-repeat; }
+.stars i { position: absolute; inset: 0; width: var(--r); overflow: hidden; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><g fill='%23E8B36A'><polygon points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/><polygon transform='translate(20)' points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/><polygon transform='translate(40)' points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/><polygon transform='translate(60)' points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/><polygon transform='translate(80)' points='10,1 12.9,7 19.5,7.6 14.5,12.1 16,18.7 10,15.4 4,18.7 5.5,12.1 0.5,7.6 7.1,7'/></g></svg>") 0 0 / 78px 14px no-repeat; }
+.fp-act { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.fp-act a { color: var(--glacier); text-decoration: none; }
+.fp-more { background: var(--soft); border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 7px 12px; font: 400 12.5px var(--f-body); cursor: pointer; }
+.fp-more:hover { border-color: var(--ink); }
+.fp-embed iframe { width: 100%; height: 300px; border: 0; border-radius: 10px; background: var(--soft); }
+.fp-embedhint { margin: 6px 0 0; font-size: 11.5px; color: var(--muted); }
