@@ -57,8 +57,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* 首頁主視覺：會動的雪景＋飄雪 */
 .hero { position: relative; overflow: hidden; color: var(--hero-ink); background: #0E2A63; min-height: min(92vh, 860px); display: grid; align-items: end; }
-.hero-ph { position: absolute; inset: -6%; background: url("hero.jpg") 60% 38% / cover no-repeat; transform: scale(1.02); animation: heroKb 40s ease-in-out infinite alternate; }
-@media (max-width: 700px) { .hero-ph { background-image: url("hero-m.jpg"); background-position: 50% 30%; } }
+.hero-ph { position: absolute; inset: -6%; background: url("hero.jpg") 60% 38% / cover no-repeat; transform: scale(1.02); animation: heroKb 40s ease-in-out infinite alternate; opacity: 0; transition: opacity 1.6s ease; }
+.hero-ph.cur { opacity: 1; }
+@media (max-width: 700px) { .hero-ph.first { background-image: url("hero-m.jpg"); background-position: 50% 30%; } }
 @keyframes heroKb { from { transform: scale(1.02) translate(0, 0); } to { transform: scale(1.12) translate(-1.5%, -1.5%); } }
 @media (prefers-reduced-motion: reduce) { .hero-ph { animation: none; } }
 .hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
@@ -413,3 +414,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .late { background: rgba(255,90,76,.16); color: var(--accent); }
 .wait { background: rgba(106,164,255,.14); color: var(--glacier); }
 .stop.late time { color: var(--accent); }
+
+/* 序幕：透明路線圖 */
+.film .rmap-box { position: absolute; right: 18px; bottom: calc(150px + env(safe-area-inset-bottom)); width: min(34vw, 460px); height: min(38vh, 340px); pointer-events: none; z-index: 3; }
+@media (max-width: 760px) { .film .rmap-box { right: 12px; top: calc(84px + env(safe-area-inset-top)); bottom: auto; width: 46vw; height: 26vh; } }
+.film .rmap { width: 100%; height: 100%; overflow: hidden; --a: .55; transition: opacity .6s; -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 55%, transparent 100%); }
+.film .rmap.light { --a: .3; } .film .rmap.strong { --a: .9; } .film .rmap.off { opacity: 0; }
+.film .rm-land { stroke: rgba(244,241,234,calc(var(--a) * .55)); }
+.film .rm-casing { stroke: rgba(5,8,15,calc(var(--a) * .7)); }
+.film .rm-route { stroke: rgba(244,241,234,calc(var(--a) * .95)); }
+.film .rm-trail { stroke: rgba(255,90,76,calc(var(--a) + .1)); }
+.film .rm-stop { fill: rgba(244,241,234,calc(var(--a) * .95)); stroke: rgba(5,8,15,.6); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.film .rm-dot { fill: #FF5A4C; stroke: rgba(5,8,15,.5); stroke-width: .4px; vector-effect: non-scaling-stroke; }
+.film .rm-glow { fill: rgba(255,90,76,.35); animation: rmPulse 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.film .rmap.resting .rm-glow { animation-duration: 1.6s; }
+@keyframes rmPulse { 0%, 100% { transform: scale(.6); opacity: .9; } 50% { transform: scale(1.3); opacity: 0; } }
+.film .rm-label { fill: rgba(244,241,234,calc(var(--a) + .3)); font-family: "Noto Sans TC", sans-serif; font-weight: 400; letter-spacing: .05em; paint-order: stroke; stroke: rgba(5,8,15,.6); }

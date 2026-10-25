@@ -7,6 +7,7 @@
   (window.Plan ? Plan.ready : Promise.resolve()).catch(function () { }).then(function () { run(); });
   function run() {
   var IMG = (window.BASE || "") + "assets/img/";
+  function bg(el, spec) { var m = String(spec).match(/^(.*)@(\d+),(\d+)$/); el.style.backgroundImage = "url(" + IMG + (m ? m[1] : spec) + ")"; if (m) el.style.backgroundPosition = m[2] + "% " + m[3] + "%"; }
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var dayIdx = T.days.indexOf(day);
   var def = S[date] || {};
@@ -35,7 +36,7 @@
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   var gate = el("div", "gate");
-  if (def.poster && def.poster.img) { var gph = el("div", "gate-ph"); gph.style.backgroundImage = "url(" + IMG + def.poster.img + ")"; gate.appendChild(gph); gate.appendChild(el("div", "gate-veil")); }
+  if (def.poster && def.poster.img) { var gph = el("div", "gate-ph"); bg(gph, def.poster.img); gate.appendChild(gph); gate.appendChild(el("div", "gate-veil")); }
   gate.innerHTML += '<div class="gate-in"><p class="k">' + esc(date.replace(/-/g, " · ")) + ' · 星期' + "日一二三四五六"[new Date(date + "T00:00:00").getDay()] + '</p><h1>' + esc(day.title) + '</h1><p>' + esc((def.poster && def.poster.line) || day.sub) + '</p>' +
     '<button class="go" type="button" aria-label="開始"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>' +
     '<div><button class="mute" type="button">不要聲音，直接看</button><span class="sep">·</span><button class="mute skipgate" type="button">跳過序幕</button></div></div>';
@@ -46,7 +47,7 @@
     if (sc.type === "title" && !sc.img && !sc.imgs && !sc.video && def.poster && def.poster.img) { sc.img = def.poster.img; sc.kb = sc.kb || "in"; }
     if (sc.imgs && sc.imgs.length) {
       sc.imgs.forEach(function (im, k) {
-        var layer = el("div", "ph multi" + (k === 0 ? " cur" : "")); layer.style.backgroundImage = "url(" + IMG + im + ")";
+        var layer = el("div", "ph multi" + (k === 0 ? " cur" : "")); bg(layer, im);
         layer.style.setProperty("--kb", "kb" + (k % 2 ? "Out" : "In")); layer.style.setProperty("--dur", Math.round((sc.dur || 9000) / sc.imgs.length + 1200) + "ms");
         s.appendChild(layer);
       });
@@ -57,7 +58,7 @@
         ph = document.createElement("video"); ph.className = "ph"; ph.muted = true; ph.loop = true; ph.playsInline = true; ph.setAttribute("playsinline", ""); ph.setAttribute("muted", ""); ph.preload = i < 2 ? "auto" : "metadata";
         if (sc.img) ph.poster = IMG + sc.img;
         var src = document.createElement("source"); src.src = (window.BASE || "") + "assets/video/" + sc.video; src.type = "video/mp4"; ph.appendChild(src);
-      } else { ph = el("div", "ph"); ph.style.backgroundImage = "url(" + IMG + sc.img + ")"; }
+      } else { ph = el("div", "ph"); bg(ph, sc.img); }
       ph.style.setProperty("--kb", "kb" + (sc.kb === "out" ? "Out" : sc.kb === "pan" ? "Pan" : "In")); ph.style.setProperty("--dur", (sc.dur || 9000) + "ms");
       s.appendChild(ph); s.appendChild(el("div", "veil"));
     }
@@ -73,10 +74,100 @@
     stage.appendChild(s); return s;
   });
   var snow = el("canvas", "snow"); stage.appendChild(snow);
+
+  /* ---------- 透明路線圖：北海道輪廓＋當天路線＋跟著場景走的光點 ---------- */
+  var RM = { svg: null, pts: [], legs: [], pos: 0, target: 0, anim: null, level: (function () { try { return localStorage.getItem("snow13-rmap") || "mid"; } catch (e) { return "mid"; } })() };
+  var sched = plan.stops.length ? plan : null;
+  function proj(lon, lat) { return [lon * Math.cos(43.3 * Math.PI / 180), -lat]; }
+  function buildRouteMap(outline) {
+    if (!sched || !window.Plan) return;
+    var stops = sched.stops, legs = sched.legs, pts = [];
+    /* 整條路線的折線（含每一站的索引位置） */
+    var markers = [];
+    stops.forEach(function (st, i) {
+      if (i === 0) { pts.push(proj(st.lon, st.lat)); markers.push(0); return; }
+      var g = legs[i - 1].geom || [[stops[i - 1].lon, stops[i - 1].lat], [st.lon, st.lat]];
+      g.forEach(function (c, k) { if (k === 0) return; pts.push(proj(c[0], c[1])); });
+      markers.push(pts.length - 1);
+    });
+    var cum = [0]; for (var i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    RM.pts = pts; RM.cum = cum; RM.markers = markers; RM.total = cum[cum.length - 1] || 1;
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var minx = Math.min.apply(null, xs), maxx = Math.max.apply(null, xs), miny = Math.min.apply(null, ys), maxy = Math.max.apply(null, ys);
+    var w = Math.max(maxx - minx, 0.05), h = Math.max(maxy - miny, 0.05), pad = Math.max(w, h) * 0.35;
+    var vb = [minx - pad, miny - pad, w + pad * 2, h + pad * 2];
+    var sw = vb[2] / 300; /* 線寬以 viewBox 單位換算，讓它在任何縮放下都差不多粗 */
+    var NS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(NS, "svg"); svg.setAttribute("class", "rmap " + RM.level); svg.setAttribute("viewBox", vb.join(" ")); svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    function path(d, cls, w) { var e = document.createElementNS(NS, "path"); e.setAttribute("d", d); e.setAttribute("class", cls); e.setAttribute("stroke-width", w); e.setAttribute("fill", "none"); e.setAttribute("stroke-linejoin", "round"); e.setAttribute("stroke-linecap", "round"); e.setAttribute("vector-effect", "none"); svg.appendChild(e); return e; }
+    if (outline) {
+      var d = "";
+      outline.geometry.coordinates.forEach(function (poly) { poly.forEach(function (ring) { ring.forEach(function (c, k) { var q = proj(c[0], c[1]); d += (k ? "L" : "M") + q[0].toFixed(3) + " " + q[1].toFixed(3); }); d += "Z"; }); });
+      var land = path(d, "rm-land", sw * 0.8); land.setAttribute("fill", "rgba(255,255,255,.035)");
+    }
+    var rd = pts.map(function (q, k) { return (k ? "L" : "M") + q[0].toFixed(4) + " " + q[1].toFixed(4); }).join("");
+    path(rd, "rm-casing", sw * 4.2);
+    path(rd, "rm-route", sw * 1.8);
+    RM.trail = path("M0 0", "rm-trail", sw * 2.4);
+    markers.forEach(function (mi, k) { var c = document.createElementNS(NS, "circle"); c.setAttribute("cx", pts[mi][0]); c.setAttribute("cy", pts[mi][1]); c.setAttribute("r", sw * 2.6); c.setAttribute("class", "rm-stop"); svg.appendChild(c); });
+    RM.glow = document.createElementNS(NS, "circle"); RM.glow.setAttribute("r", sw * 9); RM.glow.setAttribute("class", "rm-glow"); svg.appendChild(RM.glow);
+    RM.dot = document.createElementNS(NS, "circle"); RM.dot.setAttribute("r", sw * 3.6); RM.dot.setAttribute("class", "rm-dot"); svg.appendChild(RM.dot);
+    RM.label = document.createElementNS(NS, "text"); RM.label.setAttribute("class", "rm-label"); RM.label.setAttribute("font-size", sw * 9); RM.label.setAttribute("stroke-width", sw * 1.2); svg.appendChild(RM.label);
+    RM.svg = svg; RM.sw = sw;
+    var box = el("div", "rmap-box"); box.appendChild(svg); stage.appendChild(box);
+    setDot(0, true);
+  }
+  function pointAt(dist) {
+    var pts = RM.pts, cum = RM.cum; if (!pts.length) return null;
+    dist = Math.max(0, Math.min(RM.total, dist));
+    var i = 1; while (i < cum.length && cum[i] < dist) i++;
+    if (i >= cum.length) return pts[pts.length - 1];
+    var t = (dist - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1);
+    return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t];
+  }
+  function setDot(dist, jump) {
+    if (!RM.svg) return;
+    RM.pos = dist; var q = pointAt(dist); if (!q) return;
+    RM.dot.setAttribute("cx", q[0]); RM.dot.setAttribute("cy", q[1]); RM.glow.setAttribute("cx", q[0]); RM.glow.setAttribute("cy", q[1]);
+    /* 走過的路亮起來 */
+    var d = "", pts = RM.pts, cum = RM.cum;
+    for (var i = 0; i < pts.length && cum[i] <= dist; i++) d += (i ? "L" : "M") + pts[i][0].toFixed(4) + " " + pts[i][1].toFixed(4);
+    d += (d ? "L" : "M") + q[0].toFixed(4) + " " + q[1].toFixed(4);
+    RM.trail.setAttribute("d", d);
+    /* 站名 */
+    var atStop = -1; RM.markers.forEach(function (mi, k) { if (Math.abs(RM.cum[mi] - dist) < RM.total * 0.004) atStop = k; });
+    RM.svg.classList.toggle("resting", atStop >= 0);
+    if (atStop >= 0) { RM.label.textContent = sched.stops[atStop].name.replace(/（.*?）/g, ""); RM.label.setAttribute("x", q[0] + RM.sw * 6); RM.label.setAttribute("y", q[1] - RM.sw * 5); }
+    else RM.label.textContent = "";
+  }
+  function moveDotTo(stopIdx, ms) {
+    if (!RM.svg) return;
+    cancelAnimationFrame(RM.anim);
+    var to = RM.cum[RM.markers[Math.max(0, Math.min(stopIdx, RM.markers.length - 1))]], from = RM.pos, t0 = performance.now();
+    if (Math.abs(to - from) < 1e-9) { setDot(to); return; }
+    (function step(now) { var k = Math.min(1, (now - t0) / ms); var e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; setDot(from + (to - from) * e); if (k < 1) RM.anim = requestAnimationFrame(step); })(t0);
+  }
+  /* 每一幕對應到時間表上的第幾站（同一地點重複時依序往後找） */
+  var sceneStop = [], lastIdx = 0;
+  scenes.forEach(function (sc, i) {
+    var idx = null;
+    if (sc.stop && sched) { for (var k = lastIdx; k < sched.stops.length; k++) if (sched.stops[k].id === sc.stop) { idx = k; break; } if (idx == null) idx = lastIdx; lastIdx = idx; }
+    sceneStop.push(idx);
+  });
+  function nextStopAfter(i) { for (var k = i + 1; k < sceneStop.length; k++) if (sceneStop[k] != null) return sceneStop[k]; return null; }
+  function syncDot(i) {
+    if (!RM.svg) return;
+    var sc = scenes[i], idx = sceneStop[i];
+    if (sc.type === "title") { moveDotTo(0, 600); return; }
+    if (idx != null) { moveDotTo(idx, 1600); return; }
+    if (sc.type === "drive") { var nx = nextStopAfter(i); if (nx != null) moveDotTo(nx, Math.max(2000, (sc.dur || 9000) - 1500)); }
+    /* 其他沒有站點的幕：光點停在原地 */
+  }
+  fetch((window.BASE || "") + "data/hokkaido.json").then(function (r) { return r.json(); }).then(buildRouteMap).catch(function () { buildRouteMap(null); });
   var chrome = el("div", "chrome");
   chrome.innerHTML = '<div class="prog">' + scenes.map(function () { return "<i></i>"; }).join("") + '</div><p class="fbrand">北海道 · 雪上的大小腳印</p>' +
     '<div class="tools"><button class="ic" id="fmute" aria-label="靜音"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" hidden><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg></button>' +
-    '<button class="ic" id="fskip" aria-label="跳過"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 5l10 7-10 7zM19 5v14"/></svg></button></div>' +
+    '<button class="ic" id="frmap" aria-label="路線圖濃淡"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3z"/><path d="M9 4v13M15 7v13"/></svg></button><button class="ic" id="fskip" aria-label="跳過"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 5l10 7-10 7zM19 5v14"/></svg></button></div>' +
     '<div class="tap"><button id="fprev" aria-label="上一幕"></button><button id="fnext" aria-label="下一幕"></button></div><p class="hint">點右邊下一幕 · 左邊上一幕</p>';
   chrome.hidden = true;
   root.appendChild(gate); root.appendChild(stage); root.appendChild(chrome);
@@ -164,7 +255,7 @@
     bars.forEach(function (b, k) { b.classList.toggle("done", k < i); b.classList.toggle("live", k === i); b.style.setProperty("--dur", secs[i].dataset.dur + "ms"); });
     var s = secs[i];
     s.querySelectorAll(".cap > *, .title > div > *, .endcard .t, .endcard .h, .endcard .s, .fbtn, .ph").forEach(function (e) { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
-    cur = i; chrome.classList.toggle("last", i === secs.length - 1);
+    cur = i; chrome.classList.toggle("last", i === secs.length - 1); syncDot(i);
     secs.forEach(function (sec, k) { var v = sec.querySelector("video.ph"); if (!v) return; if (k === i) { try { v.currentTime = 0; var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } else if (!v.paused) v.pause(); });
     var nx = secs[i + 1] && secs[i + 1].querySelector("video.ph"); if (nx && nx.preload !== "auto") { nx.preload = "auto"; try { nx.load(); } catch (e) { } }
     var amb = s.dataset.amb; driveOn = amb === "drive";
@@ -203,11 +294,17 @@
   chrome.querySelector("#fnext").addEventListener("click", function () { show(cur + 1); });
   chrome.querySelector("#fprev").addEventListener("click", function () { show(cur - 1); });
   chrome.querySelector("#fskip").addEventListener("click", finish);
+  chrome.querySelector("#frmap").addEventListener("click", function () {
+    var order = ["mid", "strong", "off", "light"]; RM.level = order[(order.indexOf(RM.level) + 1) % order.length];
+    try { localStorage.setItem("snow13-rmap", RM.level); } catch (e) { }
+    if (RM.svg) RM.svg.setAttribute("class", "rmap " + RM.level);
+    hint.textContent = "路線圖：" + { light: "淡", mid: "中", strong: "濃", off: "關" }[RM.level]; hint.style.opacity = 1; setTimeout(function () { hint.style.opacity = 0; }, 1500);
+  });
   stage.addEventListener("click", function (e) { if (e.target.closest("#toplan")) finish(); });
   chrome.querySelector("#fmute").addEventListener("click", function () { muted = !muted; if (!music && !muted) { try { startMusic(); music.setAmb(secs[cur] ? secs[cur].dataset.amb : "snow"); } catch (e) { } } else if (music) music.setMuted(muted); updMute(); });
   addEventListener("keydown", function (e) { if (!started || ended) return; if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); show(cur + 1); } if (e.key === "ArrowLeft") show(cur - 1); if (e.key === "Escape") finish(); });
   document.addEventListener("visibilitychange", function () { if (AC) { document.hidden ? AC.suspend() : AC.resume(); } });
-  scenes.forEach(function (sc) { (sc.imgs || (sc.img ? [sc.img] : [])).forEach(function (u) { var im = new Image(); im.src = IMG + u; }); });
+  scenes.forEach(function (sc) { (sc.imgs || (sc.img ? [sc.img] : [])).forEach(function (u) { var im = new Image(); im.src = IMG + String(u).split("@")[0]; }); });
   /* 序幕結束時停掉所有影片 */
   document.addEventListener("film:end", function () { secs.forEach(function (sec) { var v = sec.querySelector("video.ph"); if (v) try { v.pause(); } catch (e) { } }); });
   }

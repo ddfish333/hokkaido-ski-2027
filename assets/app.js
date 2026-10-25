@@ -92,9 +92,23 @@
   }
 
   /* ---------- 主視覺 ---------- */
+  var HERO_IMGS = ["assets/hero.jpg", "assets/img/scene/otaru-5.jpg@50,55", "assets/img/scene/kiroro-1.jpg@50,45", "assets/img/scene/ningle-1.jpg@50,50", "assets/img/scene/villa-5.jpg@50,50", "assets/img/scene/biei-4.jpg@50,40"];
+  function initHeroCarousel() {
+    var first = $(".hero-ph"); if (!first) return;
+    first.classList.add("cur", "first");
+    if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var layers = [first];
+    HERO_IMGS.slice(1).forEach(function (spec) {
+      var m = spec.match(/^(.*)@(\d+),(\d+)$/), d = document.createElement("div"); d.className = "hero-ph"; d.setAttribute("aria-hidden", "true");
+      d.style.backgroundImage = "url(" + BASE + (m ? m[1] : spec) + ")"; if (m) d.style.backgroundPosition = m[2] + "% " + m[3] + "%";
+      first.parentNode.insertBefore(d, first.nextSibling); layers.push(d);
+    });
+    var k = 0; setInterval(function () { k = (k + 1) % layers.length; layers.forEach(function (l, j) { l.classList.toggle("cur", j === k); if (j === k) { l.style.animation = "none"; void l.offsetWidth; l.style.animation = ""; } }); }, 6500);
+  }
   function renderHero() {
     if (has("updated")) $("#updated").textContent = T.updated;
     var c = $("#countdown"); if (!c) return;
+    initHeroCarousel();
     if (TODAY < T.start) {
       c.innerHTML = '<span class="big">' + dayDiff(TODAY, T.start) + '</span><span class="lbl">天後出發</span>';
     } else if (TODAY <= T.end) {
