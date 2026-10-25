@@ -333,6 +333,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .film .scene { position: absolute; inset: 0; opacity: 0; transition: opacity 1.6s ease; pointer-events: none; }
 .film .scene.on { opacity: 1; }
 .film .ph { position: absolute; inset: -6%; background-size: cover; background-position: center; will-change: transform; transform: scale(1.02); }
+.film video.ph { width: 112%; height: 112%; object-fit: cover; background: #05080F; }
 .film .scene.on .ph { animation: var(--kb, kbIn) var(--dur, 9s) linear forwards; }
 @keyframes kbIn { from { transform: scale(1.02) translate(0, 0); } to { transform: scale(1.12) translate(-1.5%, -1%); } }
 @keyframes kbOut { from { transform: scale(1.14) translate(1%, 1%); } to { transform: scale(1.02) translate(0, 0); } }

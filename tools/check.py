@@ -95,9 +95,11 @@ for d, sc in scenes.items():
             E(f"{d}：序幕第 {i} 幕指向站點「{s['stop']}」，但當天站點只有 {stop_ids}（行程改了，腳本沒跟上）")
         if s.get("img") and not os.path.exists(os.path.join(img_root, s["img"])):
             E(f"{d}：序幕第 {i} 幕圖片不存在 assets/img/{s['img']}")
+        if s.get("video") and not os.path.exists(os.path.join(ROOT, "assets", "video", s["video"])):
+            E(f"{d}：序幕第 {i} 幕影片不存在 assets/video/{s['video']}")
     covered = {s.get("stop") for s in sc.get("scenes") or []}
     if sc.get("scenes"):
-        missing = [x for x in stop_ids if x not in covered and place_of.get(x)]
+        missing = [x for x in stop_ids if x not in covered and place_of.get(x) and not str(place_of.get(x)).startswith("hotels/")]
         if missing: W(f"{d}：序幕沒有提到這些站點：{missing}")
     else:
         W(f"{d}：還沒有完整序幕（目前用標題卡＋海報兩幕）")

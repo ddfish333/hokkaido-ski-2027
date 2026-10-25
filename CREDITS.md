@@ -52,3 +52,11 @@ No freely licensed photos found on Wikimedia Commons for these hotels; no images
 - 海報與章節：上表所列 Commons 照片，經裁切壓縮。
 - 住宿照片（山郷 春 Villa -SHUN-、BEST DAY EVER FURANO LODGES、FAV LUX 札幌薄野）：各住宿官方網站／訂房頁，僅供同行家人行前參考，版權屬原業者。
 - 序幕音樂：網頁以 Web Audio 即時生成，無外部音檔。
+
+## 2026-10-25 第二批（家人依「照片清單」抓的，來源寫在各檔同名 .txt）
+
+海報與序幕新增使用：
+- Wikimedia Commons：Snowing Shin-Chitose Airport 20090220；江差町 - panoramio；Feuerbachbrücke with snow at night 2021-01-29（夜間雪街，德國，當 AEON 停車場氛圍）；キロロリゾート；Kiroro snow world gondola；Otaru Canal Night；小樽雪あかりの路 2013 - panoramio；Asahiyama zoo Penguin 01／02；Furano Snow Resort view1／view3；130503 Ningle Terrace Furano 05s10；The Christmas-tree called in Biei - panoramio；Odori Park Sapporo Snow Festival 2007；さっぽろテレビ塔 - panoramio；Mt. Teine in Sapporo March 2009；Asarigawa-Onsen-Hotel01；Biei at Night (2518642512)。各依其 CC BY／CC BY-SA 授權。
+- Pexels（Pexels License）：Hosea Huang〈Blue Pond winter〉；jason hu〈Sapporo winter cityscape at dusk〉；禮湘 石〈Frozen Shirahige waterfall〉。
+- 影片（Pexels License）：Stefano Barbieri〈Snowy mountain range from an airplane window〉；Kim Dodge〈Night drive on snowy winter road〉；영진 성〈Snowfall in urban night landscape〉。
+- 影片（Wikimedia Commons）：Krvavec Snowboarding 4K sequence；Fantastic fireplace fire（free video library）。皆經裁剪為 8–12 秒、720p、無聲。

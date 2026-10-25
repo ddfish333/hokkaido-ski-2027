@@ -42,11 +42,17 @@
   var secs = scenes.map(function (sc, i) {
     var s = el("section", "scene" + (sc.warm ? " warm" : "") + (sc.type === "title" || sc.type === "drive" ? " cold" : ""));
     s.dataset.dur = sc.dur || 9000; s.dataset.amb = sc.amb || "snow";
-    if (sc.img) {
-      var ph = el("div", "ph"); ph.style.backgroundImage = "url(" + IMG + sc.img + ")"; ph.style.setProperty("--kb", "kb" + (sc.kb === "out" ? "Out" : sc.kb === "pan" ? "Pan" : "In")); ph.style.setProperty("--dur", (sc.dur || 9000) + "ms");
+    if (sc.video || sc.img) {
+      var ph;
+      if (sc.video && !reduce) {
+        ph = document.createElement("video"); ph.className = "ph"; ph.muted = true; ph.loop = true; ph.playsInline = true; ph.setAttribute("playsinline", ""); ph.setAttribute("muted", ""); ph.preload = i < 2 ? "auto" : "metadata";
+        if (sc.img) ph.poster = IMG + sc.img;
+        var src = document.createElement("source"); src.src = (window.BASE || "") + "assets/video/" + sc.video; src.type = "video/mp4"; ph.appendChild(src);
+      } else { ph = el("div", "ph"); ph.style.backgroundImage = "url(" + IMG + sc.img + ")"; }
+      ph.style.setProperty("--kb", "kb" + (sc.kb === "out" ? "Out" : sc.kb === "pan" ? "Pan" : "In")); ph.style.setProperty("--dur", (sc.dur || 9000) + "ms");
       s.appendChild(ph); s.appendChild(el("div", "veil"));
     }
-    if (sc.type === "drive") { var c = el("canvas", "drive"); c.id = "drive"; s.appendChild(c); }
+    if (sc.type === "drive" && !(sc.video && !reduce)) { var c = el("canvas", "drive"); c.id = "drive"; s.appendChild(c); }
     if (sc.type === "title") {
       s.appendChild(el("div", "title", '<div><p class="eyebrow">' + esc(sc.eyebrow || "") + '</p><h2 class="big">' + esc(sc.h) + '</h2><p class="sub">' + esc(sc.s || "") + '</p></div>'));
     } else if (sc.type === "end") {
@@ -150,6 +156,8 @@
     var s = secs[i];
     s.querySelectorAll(".cap > *, .title > div > *, .endcard .t, .endcard .h, .endcard .s, .fbtn, .ph").forEach(function (e) { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
     cur = i; chrome.classList.toggle("last", i === secs.length - 1);
+    secs.forEach(function (sec, k) { var v = sec.querySelector("video.ph"); if (!v) return; if (k === i) { try { v.currentTime = 0; var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } else if (!v.paused) v.pause(); });
+    var nx = secs[i + 1] && secs[i + 1].querySelector("video.ph"); if (nx && nx.preload !== "auto") { nx.preload = "auto"; try { nx.load(); } catch (e) { } }
     var amb = s.dataset.amb; driveOn = amb === "drive";
     snowAmt = amb === "fire" ? .35 : amb === "quiet" ? .5 : amb === "drive" ? 0 : 1; wind = amb === "drive" ? 0 : .15 + Math.random() * .4;
     if (music) music.setAmb(amb);
@@ -185,5 +193,7 @@
   addEventListener("keydown", function (e) { if (!started || ended) return; if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); show(cur + 1); } if (e.key === "ArrowLeft") show(cur - 1); if (e.key === "Escape") finish(); });
   document.addEventListener("visibilitychange", function () { if (AC) { document.hidden ? AC.suspend() : AC.resume(); } });
   scenes.forEach(function (sc) { if (sc.img) { var im = new Image(); im.src = IMG + sc.img; } });
+  /* 序幕結束時停掉所有影片 */
+  document.addEventListener("film:end", function () { secs.forEach(function (sec) { var v = sec.querySelector("video.ph"); if (v) try { v.pause(); } catch (e) { } }); });
   }
 })();
