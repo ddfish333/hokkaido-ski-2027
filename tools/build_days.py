@@ -3,6 +3,7 @@
 import json, os, re, subprocess
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 days = json.loads(subprocess.run(["node", "-e", "global.window={};require(process.argv[1]);console.log(JSON.stringify(window.TRIP.days))", os.path.join(ROOT, "data/trip.js")], capture_output=True, text=True, check=True).stdout)
+subprocess.run(["python3", os.path.join(ROOT, "tools/stamp.py")], check=True)
 TPL = open(os.path.join(ROOT, "tools/day.template.html"), encoding="utf-8").read()
 for i, d in enumerate(days):
     mmdd = d["date"][5:].replace("-", "")
