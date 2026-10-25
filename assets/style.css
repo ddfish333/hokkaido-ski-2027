@@ -1,4 +1,4 @@
-/* 雪國十三日 — 時尚簡約：雪白底、墨藍字、巡邏紅點綴；等高線是唯一的裝飾。 */
+/* 北海道・雪上的大小腳印 — 時尚簡約：雪白底、墨藍字、巡邏紅點綴；等高線是唯一的裝飾。 */
 :root {
   --bg: #F3F5F8;
   --paper: #FFFFFF;
@@ -67,7 +67,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   mask-image: radial-gradient(closest-side, #000 55%, transparent); -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent); pointer-events: none; }
 .hero-in { position: relative; padding-block: 56px 40px; display: grid; gap: 18px; }
 .eyebrow { margin: 0; font: 600 12px/1 var(--f-display); font-stretch: 125%; letter-spacing: .32em; color: var(--hero-muted); }
-.hero-title { margin: 0; font: 900 clamp(64px, 15vw, 168px)/1.02 var(--f-body); letter-spacing: .04em; }
+.hero-title { margin: 0; font: 900 clamp(56px, 13vw, 156px)/1.04 var(--f-body); letter-spacing: .04em; display: grid; }
+.hero-title .ht-a { font-size: .62em; font-weight: 700; color: var(--hero-muted); letter-spacing: .12em; }
 .r-meta .num { font-family: var(--f-body); font-variant-numeric: tabular-nums; color: var(--ink); }
 .hero-sub { margin: 0; font: 500 15px/1.6 var(--f-body); color: var(--hero-muted); }
 .hero-sub .dot { margin: 0 .6em; color: var(--accent); }
