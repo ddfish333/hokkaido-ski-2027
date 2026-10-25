@@ -215,9 +215,10 @@
     html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>' + (state.mode === "snow" ? "下雪" : "一般") + '</span><b>' + fmtMin(sch.total.min) + '</b></div><div><span>' + (state.mode === "snow" ? "一般" : "下雪") + '</span><b>' + fmtMin(alt.total.min) + '</b></div><div><span>距離</span><b>' + sch.total.km + ' km</b></div>' + (sch.end != null ? '<div><span>最後到達</span><b>' + Plan.hm(sch.end) + '</b></div>' : "") + '</div></div>';
     html += '<div class="card"><p class="panel-label">天氣</p>' + dayWeather(d) + '</div>';
     html += '<div class="card"><p class="panel-label">日照</p><div class="sunrow"><div><span>日出</span><b>' + d.sun[0] + '</b></div><div><span>日落</span><b>' + d.sun[1] + '</b></div><div><span>天黑</span><b>' + d.sun[2] + '</b></div></div></div>';
-    html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(d.meals[0]) + '</li><li><span>晚</span>' + esc(d.meals[1]) + '</li></ul></div>';
+    html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(d.meals[0]) + '</li><li><span>晚</span>' + esc(d.meals[1]) + '</li></ul><a class="jump" href="#dayfood">看附近有哪些店 ↓</a></div>';
     html += '</div>';
     $("#dayview").innerHTML = html;
+    if (has("dayfood")) $("#dayfood").innerHTML = foodBlock(d, b);
     renderModeSeg();
     var nav = $("#daynav");
     if (nav) {
@@ -642,8 +643,43 @@
     $("#roadlinks").innerHTML = T.links.map(function (l) { return '<li><a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a></li>'; }).join("");
   }
 
-  /* ---------- 吃喝 ---------- */
+  /* ---------- 吃喝：清單在 data/food.js ---------- */
+  var FOOD = window.FOOD || [], FOOD_AREAS = window.FOOD_AREAS || {};
+  var FIT = { best: ["很適合 9 人帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
+  function foodItem(f, d, b) {
+    var wd = d ? new Date(d.date + "T00:00:00").getDay() : -1, closedToday = f.closed && f.closed.indexOf(wd) >= 0;
+    var planned = !!(d && f.key && d.meals.join("").indexOf(f.key) >= 0);
+    var km = b ? haversine(b, f) * 1.35 : 0, min = b ? r5(km / 40 * 60) : 0;
+    var fit = FIT[f.fit] || FIT.ok;
+    return '<li class="fp ' + fit[1] + (closedToday ? " closed" : "") + (planned ? " planned" : "") + '">' +
+      '<div class="fp-top"><b>' + esc(f.name) + '</b><span class="kind">' + esc(f.kind) + '</span>' + (planned ? '<span class="badge gold">今天預計</span>' : "") + (closedToday ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
+      '<p class="fp-what">' + em(f.what) + '</p>' +
+      '<p class="fp-meta">' + esc(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (b ? ' · 從' + esc(b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span>' +
+      ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(f.name.replace(/（.*?）/g, "") + " " + (f.area === "Kiroro" ? "キロロ" : f.area)) + '" target="_blank" rel="noopener">地圖 →</a></p></li>';
+  }
+  function foodBlock(d, b) {
+    var areas = FOOD_AREAS[d.base] || [], list = FOOD.filter(function (f) { return areas.indexOf(f.area) >= 0; });
+    var byArea = {}; list.forEach(function (f) { (byArea[f.area] = byArea[f.area] || []).push(f); });
+    var html = '<div class="sec-head"><h2>今天可以吃什麼</h2><p class="sec-note">午餐 ' + esc(d.meals[0]) + '；晚餐預計 ' + esc(d.meals[1]) + '。下面是住在' + esc(b.short.split("・").pop()) + '這幾天附近的店，按地區分；公休日已經對到當天。</p></div>';
+    areas.forEach(function (ar) {
+      if (!byArea[ar]) return;
+      var items = byArea[ar].slice().sort(function (x, y) { var wd = new Date(d.date + "T00:00:00").getDay(); var cx = x.closed && x.closed.indexOf(wd) >= 0, cy = y.closed && y.closed.indexOf(wd) >= 0; if (cx !== cy) return cx ? 1 : -1; var o = { best: 0, ok: 1, unknown: 2, warn: 3 }; return (o[x.fit] || 1) - (o[y.fit] || 1); });
+      html += '<h3 class="h3">' + esc(ar) + (ar === "Kiroro" ? "（雪場內，午餐）" : "") + '</h3><ul class="foodpick">' + items.map(function (f) { return foodItem(f, d, b); }).join("") + '</ul>';
+    });
+    return html;
+  }
   function renderFood() {
+    if (!has("foodlist")) return;
+    if (FOOD.length) {
+      var areas = ["全部"]; FOOD.forEach(function (f) { if (areas.indexOf(f.area) < 0) areas.push(f.area); });
+      $("#foodfilter").innerHTML = areas.map(function (a) { return '<button type="button" class="chip solid" aria-pressed="' + (state.foodArea === a) + '" data-a="' + esc(a) + '">' + esc(a) + '</button>'; }).join("");
+      $("#foodfilter").onclick = function (e) { var b = e.target.closest("[data-a]"); if (!b) return; state.foodArea = b.dataset.a; renderFood(); };
+      $("#foodlist").innerHTML = '<ul class="foodpick">' + FOOD.filter(function (f) { return state.foodArea === "全部" || f.area === state.foodArea; }).map(function (f) { return foodItem(f, null, null); }).join("") + '</ul>';
+      return;
+    }
+    renderFoodLegacy();
+  }
+  function renderFoodLegacy() {
     if (!has("foodlist")) return;
     var foods = T.places.filter(function (p) { return p.type === "food"; });
     var areas = ["全部"]; foods.forEach(function (f) { if (areas.indexOf(f.area) < 0) areas.push(f.area); });

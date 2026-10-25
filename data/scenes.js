@@ -21,14 +21,15 @@ window.SCENES = {
     ]
   },
   "2027-01-08": {
-    poster: { img: "poster/0108.jpg", line: "第一次上 Kiroro。上午跟教練，下午自己滑，晚上 Onze 夜滑。" },
+    poster: { img: "poster/0108.jpg", line: "第一次上 Kiroro。滑完泡湯，再去小樽吃壽司。" },
     scenes: [
       { type: "title", eyebrow: "DAY 02 · KIRORO", h: "Kiroro 初滑", s: "第一次上山。先把節奏抓起來。", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], amb: "snow", dur: 5500 },
       { stop: "villa", label: "早上", imgs: ["scene/villa-6.jpg", "scene/villa-7.jpg", "scene/villa-2.jpg"], h: "07:50 出發。", s: "早餐在家吃，雪板前一晚就上車。", amb: "quiet", dur: 6000 },
       { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "第一次上 Kiroro。", s: "上午跟教練認識雪場。粉雪在這裡，不用找。", amb: "quiet", dur: 7000 },
       { t: "下午", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "自己的雪道。", s: "教練走了之後，才是真正開始滑的時候。", amb: "quiet", dur: 7000 },
-      { stop: "onze", imgs: ["scene/onze-1.jpg", "scene/villa-5.jpg"], h: "晚上，大人輪流去 Onze 夜滑。", s: "走路五分鐘，燈開到 22:45。另一個人留在家裡陪小孩睡。", amb: "snow", dur: 6500 },
-      { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "明天還是 Kiroro。<br>連假第一天，早一點出門。", amb: "fire", warm: true, dur: 8000 }
+      { stop: "kiroro_onsen", imgs: ["scene/asari-1.jpg", "scene/kiroro-2.jpg"], h: "收板，直接泡湯。", s: "就在雪場旁邊。小孩暖了再上車。", amb: "quiet", warm: true, dur: 6500 },
+      { stop: "waraku", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg"], h: "小樽，壽司。", s: "小孩自己挑盤子。吃完 20 分鐘就到家。", amb: "snow", warm: true, dur: 7000 },
+      { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "想夜滑的大人走路去 Onze。<br>明天連假，早一點出門。", amb: "fire", warm: true, dur: 8000 }
     ]
   },
   "2027-01-09": {
@@ -143,7 +144,7 @@ window.SCENES = {
 
 /* 站點 id → 照片資料夾（hokkaido-photos-web/places/…）。check.py 用它算出「行程會去、但還沒有照片」的地方。 */
 window.PLACE_OF_STOP = {
-  cts: "new-chitose", rental: null, aeon: "aeon-hassamu", villa: "hotels/shun-villa", kiroro: "kiroro", onze: "onze", asari: "asari",
+  cts: "new-chitose", rental: null, kiroro_onsen: "kiroro", waraku: null, aeon: "aeon-hassamu", villa: "hotels/shun-villa", kiroro: "kiroro", onze: "onze", asari: "asari",
   canal: "otaru-canal", naruto: null, zoo: "asahiyama-zoo", lodge: "hotels/furano-lodge", kumagera: null, kita: "furano-ski", fzone: "furano-ski",
   ningle: "ningle-terrace", fstn: "furano-station", yuiga: null, junpei: null, chiyoda: "chiyoda-farm", shirahige: "shirahige-falls", aoiike: "blue-pond",
   favlux: "hotels/fav-lux", beer: "sapporo-beer-garden", takino: "takino", aoao: "aoao", soul: null, teine: "teine", kani: null
