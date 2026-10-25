@@ -1,0 +1,15 @@
+name: 行程一致性檢查
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: 重新產生單日頁並確認沒有差異
+        run: |
+          python3 tools/build_days.py >/dev/null
+          git diff --exit-code -- day/ || (echo "::error::day/ 與 trip.js 不同步，請在本機執行 tools/build_days.py 後再推" && exit 1)
+      - name: 檢查 trip / dayplan / scenes / 單日頁 一致
+        run: python3 tools/check.py /nonexistent

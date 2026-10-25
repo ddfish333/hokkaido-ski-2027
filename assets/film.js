@@ -8,7 +8,18 @@
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var dayIdx = T.days.indexOf(day);
   var def = S[date] || {};
+  var plan = (window.DAYPLAN || {})[date] || { stops: [] };
+  function stopOf(id) { return plan.stops.filter(function (x) { return x.id === id; })[0]; }
   var scenes = def.scenes;
+  if (scenes) {
+    scenes = scenes.filter(function (sc) {
+      if (!sc.stop) return true;
+      var st = stopOf(sc.stop);
+      if (!st) { if (window.console) console.warn("序幕略過：" + date + " 已經沒有站點 " + sc.stop); return false; }
+      if (!sc.t) sc.t = st.time + " · " + (sc.label || st.name);
+      return true;
+    });
+  }
   if (!scenes) {
     var p = def.poster || {};
     scenes = [
