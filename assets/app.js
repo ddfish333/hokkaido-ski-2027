@@ -145,9 +145,9 @@
       (d.alert ? '<p class="alert">' + esc(d.alert) + '</p>' : "") +
       '<ol class="timeline">' + d.plan.map(function (p) { return '<li><time>' + esc(p[0]) + '</time><span>' + em(p[1]) + '</span></li>'; }).join("") + '</ol></div>';
     html += '<div class="side">';
-    html += '<div class="card"><p class="panel-label">車程（一般／下雪）</p><ul class="legs">' + d.legs.map(function (l) {
-      return '<li class="leg"><div class="path">' + esc(l[0]) + ' → ' + esc(l[1]) + '<small>' + l[2] + ' km</small></div><div class="t">' + fmtMin(l[3]) + '<small>雪 ' + fmtMin(l[4]) + '</small></div></li>';
-    }).join("") + '</ul></div>';
+    var pl = (window.DAYPLAN || {})[d.date], tn = 0, ts = 0, tk = 0;
+    if (pl) pl.legs.forEach(function (l) { if (l.mode !== "walk") { tn += l.normal; ts += l.snow; tk += l.km; } });
+    html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>一般</span><b>' + fmtMin(tn) + '</b></div><div><span>下雪</span><b>' + fmtMin(ts) + '</b></div><div><span>距離</span><b>' + Math.round(tk) + ' km</b></div></div></div>';
     html += '<div class="card"><p class="panel-label">天氣</p>' + dayWeather(d) + '</div>';
     html += '<div class="card"><p class="panel-label">日照</p><div class="sunrow"><div><span>日出</span><b>' + d.sun[0] + '</b></div><div><span>日落</span><b>' + d.sun[1] + '</b></div><div><span>天黑</span><b>' + d.sun[2] + '</b></div></div></div>';
     html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(d.meals[0]) + '</li><li><span>晚</span>' + esc(d.meals[1]) + '</li></ul></div>';
@@ -155,7 +155,7 @@
     $("#dayview").innerHTML = html;
   }
 
-  /* ---------- 地圖 ---------- */
+  /* ---------- 地圖：預設跟著日期走；地區按鈕切到探索模式 ---------- */
   var CATS = [
     ["stay", "住宿", "--accent"], ["ski", "雪場", "--c-ski"], ["sight", "景點", "--c-sight"], ["food", "餐廳", "--c-food"],
     ["onsen", "溫泉", "--c-onsen"], ["shop", "購物", "--c-shop"], ["grocery", "超市", "--c-grocery"], ["hospital", "醫院", "--c-hospital"], ["transport", "交通", "--c-transport"]
@@ -169,10 +169,12 @@
     ["all", "全區", [[140.90, 42.74], [142.72, 43.84]]]
   ];
   var SKI_LABEL = { onze: "Onze", kiroro: "Kiroro", furano_kita: "富良野（北之峰）", teine: "Teine", asari: "朝里川" };
-  var map = null, gpsMarker = null, mapReady = false, KEYS = [], POIS = [];
+  var CIRCLED = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨"];
+  var map = null, gpsMarker = null, mapReady = false, KEYS = [], POIS = [], STOPS = [];
   state.area = "day";
   var isDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#5A687A"; }
+  function dayPlan() { return (window.DAYPLAN || {})[T.days[state.day].date] || { stops: [], legs: [] }; }
 
   function popupHTML(p) {
     var a = '<a href="' + navUrl(p.lat, p.lon) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
@@ -194,8 +196,32 @@
   function poiData() { return fc(POIS, function (p) { return catOn[p.type]; }); }
   function keyFilter() { var on = ["stay", "ski"].filter(function (t) { return catOn[t]; }); return ["in", ["get", "type"], ["literal", on]]; }
 
+  /* 當天的站點：同一地點（例如出發與回到住宿）合併成一個點，編號寫成「1・4」 */
+  function stopGroups() {
+    var groups = [];
+    dayPlan().stops.forEach(function (s, i) {
+      var g = groups.filter(function (x) { return Math.abs(x.lat - s.lat) < 0.0004 && Math.abs(x.lon - s.lon) < 0.0004; })[0];
+      if (g) { g.nums.push(i + 1); g.times.push(s.time); }
+      else groups.push({ name: s.name, lat: s.lat, lon: s.lon, nums: [i + 1], times: [s.time], note: s.note });
+    });
+    return groups;
+  }
+  function stopData() {
+    STOPS = stopGroups();
+    return { type: "FeatureCollection", features: STOPS.map(function (g, i) {
+      var role = g.nums[0] === 1 ? "start" : (g.nums[g.nums.length - 1] === dayPlan().stops.length ? "end" : "mid");
+      return { type: "Feature", geometry: { type: "Point", coordinates: [g.lon, g.lat] },
+        properties: { i: i, num: g.nums.join("·"), label: g.name + "  " + g.times.join("／"), role: role } };
+    }) };
+  }
+  function routeData() {
+    var date = T.days[state.day].date;
+    var feats = state.routes ? state.routes.features.filter(function (f) { return f.properties.date === date; }) : [];
+    return { type: "FeatureCollection", features: feats };
+  }
+
   function initMap() {
-    renderLayers(); renderAreas();
+    renderLayers(); renderAreas(); renderStops(); applyMode();
     KEYS = keyPoints(); POIS = T.places.slice();
     if (!window.maplibregl) { $("#mapfallback").hidden = false; return; }
     try {
@@ -211,26 +237,21 @@
     });
     map.on("load", function () {
       var C = {}; CATS.forEach(function (c) { C[c[0]] = cssVar(c[2]); });
-      var ink = cssVar("--ink"), paper = cssVar("--paper"), accent = cssVar("--accent");
+      var ink = cssVar("--ink"), paper = cssVar("--paper"), accent = cssVar("--accent"), muted = cssVar("--muted");
       var color = ["match", ["get", "type"]]; CATS.forEach(function (c) { color.push(c[0], C[c[0]]); }); color.push(ink);
 
-      map.addSource("routes", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-      map.addLayer({ id: "route-casing", type: "line", source: "routes", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": paper, "line-width": 9, "line-opacity": 0.95 } });
-      map.addLayer({ id: "route-line", type: "line", source: "routes", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": accent, "line-width": 4.5 } });
-
+      /* 探索模式：住宿、雪場、其他地點 */
       map.addSource("poi", { type: "geojson", data: poiData(), cluster: true, clusterRadius: 44, clusterMaxZoom: 11 });
       map.addLayer({ id: "poi-cluster", type: "circle", source: "poi", filter: ["has", "point_count"],
         paint: { "circle-color": ink, "circle-opacity": 0.82, "circle-radius": ["step", ["get", "point_count"], 14, 5, 17, 10, 21], "circle-stroke-width": 2, "circle-stroke-color": paper } });
       map.addLayer({ id: "poi-count", type: "symbol", source: "poi", filter: ["has", "point_count"],
-        layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["Noto Sans Bold"], "text-size": 12, "text-allow-overlap": true },
-        paint: { "text-color": paper } });
+        layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["Noto Sans Bold"], "text-size": 12, "text-allow-overlap": true }, paint: { "text-color": paper } });
       map.addLayer({ id: "poi-dot", type: "circle", source: "poi", filter: ["!", ["has", "point_count"]],
         paint: { "circle-color": color, "circle-radius": 6.5, "circle-stroke-width": 2, "circle-stroke-color": paper } });
       map.addLayer({ id: "poi-label", type: "symbol", source: "poi", filter: ["!", ["has", "point_count"]], minzoom: 10,
         layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Regular"], "text-size": 12, "text-max-width": 9,
           "text-variable-anchor": ["top", "bottom", "left", "right"], "text-radial-offset": 0.9, "text-justify": "auto" },
         paint: { "text-color": ink, "text-halo-color": paper, "text-halo-width": 1.6 } });
-
       map.addSource("key", { type: "geojson", data: fc(KEYS) });
       map.addLayer({ id: "key-dot", type: "circle", source: "key", filter: keyFilter(),
         paint: { "circle-color": ["match", ["get", "type"], "stay", accent, C.ski], "circle-radius": ["match", ["get", "type"], "stay", 9, 7.5], "circle-stroke-width": 3, "circle-stroke-color": paper } });
@@ -239,26 +260,54 @@
           "text-variable-anchor": ["top", "bottom", "left", "right"], "text-radial-offset": 1.1, "text-justify": "auto" },
         paint: { "text-color": ["match", ["get", "type"], "stay", accent, ink], "text-halo-color": paper, "text-halo-width": 2.2 } });
 
+      /* 當天模式：路線＋編號站點 */
+      map.addSource("dayroute", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "dayroute-casing", type: "line", source: "dayroute", filter: ["==", ["get", "mode"], "drive"], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": paper, "line-width": 9, "line-opacity": 0.95 } });
+      map.addLayer({ id: "dayroute-line", type: "line", source: "dayroute", filter: ["==", ["get", "mode"], "drive"], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": accent, "line-width": 4.5 } });
+      map.addLayer({ id: "dayroute-walk", type: "line", source: "dayroute", filter: ["==", ["get", "mode"], "walk"], layout: { "line-cap": "round" }, paint: { "line-color": accent, "line-width": 3, "line-dasharray": [1, 2] } });
+      map.addSource("daystops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "stop-dot", type: "circle", source: "daystops",
+        paint: { "circle-color": ["match", ["get", "role"], "mid", ink, accent], "circle-radius": ["case", [">", ["length", ["get", "num"]], 2], 17, 13], "circle-stroke-width": 3, "circle-stroke-color": paper } });
+      map.addLayer({ id: "stop-num", type: "symbol", source: "daystops",
+        layout: { "text-field": ["get", "num"], "text-font": ["Noto Sans Bold"], "text-size": 12, "text-allow-overlap": true, "text-ignore-placement": true },
+        paint: { "text-color": paper } });
+      map.addLayer({ id: "stop-label", type: "symbol", source: "daystops",
+        layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Bold"], "text-size": 13, "text-max-width": 14,
+          "text-variable-anchor": ["left", "right", "top", "bottom"], "text-radial-offset": 1.5, "text-justify": "auto" },
+        paint: { "text-color": ink, "text-halo-color": paper, "text-halo-width": 2.4 } });
+
       function open(list, f) {
         var p = list[f.properties.i]; if (!p) return;
         new maplibregl.Popup({ offset: 14, maxWidth: "290px" }).setLngLat([p.lon, p.lat]).setHTML(popupHTML(p)).addTo(map);
       }
       ["key-dot", "key-label"].forEach(function (id) { map.on("click", id, function (e) { open(KEYS, e.features[0]); }); });
       ["poi-dot", "poi-label"].forEach(function (id) { map.on("click", id, function (e) { open(POIS, e.features[0]); }); });
+      ["stop-dot", "stop-label"].forEach(function (id) { map.on("click", id, function (e) { var g = STOPS[e.features[0].properties.i]; if (g) open([{ name: g.nums.map(function (n) { return CIRCLED[n - 1] || n; }).join("") + " " + g.name, note: g.times.join("／") + "　" + g.note, lat: g.lat, lon: g.lon }], { properties: { i: 0 } }); }); });
       map.on("click", "poi-cluster", function (e) {
         var f = e.features[0];
         map.getSource("poi").getClusterExpansionZoom(f.properties.cluster_id).then(function (z) {
           map.easeTo({ center: f.geometry.coordinates, zoom: z + 0.5 });
         }).catch(function () { map.easeTo({ center: f.geometry.coordinates, zoom: map.getZoom() + 2 }); });
       });
-      ["key-dot", "key-label", "poi-dot", "poi-label", "poi-cluster"].forEach(function (id) {
+      ["key-dot", "key-label", "poi-dot", "poi-label", "poi-cluster", "stop-dot", "stop-label"].forEach(function (id) {
         map.on("mouseenter", id, function () { map.getCanvas().style.cursor = "pointer"; });
         map.on("mouseleave", id, function () { map.getCanvas().style.cursor = ""; });
       });
       mapReady = true;
-      fetch("data/routes.geojson").then(function (r) { return r.json(); }).then(function (gj) { state.routes = gj; updateRoute(false); })
+      fetch("data/dayroutes.geojson").then(function (r) { return r.json(); }).then(function (gj) { state.routes = gj; updateRoute(false); })
         .catch(function () { updateRoute(false); });
     });
+  }
+  var EXPLORE_LAYERS = ["poi-cluster", "poi-count", "poi-dot", "poi-label", "key-dot", "key-label"];
+  var DAY_LAYERS = ["dayroute-casing", "dayroute-line", "dayroute-walk", "stop-dot", "stop-num", "stop-label"];
+  function applyMode() {
+    var day = state.area === "day";
+    $("#layers").hidden = day;
+    $("#stoppanel").hidden = !day;
+    $("#explorepanel").hidden = day;
+    if (!map || !mapReady) return;
+    EXPLORE_LAYERS.forEach(function (id) { map.setLayoutProperty(id, "visibility", day ? "none" : "visible"); });
+    DAY_LAYERS.forEach(function (id) { map.setLayoutProperty(id, "visibility", day ? "visible" : "none"); });
   }
   function renderLayers() {
     var box = $("#layers");
@@ -276,36 +325,59 @@
   function renderAreas() {
     var box = $("#areas");
     box.innerHTML = AREAS.map(function (a) {
-      return '<button type="button" role="tab" aria-selected="' + (state.area === a[0]) + '" data-area="' + a[0] + '">' + esc(a[1]) + '</button>';
+      var label = a[0] === "day" ? md(T.days[state.day].date) + " 行程" : a[1];
+      return '<button type="button" role="tab" aria-selected="' + (state.area === a[0]) + '" data-area="' + a[0] + '">' + esc(label) + '</button>';
     }).join("");
     box.onclick = function (e) {
       var b = e.target.closest("[data-area]"); if (!b) return;
-      state.area = b.dataset.area; renderAreas(); fitArea(true);
+      state.area = b.dataset.area; renderAreas(); applyMode(); fitArea(true);
     };
   }
   function fitArea(animate) {
     if (!map || !mapReady) return;
-    var w = map.getContainer().clientWidth, pad = w < 500 ? 56 : 90;
-    var opt = { padding: { top: pad, bottom: pad * 0.7, left: pad, right: pad }, maxZoom: 12.5, duration: animate ? 800 : 0 };
+    var w = map.getContainer().clientWidth, pad = w < 500 ? 40 : 80;
+    var opt = { padding: { top: pad + 10, bottom: pad + 10, left: pad, right: w < 500 ? 120 : 150 }, maxZoom: 13, duration: animate ? 800 : 0 };
     if (state.area !== "day") {
       var a = AREAS.filter(function (x) { return x[0] === state.area; })[0];
       map.fitBounds(a[2], opt); return;
     }
-    var d = T.days[state.day], b = baseById[d.base];
-    var bounds = new maplibregl.LngLatBounds([b.lon, b.lat], [b.lon, b.lat]);
-    var feats = state.routes ? state.routes.features.filter(function (x) { return x.properties.date === d.date; }) : [];
-    feats.forEach(function (x) { x.geometry.coordinates.forEach(function (c) { bounds.extend(c); }); });
-    if (!feats.length) { opt.maxZoom = 11; }
+    var pts = dayPlan().stops.map(function (s) { return [s.lon, s.lat]; });
+    routeData().features.forEach(function (f) { f.geometry.coordinates.forEach(function (c) { pts.push(c); }); });
+    if (!pts.length) { var b = baseById[T.days[state.day].base]; pts.push([b.lon, b.lat]); }
+    var bounds = new maplibregl.LngLatBounds(pts[0], pts[0]);
+    pts.forEach(function (c) { bounds.extend(c); });
     map.fitBounds(bounds, opt);
   }
   function updateRoute(animate) {
+    renderStops();
     if (!map || !mapReady) return;
-    var date = T.days[state.day].date;
-    var feats = state.routes ? state.routes.features.filter(function (x) { return x.properties.date === date; }) : [];
-    map.getSource("routes").setData({ type: "FeatureCollection", features: feats });
-    state.area = "day"; renderAreas();
+    map.getSource("dayroute").setData(routeData());
+    map.getSource("daystops").setData(stopData());
+    state.area = "day"; renderAreas(); applyMode();
     fitArea(animate);
   }
+  function renderStops() {
+    var d = T.days[state.day], plan = dayPlan(), o = null;
+    var html = '<h3 class="panel-h">' + md(d.date) + '（' + dow(d.date) + '）行程點</h3><ol class="stops">';
+    plan.stops.forEach(function (s, i) {
+      var role = i === 0 ? " start" : (i === plan.stops.length - 1 ? " end" : "");
+      if (i > 0) {
+        var l = plan.legs[i - 1], prev = plan.stops[i - 1];
+        var nav = l.mode === "walk"
+          ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + prev.lat + ',' + prev.lon + '&destination=' + s.lat + ',' + s.lon + '" target="_blank" rel="noopener">步行導航</a>'
+          : '<a href="' + navUrl(s.lat, s.lon, prev) + '" target="_blank" rel="noopener">導航</a>';
+        html += '<li class="hop"><span>' + (l.mode === "walk" ? "步行 " : "") + l.km + ' km · ' + fmtMin(l.normal) + (l.mode === "walk" ? "" : '<em>雪 ' + fmtMin(l.snow) + '</em>') + '</span>' + nav + '</li>';
+      }
+      html += '<li class="stop' + role + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + '</div><div class="sn">' + em(s.note) + '</div></div></li>';
+    });
+    html += '</ol>';
+    $("#stoppanel").innerHTML = html;
+  }
+  $("#stoppanel").addEventListener("click", function (e) {
+    var li = e.target.closest("[data-s]"); if (!li || !map) return;
+    var s = dayPlan().stops[+li.dataset.s];
+    map.flyTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 13), duration: 700 });
+  });
 
   /* ---------- 出發地與車程 ---------- */
   function renderOrigin() {
@@ -541,8 +613,38 @@
     }).catch(function () { /* 用內建匯率 */ });
   }
 
+
+  /* ---------- 首頁飄雪 ---------- */
+  function initSnow() {
+    var cv = $("#snow"); if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext("2d"), flakes = [], W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2), running = true;
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function size() {
+      W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var n = Math.min(180, Math.round(W * H / 9000));
+      flakes = []; for (var i = 0; i < n; i++) flakes.push(mk(true));
+    }
+    function mk(any) { var r = Math.random(); return { x: Math.random() * W, y: any ? Math.random() * H : -6, r: 0.6 + r * r * 2.6, v: 0.25 + r * 0.9, a: 0.35 + Math.random() * 0.55, s: Math.random() * 6.28, sw: 0.3 + Math.random() * 0.9 }; }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < flakes.length; i++) {
+        var f = flakes[i];
+        if (!still) { f.y += f.v; f.s += 0.012; f.x += Math.sin(f.s) * f.sw * 0.35 + 0.08; if (f.y > H + 6 || f.x > W + 6) { flakes[i] = mk(false); flakes[i].x = Math.random() * W; continue; } }
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.2832); ctx.fillStyle = "rgba(255,255,255," + f.a + ")"; ctx.fill();
+      }
+    }
+    function loop() { if (!running) return; draw(); requestAnimationFrame(loop); }
+    size(); window.addEventListener("resize", function () { size(); if (still) draw(); });
+    if (still) { draw(); return; }
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) { var vis = es[0].isIntersecting; if (vis && !running) { running = true; loop(); } else if (!vis) running = false; }).observe(cv);
+    }
+    loop();
+  }
+
   /* ---------- 啟動 ---------- */
   renderFx();
+  initSnow();
   renderHero();
   renderDayStrip();
   renderDay();

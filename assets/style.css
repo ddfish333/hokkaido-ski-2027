@@ -60,15 +60,18 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .curbtn { flex: none; font: 600 12px/1 var(--f-body); padding: 8px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.22); background: none; color: var(--hero-ink); cursor: pointer; white-space: nowrap; }
 .curbtn:hover { border-color: var(--hero-ink); }
 
-/* 主視覺：深墨藍＋等高線 */
-.hero { background: var(--hero); color: var(--hero-ink); position: relative; overflow: hidden; }
-.hero::before { content: ""; position: absolute; inset: -40% -20% -40% 30%;
-  background: repeating-radial-gradient(ellipse at 62% 42%, transparent 0 26px, rgba(159,176,197,.16) 26px 27px);
-  mask-image: radial-gradient(closest-side, #000 55%, transparent); -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent); pointer-events: none; }
-.hero-in { position: relative; padding-block: 56px 40px; display: grid; gap: 18px; }
+/* 主視覺：美瑛雪原照片＋飄落粉雪 */
+.hero { background: #0E2A63 url("hero.jpg") 60% 38% / cover no-repeat; color: var(--hero-ink); position: relative; overflow: hidden; }
+@media (max-width: 700px) { .hero { background-image: url("hero-m.jpg"); background-position: 50% 30%; } }
+.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(6,18,44,.72) 0%, rgba(6,18,44,.42) 45%, rgba(6,18,44,0) 75%),
+              linear-gradient(0deg, rgba(6,14,30,.88) 0%, rgba(6,14,30,.35) 34%, rgba(6,14,30,0) 58%); }
+.hero-snow { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.hero-in { position: relative; padding-block: clamp(72px, 12vw, 140px) 40px; display: grid; gap: 18px; min-height: min(78vh, 720px); align-content: end; }
+.hero-title, .hero-sub, .eyebrow { text-shadow: 0 2px 18px rgba(4,12,30,.35); }
 .eyebrow { margin: 0; font: 600 12px/1 var(--f-display); font-stretch: 125%; letter-spacing: .32em; color: var(--hero-muted); }
 .hero-title { margin: 0; font: 900 clamp(56px, 13vw, 156px)/1.04 var(--f-body); letter-spacing: .04em; display: grid; }
-.hero-title .ht-a { font-size: .62em; font-weight: 700; color: var(--hero-muted); letter-spacing: .12em; }
+.hero-title .ht-a { font-size: .62em; font-weight: 700; color: rgba(243,246,250,.82); letter-spacing: .12em; }
 .r-meta .num { font-family: var(--f-body); font-variant-numeric: tabular-nums; color: var(--ink); }
 .hero-sub { margin: 0; font: 500 15px/1.6 var(--f-body); color: var(--hero-muted); }
 .hero-sub .dot { margin: 0 .6em; color: var(--accent); }
@@ -274,3 +277,20 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .foot { padding-block: 36px 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
 .foot-in p { margin: 0 0 6px; max-width: 80ch; }
+
+/* 地圖旁的當天行程點 */
+.mapgrid .panel { max-height: 640px; overflow-y: auto; }
+@media (max-width: 900px) { .mapgrid .panel { max-height: none; } }
+.stops { list-style: none; margin: 12px 0 0; padding: 0; }
+.stop { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; padding: 8px 6px; margin: 0 -6px; border-radius: 10px; cursor: pointer; }
+.stop:hover { background: var(--soft); }
+.stop .n { width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font: 700 12px/1 var(--f-mono); }
+.stop.start .n, .stop.end .n { background: var(--accent); color: #fff; }
+.stop .st { font-weight: 700; line-height: 1.4; }
+.stop time { color: var(--accent); font-family: var(--f-mono); margin-right: 4px; }
+.stop .sn { font-size: 13px; color: var(--muted); }
+.hop { margin-left: 12px; padding: 6px 0 6px 22px; border-left: 2px dashed var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 500 12px/1.4 var(--f-mono); color: var(--muted); }
+.hop em { font-style: normal; color: var(--warn); margin-left: 8px; }
+.hop a { flex: none; color: var(--glacier); text-decoration: none; font: 600 12px/1 var(--f-body); padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; }
+.hop a:hover { border-color: var(--glacier); }
+#day .mapgrid { margin-bottom: 20px; }
