@@ -35,14 +35,23 @@
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   var gate = el("div", "gate");
-  gate.innerHTML = '<div><p class="k">' + esc(date.replace(/-/g, " · ")) + ' · 星期' + "日一二三四五六"[new Date(date + "T00:00:00").getDay()] + '</p><h1>' + esc(day.title) + '</h1><p>' + esc((def.poster && def.poster.line) || day.sub) + '</p>' +
+  if (def.poster && def.poster.img) { var gph = el("div", "gate-ph"); gph.style.backgroundImage = "url(" + IMG + def.poster.img + ")"; gate.appendChild(gph); gate.appendChild(el("div", "gate-veil")); }
+  gate.innerHTML += '<div class="gate-in"><p class="k">' + esc(date.replace(/-/g, " · ")) + ' · 星期' + "日一二三四五六"[new Date(date + "T00:00:00").getDay()] + '</p><h1>' + esc(day.title) + '</h1><p>' + esc((def.poster && def.poster.line) || day.sub) + '</p>' +
     '<button class="go" type="button" aria-label="開始"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>' +
     '<div><button class="mute" type="button">不要聲音，直接看</button><span class="sep">·</span><button class="mute skipgate" type="button">跳過序幕</button></div></div>';
   var stage = el("div", "stage");
   var secs = scenes.map(function (sc, i) {
     var s = el("section", "scene" + (sc.warm ? " warm" : "") + (sc.type === "title" || sc.type === "drive" ? " cold" : ""));
     s.dataset.dur = sc.dur || 9000; s.dataset.amb = sc.amb || "snow";
-    if (sc.video || sc.img) {
+    if (sc.type === "title" && !sc.img && !sc.imgs && !sc.video && def.poster && def.poster.img) { sc.img = def.poster.img; sc.kb = sc.kb || "in"; }
+    if (sc.imgs && sc.imgs.length) {
+      sc.imgs.forEach(function (im, k) {
+        var layer = el("div", "ph multi" + (k === 0 ? " cur" : "")); layer.style.backgroundImage = "url(" + IMG + im + ")";
+        layer.style.setProperty("--kb", "kb" + (k % 2 ? "Out" : "In")); layer.style.setProperty("--dur", Math.round((sc.dur || 9000) / sc.imgs.length + 1200) + "ms");
+        s.appendChild(layer);
+      });
+      s.appendChild(el("div", "veil")); s.dataset.n = sc.imgs.length;
+    } else if (sc.video || sc.img) {
       var ph;
       if (sc.video && !reduce) {
         ph = document.createElement("video"); ph.className = "ph"; ph.muted = true; ph.loop = true; ph.playsInline = true; ph.setAttribute("playsinline", ""); ph.setAttribute("muted", ""); ph.preload = i < 2 ? "auto" : "metadata";
@@ -147,7 +156,7 @@
   }
 
   /* ---------- 播放控制 ---------- */
-  var cur = -1, timer = null, started = false;
+  var cur = -1, timer = null, started = false, cycleT = null;
   function show(i) {
     if (i < 0) i = 0; if (i >= secs.length) { finish(); return; }
     clearTimeout(timer);
@@ -162,6 +171,12 @@
     snowAmt = amb === "fire" ? .35 : amb === "quiet" ? .5 : amb === "drive" ? 0 : 1; wind = amb === "drive" ? 0 : .15 + Math.random() * .4;
     if (music) music.setAmb(amb);
     var dur = reduce ? Math.min(5000, +s.dataset.dur) : +s.dataset.dur;
+    clearInterval(cycleT);
+    if (+s.dataset.n > 1) {
+      var layers = s.querySelectorAll(".ph.multi"), k = 0, step = Math.round(dur / layers.length);
+      layers.forEach(function (l, j) { l.classList.toggle("cur", j === 0); l.style.animation = "none"; void l.offsetWidth; l.style.animation = ""; });
+      cycleT = setInterval(function () { k = (k + 1) % layers.length; layers.forEach(function (l, j) { l.classList.toggle("cur", j === k); if (j === k) { l.style.animation = "none"; void l.offsetWidth; l.style.animation = ""; } }); if (k === layers.length - 1) clearInterval(cycleT); }, step);
+    }
     if (i < secs.length - 1) timer = setTimeout(function () { show(i + 1); }, dur);
     if (i > 0) hint.style.opacity = 0;
   }
@@ -174,7 +189,7 @@
     setTimeout(function () { hint.style.opacity = 0; }, 6000);
   }
   function finish() {
-    if (ended) return; ended = true; clearTimeout(timer);
+    if (ended) return; ended = true; clearTimeout(timer); clearInterval(cycleT);
     if (music) music.fadeOut();
     chrome.hidden = true; root.classList.add("off");
     document.body.classList.remove("film-open"); window.scrollTo(0, 0);
@@ -192,7 +207,7 @@
   chrome.querySelector("#fmute").addEventListener("click", function () { muted = !muted; if (!music && !muted) { try { startMusic(); music.setAmb(secs[cur] ? secs[cur].dataset.amb : "snow"); } catch (e) { } } else if (music) music.setMuted(muted); updMute(); });
   addEventListener("keydown", function (e) { if (!started || ended) return; if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); show(cur + 1); } if (e.key === "ArrowLeft") show(cur - 1); if (e.key === "Escape") finish(); });
   document.addEventListener("visibilitychange", function () { if (AC) { document.hidden ? AC.suspend() : AC.resume(); } });
-  scenes.forEach(function (sc) { if (sc.img) { var im = new Image(); im.src = IMG + sc.img; } });
+  scenes.forEach(function (sc) { (sc.imgs || (sc.img ? [sc.img] : [])).forEach(function (u) { var im = new Image(); im.src = IMG + u; }); });
   /* 序幕結束時停掉所有影片 */
   document.addEventListener("film:end", function () { secs.forEach(function (sec) { var v = sec.querySelector("video.ph"); if (v) try { v.pause(); } catch (e) { } }); });
   }

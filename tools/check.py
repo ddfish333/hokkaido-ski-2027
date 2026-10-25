@@ -93,8 +93,8 @@ for d, sc in scenes.items():
     for i, s in enumerate(sc.get("scenes") or [], 1):
         if s.get("stop") and s["stop"] not in stop_ids:
             E(f"{d}：序幕第 {i} 幕指向站點「{s['stop']}」，但當天站點只有 {stop_ids}（行程改了，腳本沒跟上）")
-        if s.get("img") and not os.path.exists(os.path.join(img_root, s["img"])):
-            E(f"{d}：序幕第 {i} 幕圖片不存在 assets/img/{s['img']}")
+        for im in ([s["img"]] if s.get("img") else []) + list(s.get("imgs") or []):
+            if not os.path.exists(os.path.join(img_root, im)): E(f"{d}：序幕第 {i} 幕圖片不存在 assets/img/{im}")
         if s.get("video") and not os.path.exists(os.path.join(ROOT, "assets", "video", s["video"])):
             E(f"{d}：序幕第 {i} 幕影片不存在 assets/video/{s['video']}")
     covered = {s.get("stop") for s in sc.get("scenes") or []}

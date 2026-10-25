@@ -377,7 +377,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .film .tap button { height: 100%; opacity: 0; border: 0; background: none; cursor: pointer; }
 .film .chrome.last .tap { display: none; }
 .film .hint { position: absolute; bottom: calc(22px + env(safe-area-inset-bottom)); left: 0; right: 0; margin: 0; text-align: center; font: 400 11px/1 var(--f-display); letter-spacing: .25em; color: rgba(244,241,234,.4); transition: opacity 1s; }
-.film .gate { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; background: #05080F; text-align: center; padding: 24px; transition: opacity 1.4s ease; }
+.film .gate { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; background: #05080F; text-align: center; padding: 24px; transition: opacity 1.4s ease; overflow: hidden; }
+.film .gate-ph { position: absolute; inset: -6%; background-size: cover; background-position: center; animation: kbIn 18s linear forwards; }
+.film .gate-veil { position: absolute; inset: 0; background: radial-gradient(80% 70% at 50% 55%, rgba(5,8,15,.55), rgba(5,8,15,.85)); }
+.film .gate-in { position: relative; text-shadow: 0 2px 24px rgba(5,8,15,.6); }
+.film .ph.multi { opacity: 0; transition: opacity .9s ease; }
+.film .ph.multi.cur { opacity: 1; }
+.film .scene.on .ph.multi { animation: none; }
+.film .scene.on .ph.multi.cur { animation: var(--kb, kbIn) var(--dur, 4s) linear forwards; }
 .film .gate.off { opacity: 0; pointer-events: none; }
 .film .gate .k { margin: 0 0 18px; }
 .film .gate h1 { font: 300 clamp(30px, 6vw, 56px)/1.2 var(--f-body); letter-spacing: .2em; margin: 0 0 12px; }
