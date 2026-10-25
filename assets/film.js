@@ -75,15 +75,16 @@
   });
   var snow = el("canvas", "snow"); stage.appendChild(snow);
 
-  /* ---------- 透明路線圖：北海道輪廓＋當天路線＋跟著場景走的光點 ---------- */
-  var RM = { svg: null, pts: [], legs: [], pos: 0, target: 0, anim: null, level: (function () { try { return localStorage.getItem("snow13-rmap") || "mid"; } catch (e) { return "mid"; } })() };
+  /* ---------- 全畫面霧玻璃路線圖：海岸線＋全程路線＋當天路線＋地名，鏡頭跟著均速移動的光點 ---------- */
+  var RM = { svg: null, pts: [], pos: 0, target: 0, cam: null, camT: null, lastT: 0, raf: null,
+    level: (function () { try { return localStorage.getItem("snow13-rmap") || "mid"; } catch (e) { return "mid"; } })() };
   var sched = plan.stops.length ? plan : null;
-  function proj(lon, lat) { return [lon * Math.cos(43.3 * Math.PI / 180), -lat]; }
+  var COSL = Math.cos(43.3 * Math.PI / 180);
+  function proj(lon, lat) { return [lon * COSL, -lat]; }
+  var TOWNS = [["札幌", 43.062, 141.354, 2], ["小樽", 43.191, 140.994, 2], ["千歲", 42.822, 141.652, 1], ["銭函", 43.145, 141.148, 1], ["余市", 43.195, 140.785, 1], ["旭川", 43.771, 142.365, 2], ["富良野", 43.342, 142.383, 2], ["美瑛", 43.588, 142.467, 1], ["上富良野", 43.455, 142.467, 1], ["白金溫泉", 43.463, 142.633, 1], ["定山溪", 42.967, 141.164, 1], ["手稻", 43.118, 141.247, 1], ["岩見沢", 43.196, 141.776, 1], ["滝川", 43.558, 141.911, 1], ["深川", 43.72, 142.04, 1], ["石狩", 43.17, 141.32, 1], ["江別", 43.10, 141.55, 1], ["恵庭", 42.88, 141.58, 1], ["北広島", 42.985, 141.563, 1], ["朝里", 43.17, 141.05, 1], ["赤井川", 43.08, 140.82, 1], ["石狩灣", 43.30, 141.20, 0], ["日本海", 43.45, 140.75, 0]];
   function buildRouteMap(outline) {
     if (!sched || !window.Plan) return;
-    var stops = sched.stops, legs = sched.legs, pts = [];
-    /* 整條路線的折線（含每一站的索引位置） */
-    var markers = [];
+    var stops = sched.stops, legs = sched.legs, pts = [], markers = [];
     stops.forEach(function (st, i) {
       if (i === 0) { pts.push(proj(st.lon, st.lat)); markers.push(0); return; }
       var g = legs[i - 1].geom || [[stops[i - 1].lon, stops[i - 1].lat], [st.lon, st.lat]];
@@ -92,30 +93,45 @@
     });
     var cum = [0]; for (var i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
     RM.pts = pts; RM.cum = cum; RM.markers = markers; RM.total = cum[cum.length - 1] || 1;
-    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
-    var minx = Math.min.apply(null, xs), maxx = Math.max.apply(null, xs), miny = Math.min.apply(null, ys), maxy = Math.max.apply(null, ys);
-    var w = Math.max(maxx - minx, 0.05), h = Math.max(maxy - miny, 0.05), pad = Math.max(w, h) * 0.35;
-    var vb = [minx - pad, miny - pad, w + pad * 2, h + pad * 2];
-    var sw = vb[2] / 300; /* 線寬以 viewBox 單位換算，讓它在任何縮放下都差不多粗 */
+    /* 均速：一整天的路線在 22 秒內走完，所以長的腿跑得久、短的腿一下就到 */
+    RM.speed = 0;
     var NS = "http://www.w3.org/2000/svg";
-    var svg = document.createElementNS(NS, "svg"); svg.setAttribute("class", "rmap " + RM.level); svg.setAttribute("viewBox", vb.join(" ")); svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-    function path(d, cls, w) { var e = document.createElementNS(NS, "path"); e.setAttribute("d", d); e.setAttribute("class", cls); e.setAttribute("stroke-width", w); e.setAttribute("fill", "none"); e.setAttribute("stroke-linejoin", "round"); e.setAttribute("stroke-linecap", "round"); e.setAttribute("vector-effect", "none"); svg.appendChild(e); return e; }
+    var svg = document.createElementNS(NS, "svg"); svg.setAttribute("class", "rmap"); svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+    function mk(tag, cls, attrs) { var e = document.createElementNS(NS, tag); if (cls) e.setAttribute("class", cls); Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); }); return e; }
+    var gLand = mk("g", "rm-g-land"), gAll = mk("g", "rm-g-all"), gRoute = mk("g", "rm-g-route"), gPts = mk("g", "rm-g-pts"), gLab = mk("g", "rm-g-lab");
+    [gLand, gAll, gRoute, gPts, gLab].forEach(function (g) { svg.appendChild(g); });
     if (outline) {
       var d = "";
       outline.geometry.coordinates.forEach(function (poly) { poly.forEach(function (ring) { ring.forEach(function (c, k) { var q = proj(c[0], c[1]); d += (k ? "L" : "M") + q[0].toFixed(3) + " " + q[1].toFixed(3); }); d += "Z"; }); });
-      var land = path(d, "rm-land", sw * 0.8); land.setAttribute("fill", "rgba(255,255,255,.035)");
+      gLand.appendChild(mk("path", "rm-land", { d: d }));
     }
+    /* 其他天的路線當成「道路」底紋 */
+    try {
+      Object.keys(Plan.plan.days).forEach(function (dt) { if (dt === date) return; var sc = Plan.schedule(dt, "normal"); sc.legs.forEach(function (l) { if (!l.geom) return; gAll.appendChild(mk("path", "rm-other", { d: l.geom.map(function (c, k) { var q = proj(c[0], c[1]); return (k ? "L" : "M") + q[0].toFixed(4) + " " + q[1].toFixed(4); }).join("") })); }); });
+    } catch (e) { }
     var rd = pts.map(function (q, k) { return (k ? "L" : "M") + q[0].toFixed(4) + " " + q[1].toFixed(4); }).join("");
-    path(rd, "rm-casing", sw * 4.2);
-    path(rd, "rm-route", sw * 1.8);
-    RM.trail = path("M0 0", "rm-trail", sw * 2.4);
-    markers.forEach(function (mi, k) { var c = document.createElementNS(NS, "circle"); c.setAttribute("cx", pts[mi][0]); c.setAttribute("cy", pts[mi][1]); c.setAttribute("r", sw * 2.6); c.setAttribute("class", "rm-stop"); svg.appendChild(c); });
-    RM.glow = document.createElementNS(NS, "circle"); RM.glow.setAttribute("r", sw * 9); RM.glow.setAttribute("class", "rm-glow"); svg.appendChild(RM.glow);
-    RM.dot = document.createElementNS(NS, "circle"); RM.dot.setAttribute("r", sw * 3.6); RM.dot.setAttribute("class", "rm-dot"); svg.appendChild(RM.dot);
-    RM.label = document.createElementNS(NS, "text"); RM.label.setAttribute("class", "rm-label"); RM.label.setAttribute("font-size", sw * 9); RM.label.setAttribute("stroke-width", sw * 1.2); svg.appendChild(RM.label);
-    RM.svg = svg; RM.sw = sw;
-    var box = el("div", "rmap-box"); box.appendChild(svg); stage.appendChild(box);
-    setDot(0, true);
+    gRoute.appendChild(mk("path", "rm-casing", { d: rd })); gRoute.appendChild(mk("path", "rm-route", { d: rd }));
+    RM.trail = mk("path", "rm-trail", { d: "M0 0" }); gRoute.appendChild(RM.trail);
+    markers.forEach(function (mi) { gPts.appendChild(mk("circle", "rm-stop", { cx: pts[mi][0], cy: pts[mi][1] })); });
+    RM.glow = mk("circle", "rm-glow", {}); gPts.appendChild(RM.glow);
+    RM.dot = mk("circle", "rm-dot", {}); gPts.appendChild(RM.dot);
+    /* 地名：城鎮、當天站點、其他地點 */
+    function label(name, lon, lat, cls, dy) { var q = proj(lon, lat); var t = mk("text", "rm-label " + cls, { x: q[0], y: q[1] }); t.textContent = name; t.dataset.dy = dy || 0; gLab.appendChild(t); }
+    TOWNS.forEach(function (t) { label(t[0], t[2], t[1], "town t" + t[3], 0); });
+    (T.places || []).forEach(function (p) {
+      if (!p.lat || !p.lon || /food|hospital/.test(p.type)) return;
+      var near = stops.some(function (st) { return Math.abs(st.lat - p.lat) < 0.004 && Math.abs(st.lon - p.lon) < 0.005; });
+      if (!near) label(p.name.replace(/（.*?）/g, ""), p.lon, p.lat, "poi", 0);
+    });
+    stops.forEach(function (st, i) { if (i && markers[i] === markers[i - 1]) return; label(st.name.replace(/（.*?）/g, ""), st.lon, st.lat, "stop", 0); });
+    RM.svg = svg; RM.labels = gLab.querySelectorAll("text"); RM.groups = [gLand, gAll, gRoute, gPts, gLab];
+    var box = el("div", "rmap-box " + RM.level); box.appendChild(svg); stage.appendChild(box); RM.box = box;
+    /* 鏡頭：先看整條路線，之後跟著光點 */
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    RM.fit = { cx: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, cy: (Math.min.apply(null, ys) + Math.max.apply(null, ys)) / 2, w: Math.max(Math.max.apply(null, xs) - Math.min.apply(null, xs), Math.max.apply(null, ys) - Math.min.apply(null, ys)) * 1.9 + 0.08 };
+    RM.cam = { cx: RM.fit.cx, cy: RM.fit.cy, w: RM.fit.w }; RM.camT = { cx: RM.fit.cx, cy: RM.fit.cy, w: RM.fit.w };
+    RM.pos = 0; RM.target = 0; RM.lastT = performance.now();
+    renderCam(); RM.raf = requestAnimationFrame(rmTick);
   }
   function pointAt(dist) {
     var pts = RM.pts, cum = RM.cum; if (!pts.length) return null;
@@ -125,44 +141,77 @@
     var t = (dist - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1);
     return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t];
   }
-  function setDot(dist, jump) {
-    if (!RM.svg) return;
+  function renderCam() {
+    var c = RM.cam, ar = innerWidth / innerHeight, w = c.w, h = w / ar;
+    /* 手機：光點放在畫面上半，字幕在下面 */
+    var oy = innerWidth < 760 ? h * 0.12 : 0;
+    RM.svg.setAttribute("viewBox", [c.cx - w / 2, c.cy - h / 2 + oy, w, h].join(" "));
+    var u = w / 420; /* 一個畫面寬 = 420 單位，線寬字級都用它換算 */
+    RM.svg.style.setProperty("--u", u);
+    RM.groups.forEach(function (g) { g.setAttribute("stroke-width", u); });
+    RM.svg.querySelectorAll(".rm-land").forEach(function (e) { e.setAttribute("stroke-width", u * 1.1); });
+    RM.svg.querySelectorAll(".rm-other").forEach(function (e) { e.setAttribute("stroke-width", u * 1.2); });
+    RM.svg.querySelectorAll(".rm-casing").forEach(function (e) { e.setAttribute("stroke-width", u * 6); });
+    RM.svg.querySelectorAll(".rm-route").forEach(function (e) { e.setAttribute("stroke-width", u * 2.4); });
+    RM.trail.setAttribute("stroke-width", u * 3.2);
+    RM.svg.querySelectorAll(".rm-stop").forEach(function (e) { e.setAttribute("r", u * 3.2); e.setAttribute("stroke-width", u * 1.2); });
+    RM.dot.setAttribute("r", u * 4.5); RM.dot.setAttribute("stroke-width", u * 1.5); RM.glow.setAttribute("r", u * 12);
+    var zoomIn = w < 0.36; /* 拉近時才顯示小地點 */
+    for (var i = 0; i < RM.labels.length; i++) {
+      var t = RM.labels[i], cls = t.getAttribute("class");
+      var fs = /town t2/.test(cls) ? 13 : /town t0/.test(cls) ? 12 : /town/.test(cls) ? 10.5 : /stop/.test(cls) ? 11.5 : 9;
+      t.setAttribute("font-size", u * fs); t.setAttribute("stroke-width", u * 2.2); t.setAttribute("dx", u * (/stop/.test(cls) ? 6 : 4)); t.setAttribute("dy", u * (/stop/.test(cls) ? -6 : 3.5));
+      t.style.display = (/poi/.test(cls) && !zoomIn) ? "none" : "";
+    }
+  }
+  function setDot(dist) {
     RM.pos = dist; var q = pointAt(dist); if (!q) return;
     RM.dot.setAttribute("cx", q[0]); RM.dot.setAttribute("cy", q[1]); RM.glow.setAttribute("cx", q[0]); RM.glow.setAttribute("cy", q[1]);
-    /* 走過的路亮起來 */
     var d = "", pts = RM.pts, cum = RM.cum;
     for (var i = 0; i < pts.length && cum[i] <= dist; i++) d += (i ? "L" : "M") + pts[i][0].toFixed(4) + " " + pts[i][1].toFixed(4);
     d += (d ? "L" : "M") + q[0].toFixed(4) + " " + q[1].toFixed(4);
     RM.trail.setAttribute("d", d);
-    /* 站名 */
-    var atStop = -1; RM.markers.forEach(function (mi, k) { if (Math.abs(RM.cum[mi] - dist) < RM.total * 0.004) atStop = k; });
-    RM.svg.classList.toggle("resting", atStop >= 0);
-    if (atStop >= 0) { RM.label.textContent = sched.stops[atStop].name.replace(/（.*?）/g, ""); RM.label.setAttribute("x", q[0] + RM.sw * 6); RM.label.setAttribute("y", q[1] - RM.sw * 5); }
-    else RM.label.textContent = "";
+    var resting = Math.abs(RM.target - dist) < 1e-9; RM.svg.classList.toggle("resting", resting);
+    return q;
   }
-  function moveDotTo(stopIdx, ms) {
+  function rmTick(now) {
+    RM.raf = requestAnimationFrame(rmTick);
+    var dt = Math.min(0.1, (now - RM.lastT) / 1000); RM.lastT = now;
+    /* 光點：均速走向目標 */
+    if (RM.pos !== RM.target) { var step = RM.speed * dt; RM.pos = RM.pos < RM.target ? Math.min(RM.target, RM.pos + step) : Math.max(RM.target, RM.pos - step); }
+    var q = setDot(RM.pos);
+    /* 鏡頭：跟著光點，平滑追上 */
+    if (RM.follow && q) { RM.camT.cx = q[0]; RM.camT.cy = q[1]; }
+    var k = 1 - Math.pow(0.001, dt); /* 每秒追近 99.9%…的指數平滑 */
+    RM.cam.cx += (RM.camT.cx - RM.cam.cx) * k * 0.6; RM.cam.cy += (RM.camT.cy - RM.cam.cy) * k * 0.6; RM.cam.w += (RM.camT.w - RM.cam.w) * k * 0.5;
+    renderCam();
+  }
+  /* 均速：這一趟的距離除以可用秒數，中途不加速不減速；時間到剛好抵達 */
+  function goStop(stopIdx, zoomW, secs) {
     if (!RM.svg) return;
-    cancelAnimationFrame(RM.anim);
-    var to = RM.cum[RM.markers[Math.max(0, Math.min(stopIdx, RM.markers.length - 1))]], from = RM.pos, t0 = performance.now();
-    if (Math.abs(to - from) < 1e-9) { setDot(to); return; }
-    (function step(now) { var k = Math.min(1, (now - t0) / ms); var e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; setDot(from + (to - from) * e); if (k < 1) RM.anim = requestAnimationFrame(step); })(t0);
+    RM.target = RM.cum[RM.markers[Math.max(0, Math.min(stopIdx, RM.markers.length - 1))]];
+    var d = Math.abs(RM.target - RM.pos); RM.speed = d > 0 ? d / Math.max(0.8, secs || 3) : 0;
+    RM.follow = true; RM.camT.w = zoomW;
   }
   /* 每一幕對應到時間表上的第幾站（同一地點重複時依序往後找） */
   var sceneStop = [], lastIdx = 0;
-  scenes.forEach(function (sc, i) {
+  scenes.forEach(function (sc) {
     var idx = null;
     if (sc.stop && sched) { for (var k = lastIdx; k < sched.stops.length; k++) if (sched.stops[k].id === sc.stop) { idx = k; break; } if (idx == null) idx = lastIdx; lastIdx = idx; }
     sceneStop.push(idx);
   });
   function nextStopAfter(i) { for (var k = i + 1; k < sceneStop.length; k++) if (sceneStop[k] != null) return sceneStop[k]; return null; }
+  var ZOOM_REST = innerWidth < 760 ? 0.22 : 0.3, ZOOM_MOVE = innerWidth < 760 ? 0.34 : 0.46; /* 畫面寬（投影單位，約 1 單位 = 110 km） */
   function syncDot(i) {
     if (!RM.svg) return;
     var sc = scenes[i], idx = sceneStop[i];
-    if (sc.type === "title") { moveDotTo(0, 600); return; }
-    if (idx != null) { moveDotTo(idx, 1600); return; }
-    if (sc.type === "drive") { var nx = nextStopAfter(i); if (nx != null) moveDotTo(nx, Math.max(2000, (sc.dur || 9000) - 1500)); }
+    if (sc.type === "title") { RM.follow = false; RM.camT.cx = RM.fit.cx; RM.camT.cy = RM.fit.cy; RM.camT.w = RM.fit.w; RM.target = 0; return; }
+    var dur = (sc.dur || 9000) / 1000;
+    if (idx != null) { goStop(idx, ZOOM_REST, Math.min(5, Math.max(1.8, dur * 0.55))); return; }
+    if (sc.type === "drive") { var nx = nextStopAfter(i); if (nx != null) goStop(nx, ZOOM_MOVE, Math.max(2, dur - 1.2)); return; }
     /* 其他沒有站點的幕：光點停在原地 */
   }
+  addEventListener("resize", function () { if (RM.svg) renderCam(); }, { passive: true });
   fetch((window.BASE || "") + "data/hokkaido.json").then(function (r) { return r.json(); }).then(buildRouteMap).catch(function () { buildRouteMap(null); });
   var chrome = el("div", "chrome");
   chrome.innerHTML = '<div class="prog">' + scenes.map(function () { return "<i></i>"; }).join("") + '</div><p class="fbrand">北海道 · 雪上的大小腳印</p>' +
@@ -280,7 +329,7 @@
     setTimeout(function () { hint.style.opacity = 0; }, 6000);
   }
   function finish() {
-    if (ended) return; ended = true; clearTimeout(timer); clearInterval(cycleT);
+    if (ended) return; ended = true; clearTimeout(timer); clearInterval(cycleT); cancelAnimationFrame(RM.raf);
     if (music) music.fadeOut();
     chrome.hidden = true; root.classList.add("off");
     document.body.classList.remove("film-open"); window.scrollTo(0, 0);
@@ -297,7 +346,7 @@
   chrome.querySelector("#frmap").addEventListener("click", function () {
     var order = ["mid", "strong", "off", "light"]; RM.level = order[(order.indexOf(RM.level) + 1) % order.length];
     try { localStorage.setItem("snow13-rmap", RM.level); } catch (e) { }
-    if (RM.svg) RM.svg.setAttribute("class", "rmap " + RM.level);
+    if (RM.box) RM.box.setAttribute("class", "rmap-box " + RM.level);
     hint.textContent = "路線圖：" + { light: "淡", mid: "中", strong: "濃", off: "關" }[RM.level]; hint.style.opacity = 1; setTimeout(function () { hint.style.opacity = 0; }, 1500);
   });
   stage.addEventListener("click", function (e) { if (e.target.closest("#toplan")) finish(); });
