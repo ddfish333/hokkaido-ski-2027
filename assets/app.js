@@ -224,6 +224,13 @@
       }).join("") + '</ol></div>';
     html += '<div class="side">';
     var alt = Plan.schedule(d.date, state.mode === "snow" ? "normal" : "snow");
+    if (d.base === "sapporo" && (window.SPOTS || []).some(function (x) { return x.kind === "停車"; })) {
+      var plots = (window.SPOTS || []).filter(function (x) { return x.kind === "停車"; });
+      html += '<div class="card parkcard"><p class="panel-label">車停哪裡（飯店沒有停車場）</p><ul class="parklist">' + plots.map(function (x) {
+        var url = x.g && x.g.pid ? 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(x.ja || x.name) + '&destination_place_id=' + x.g.pid : navUrl(x.lat, x.lon);
+        return '<li class="' + (x.status === "check" ? "no" : "") + '"><a href="' + url + '" target="_blank" rel="noopener"><b>' + esc(x.name) + '</b><span>' + esc(x.fee || "") + (x.caution ? ' · ' + esc(x.caution) : "") + '</span></a></li>';
+      }).join("") + '</ul><p class="park-note">點店名直接開 Google Maps 導航到停車場入口。1/16 13:00 前先停パラカ，三晚不動。</p></div>';
+    }
     html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>' + (state.mode === "snow" ? "下雪" : "一般") + '</span><b>' + fmtMin(sch.total.min) + '</b></div><div><span>' + (state.mode === "snow" ? "一般" : "下雪") + '</span><b>' + fmtMin(alt.total.min) + '</b></div><div><span>距離</span><b>' + sch.total.km + ' km</b></div>' + (sch.end != null ? '<div><span>最後到達</span><b>' + Plan.hm(sch.end) + '</b></div>' : "") + '</div></div>';
     html += '<div class="card"><p class="panel-label">天氣</p>' + dayWeather(d) + '</div>';
     html += '<div class="card"><p class="panel-label">日照</p><div class="sunrow"><div><span>日出</span><b>' + d.sun[0] + '</b></div><div><span>日落</span><b>' + d.sun[1] + '</b></div><div><span>天黑</span><b>' + d.sun[2] + '</b></div></div></div>';

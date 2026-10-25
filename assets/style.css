@@ -551,3 +551,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pick-bk, .pick-book { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
 .pick-bk a, .pick-bk .lnk { color: var(--glacier); text-decoration: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
 .pick-book { color: var(--gold); }
+
+/* 車停哪裡 */
+.parkcard { border-color: rgba(232,179,106,.35); }
+.parklist { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+.parklist a { display: grid; gap: 2px; text-decoration: none; color: var(--ink); padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid var(--line); }
+.parklist a:hover { border-color: var(--gold); }
+.parklist b { font-weight: 500; font-size: 14px; }
+.parklist span { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.parklist li.no a { opacity: .6; border-style: dashed; }
+.park-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
