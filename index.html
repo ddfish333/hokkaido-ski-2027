@@ -59,13 +59,16 @@
     <div class="wrap">
       <div class="sec-head">
         <h2 id="map-h">地圖與車程</h2>
-        <p class="sec-note">選當天住宿或用目前位置，算到每個雪場要開多久。</p>
+        <p class="sec-note">預設只顯示住宿與雪場；餐廳、景點等需要時再打開。點地點可直接開 Google Maps 導航。</p>
       </div>
+    </div>
+    <div class="wrap maptools">
+      <div class="seg seg-areas" id="areas" role="tablist" aria-label="地區"></div>
+      <div class="chips layers" id="layers" aria-label="圖層"></div>
     </div>
     <div class="wrap mapgrid">
       <div class="mapbox">
         <div id="mapcanvas" class="mapcanvas" role="region" aria-label="地圖"></div>
-        <div class="chips map-layers" id="layers" aria-label="圖層"></div>
         <p class="map-fallback" id="mapfallback" hidden>地圖載入失敗，請確認網路連線後重新整理。</p>
       </div>
       <aside class="panel" aria-labelledby="origin-h">

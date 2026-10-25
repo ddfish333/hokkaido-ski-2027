@@ -157,83 +157,154 @@
 
   /* ---------- 地圖 ---------- */
   var CATS = [
-    ["stay", "住宿", "宿", "--c-stay"], ["ski", "雪場", "雪", "--c-ski"], ["sight", "景點", "景", "--c-sight"], ["food", "餐廳", "食", "--c-food"],
-    ["onsen", "溫泉", "湯", "--c-onsen"], ["shop", "購物", "店", "--c-shop"], ["grocery", "超市", "超", "--c-grocery"], ["hospital", "醫院", "醫", "--c-hospital"], ["transport", "交通", "交", "--c-transport"]
+    ["stay", "住宿", "--accent"], ["ski", "雪場", "--c-ski"], ["sight", "景點", "--c-sight"], ["food", "餐廳", "--c-food"],
+    ["onsen", "溫泉", "--c-onsen"], ["shop", "購物", "--c-shop"], ["grocery", "超市", "--c-grocery"], ["hospital", "醫院", "--c-hospital"], ["transport", "交通", "--c-transport"]
   ];
-  var catOn = {}; CATS.forEach(function (c) { catOn[c[0]] = c[0] !== "grocery" && c[0] !== "transport" && c[0] !== "hospital"; });
-  var map = null, markers = [], gpsMarker = null, mapReady = false;
+  var catOn = { stay: true, ski: true, sight: false, food: false, onsen: false, shop: false, grocery: false, hospital: false, transport: false };
+  var AREAS = [
+    ["day", "當天行程", null],
+    ["otaru", "小樽・Kiroro", [[140.93, 43.03], [141.30, 43.26]]],
+    ["furano", "富良野・美瑛・旭川", [[142.28, 43.28], [142.70, 43.80]]],
+    ["sapporo", "札幌", [[141.15, 42.88], [141.50, 43.13]]],
+    ["all", "全區", [[140.90, 42.74], [142.72, 43.84]]]
+  ];
+  var SKI_LABEL = { onze: "Onze", kiroro: "Kiroro", furano_kita: "富良野（北之峰）", teine: "Teine", asari: "朝里川" };
+  var map = null, gpsMarker = null, mapReady = false, KEYS = [], POIS = [];
+  state.area = "day";
+  var isDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#5A687A"; }
 
   function popupHTML(p) {
     var a = '<a href="' + navUrl(p.lat, p.lon) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
     if (p.baseId) a += '<button type="button" data-origin="' + p.baseId + '">從這裡算車程</button>';
     return '<p class="pop-t">' + esc(p.name) + '</p>' + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
   }
-  function allPoints() {
+  function keyPoints() {
     var pts = [];
-    T.bases.forEach(function (b) { pts.push({ type: "stay", name: b.name, lat: b.lat, lon: b.lon, note: md(b.from) + "–" + md(b.to) + " " + b.nights + " 晚。" + b.notes.join("；"), baseId: b.id }); });
-    T.resorts.forEach(function (r) { pts.push({ type: "ski", name: r.name, lat: r.lat, lon: r.lon, note: r.tier + "。" + (r.hours || "") }); });
-    pts.push({ type: "ski", name: "富良野滑雪場 富良野區", lat: 43.3266, lon: 142.3394, note: "富良野纜車（新富良野王子飯店旁）" });
-    return pts.concat(T.places);
+    T.bases.forEach(function (b) { pts.push({ type: "stay", label: b.short.split("・").pop() + " " + b.nights + " 晚", name: b.name, lat: b.lat, lon: b.lon, note: md(b.from) + "–" + md(b.to) + " " + b.nights + " 晚。" + b.notes.join("；"), baseId: b.id }); });
+    T.resorts.forEach(function (r) { pts.push({ type: "ski", label: SKI_LABEL[r.id] || r.name, name: r.name, lat: r.lat, lon: r.lon, note: r.tier + "。" + (r.hours || "") }); });
+    pts.push({ type: "ski", label: "富良野（富良野區）", name: "富良野滑雪場 富良野區", lat: 43.3266, lon: 142.3394, note: "富良野纜車（新富良野王子飯店旁）" });
+    return pts;
   }
+  function fc(list, filterFn) {
+    return { type: "FeatureCollection", features: list.map(function (p, i) { return { p: p, i: i }; }).filter(function (x) { return !filterFn || filterFn(x.p); }).map(function (x) {
+      return { type: "Feature", geometry: { type: "Point", coordinates: [x.p.lon, x.p.lat] }, properties: { i: x.i, type: x.p.type, label: x.p.label || x.p.name.replace(/（.*?）/g, "") } };
+    }) };
+  }
+  function poiData() { return fc(POIS, function (p) { return catOn[p.type]; }); }
+  function keyFilter() { var on = ["stay", "ski"].filter(function (t) { return catOn[t]; }); return ["in", ["get", "type"], ["literal", on]]; }
+
   function initMap() {
-    renderLayers();
+    renderLayers(); renderAreas();
+    KEYS = keyPoints(); POIS = T.places.slice();
     if (!window.maplibregl) { $("#mapfallback").hidden = false; return; }
     try {
       map = new maplibregl.Map({
-        container: "mapcanvas", style: "https://tiles.openfreemap.org/styles/liberty",
+        container: "mapcanvas", style: "https://tiles.openfreemap.org/styles/" + (isDark ? "dark" : "positron"),
         center: [141.75, 43.28], zoom: 7, cooperativeGestures: true, attributionControl: { compact: true }
       });
     } catch (e) { $("#mapfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-    var catColor = {}; CATS.forEach(function (c) { catColor[c[0]] = c; });
-    allPoints().forEach(function (p) {
-      var c = catColor[p.type]; if (!c) return;
-      var elx = document.createElement("div");
-      elx.className = "marker " + p.type;
-      elx.style.setProperty("--mc", "var(" + c[3] + ")");
-      elx.textContent = c[2];
-      elx.title = p.name;
-      var popup = new maplibregl.Popup({ offset: 18, maxWidth: "290px" }).setHTML(popupHTML(p));
-      var m = new maplibregl.Marker({ element: elx }).setLngLat([p.lon, p.lat]).setPopup(popup).addTo(map);
-      elx.hidden = !catOn[p.type];
-      markers.push({ type: p.type, m: m, el: elx, p: p });
-    });
     map.getContainer().addEventListener("click", function (e) {
       var b = e.target.closest("[data-origin]"); if (!b) return;
       state.origin = b.dataset.origin; state.originManual = true; renderOrigin(); renderDrive();
     });
     map.on("load", function () {
+      var C = {}; CATS.forEach(function (c) { C[c[0]] = cssVar(c[2]); });
+      var ink = cssVar("--ink"), paper = cssVar("--paper"), accent = cssVar("--accent");
+      var color = ["match", ["get", "type"]]; CATS.forEach(function (c) { color.push(c[0], C[c[0]]); }); color.push(ink);
+
+      map.addSource("routes", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "route-casing", type: "line", source: "routes", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": paper, "line-width": 9, "line-opacity": 0.95 } });
+      map.addLayer({ id: "route-line", type: "line", source: "routes", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": accent, "line-width": 4.5 } });
+
+      map.addSource("poi", { type: "geojson", data: poiData(), cluster: true, clusterRadius: 44, clusterMaxZoom: 11 });
+      map.addLayer({ id: "poi-cluster", type: "circle", source: "poi", filter: ["has", "point_count"],
+        paint: { "circle-color": ink, "circle-opacity": 0.82, "circle-radius": ["step", ["get", "point_count"], 14, 5, 17, 10, 21], "circle-stroke-width": 2, "circle-stroke-color": paper } });
+      map.addLayer({ id: "poi-count", type: "symbol", source: "poi", filter: ["has", "point_count"],
+        layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["Noto Sans Bold"], "text-size": 12, "text-allow-overlap": true },
+        paint: { "text-color": paper } });
+      map.addLayer({ id: "poi-dot", type: "circle", source: "poi", filter: ["!", ["has", "point_count"]],
+        paint: { "circle-color": color, "circle-radius": 6.5, "circle-stroke-width": 2, "circle-stroke-color": paper } });
+      map.addLayer({ id: "poi-label", type: "symbol", source: "poi", filter: ["!", ["has", "point_count"]], minzoom: 10,
+        layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Regular"], "text-size": 12, "text-max-width": 9,
+          "text-variable-anchor": ["top", "bottom", "left", "right"], "text-radial-offset": 0.9, "text-justify": "auto" },
+        paint: { "text-color": ink, "text-halo-color": paper, "text-halo-width": 1.6 } });
+
+      map.addSource("key", { type: "geojson", data: fc(KEYS) });
+      map.addLayer({ id: "key-dot", type: "circle", source: "key", filter: keyFilter(),
+        paint: { "circle-color": ["match", ["get", "type"], "stay", accent, C.ski], "circle-radius": ["match", ["get", "type"], "stay", 9, 7.5], "circle-stroke-width": 3, "circle-stroke-color": paper } });
+      map.addLayer({ id: "key-label", type: "symbol", source: "key", filter: keyFilter(),
+        layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Bold"], "text-size": ["match", ["get", "type"], "stay", 14, 13],
+          "text-variable-anchor": ["top", "bottom", "left", "right"], "text-radial-offset": 1.1, "text-justify": "auto" },
+        paint: { "text-color": ["match", ["get", "type"], "stay", accent, ink], "text-halo-color": paper, "text-halo-width": 2.2 } });
+
+      function open(list, f) {
+        var p = list[f.properties.i]; if (!p) return;
+        new maplibregl.Popup({ offset: 14, maxWidth: "290px" }).setLngLat([p.lon, p.lat]).setHTML(popupHTML(p)).addTo(map);
+      }
+      ["key-dot", "key-label"].forEach(function (id) { map.on("click", id, function (e) { open(KEYS, e.features[0]); }); });
+      ["poi-dot", "poi-label"].forEach(function (id) { map.on("click", id, function (e) { open(POIS, e.features[0]); }); });
+      map.on("click", "poi-cluster", function (e) {
+        var f = e.features[0];
+        map.getSource("poi").getClusterExpansionZoom(f.properties.cluster_id).then(function (z) {
+          map.easeTo({ center: f.geometry.coordinates, zoom: z + 0.5 });
+        }).catch(function () { map.easeTo({ center: f.geometry.coordinates, zoom: map.getZoom() + 2 }); });
+      });
+      ["key-dot", "key-label", "poi-dot", "poi-label", "poi-cluster"].forEach(function (id) {
+        map.on("mouseenter", id, function () { map.getCanvas().style.cursor = "pointer"; });
+        map.on("mouseleave", id, function () { map.getCanvas().style.cursor = ""; });
+      });
       mapReady = true;
-      fetch("data/routes.geojson").then(function (r) { return r.json(); }).then(function (gj) {
-        map.addSource("routes", { type: "geojson", data: gj });
-        map.addLayer({ id: "route-casing", type: "line", source: "routes", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": 8, "line-opacity": 0.9 }, filter: ["==", ["get", "date"], ""] });
-        map.addLayer({ id: "route-line", type: "line", source: "routes", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#E33B2E", "line-width": 4.5 }, filter: ["==", ["get", "date"], ""] });
-        state.routes = gj;
-        updateRoute(false);
-      }).catch(function () { /* 沒有路線也能用 */ });
+      fetch("data/routes.geojson").then(function (r) { return r.json(); }).then(function (gj) { state.routes = gj; updateRoute(false); })
+        .catch(function () { updateRoute(false); });
     });
   }
   function renderLayers() {
     var box = $("#layers");
     box.innerHTML = CATS.map(function (c) {
-      return '<button type="button" class="chip" aria-pressed="' + catOn[c[0]] + '" data-cat="' + c[0] + '" style="--mc:var(' + c[3] + ')"><i></i>' + c[1] + '</button>';
+      return '<button type="button" class="chip" aria-pressed="' + catOn[c[0]] + '" data-cat="' + c[0] + '" style="--mc:var(' + c[2] + ')"><i></i>' + c[1] + '</button>';
     }).join("");
     box.onclick = function (e) {
       var b = e.target.closest("[data-cat]"); if (!b) return;
       var k = b.dataset.cat; catOn[k] = !catOn[k]; b.setAttribute("aria-pressed", catOn[k]);
-      markers.forEach(function (x) { if (x.type === k) x.el.hidden = !catOn[k]; });
+      if (!map || !mapReady) return;
+      if (k === "stay" || k === "ski") { map.setFilter("key-dot", keyFilter()); map.setFilter("key-label", keyFilter()); }
+      else map.getSource("poi").setData(poiData());
     };
   }
-  function updateRoute(fit) {
-    if (!map || !mapReady || !state.routes) return;
-    var date = T.days[state.day].date;
-    var f = ["==", ["get", "date"], date];
-    map.setFilter("route-casing", f); map.setFilter("route-line", f);
-    var feats = state.routes.features.filter(function (x) { return x.properties.date === date; });
-    var b = baseById[T.days[state.day].base];
+  function renderAreas() {
+    var box = $("#areas");
+    box.innerHTML = AREAS.map(function (a) {
+      return '<button type="button" role="tab" aria-selected="' + (state.area === a[0]) + '" data-area="' + a[0] + '">' + esc(a[1]) + '</button>';
+    }).join("");
+    box.onclick = function (e) {
+      var b = e.target.closest("[data-area]"); if (!b) return;
+      state.area = b.dataset.area; renderAreas(); fitArea(true);
+    };
+  }
+  function fitArea(animate) {
+    if (!map || !mapReady) return;
+    var w = map.getContainer().clientWidth, pad = w < 500 ? 56 : 90;
+    var opt = { padding: { top: pad, bottom: pad * 0.7, left: pad, right: pad }, maxZoom: 12.5, duration: animate ? 800 : 0 };
+    if (state.area !== "day") {
+      var a = AREAS.filter(function (x) { return x[0] === state.area; })[0];
+      map.fitBounds(a[2], opt); return;
+    }
+    var d = T.days[state.day], b = baseById[d.base];
     var bounds = new maplibregl.LngLatBounds([b.lon, b.lat], [b.lon, b.lat]);
+    var feats = state.routes ? state.routes.features.filter(function (x) { return x.properties.date === d.date; }) : [];
     feats.forEach(function (x) { x.geometry.coordinates.forEach(function (c) { bounds.extend(c); }); });
-    if (fit !== false || feats.length) map.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: fit ? 800 : 0 });
+    if (!feats.length) { opt.maxZoom = 11; }
+    map.fitBounds(bounds, opt);
+  }
+  function updateRoute(animate) {
+    if (!map || !mapReady) return;
+    var date = T.days[state.day].date;
+    var feats = state.routes ? state.routes.features.filter(function (x) { return x.properties.date === date; }) : [];
+    map.getSource("routes").setData({ type: "FeatureCollection", features: feats });
+    state.area = "day"; renderAreas();
+    fitArea(animate);
   }
 
   /* ---------- 出發地與車程 ---------- */
@@ -454,7 +525,6 @@
   }
   function rerenderMoney() {
     renderFx(); renderDay(); renderResorts(); renderFood(); renderPrep();
-    markers.forEach(function (x) { var pp = x.m.getPopup(); if (pp) pp.setHTML(popupHTML(x.p)); });
   }
   $("#curbtn").addEventListener("click", function () {
     state.cur = CUR_MODES[(CUR_MODES.indexOf(state.cur) + 1) % CUR_MODES.length];
