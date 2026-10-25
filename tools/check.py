@@ -152,8 +152,22 @@ for d in trip["days"]:
         if not any(f.get("key") and f["key"] in m for f in food) and not re.search(r"自理|便利商店|超市|飯店|民宿|機場|機上|飛機|Villa|簡單|自己煮|路上|途中|雪場|附近|市區|^回", m):
             W(f"{d['date']}：餐點「{m}」在 food.js 沒有對應的店（美食地圖不會標「預計」）")
 
+# 景點收藏（data/spots.js）：狀態合法、正式行程的 stop 真的在 plan.json、座標在北海道、id 不重複
+spots = load_js("data/spots.js", "SPOTS") or []
+sp_seen = set()
+for s in spots:
+    if s["id"] in sp_seen: E(f"spots.js：id {s['id']} 重複")
+    sp_seen.add(s["id"])
+    if s.get("status") not in ("plan", "saved", "check"): E(f"spots.js：{s['name']} 的 status「{s.get('status')}」不是 plan/saved/check")
+    if not (41 < s.get("lat", 0) < 46 and 139 < s.get("lon", 0) < 146): E(f"spots.js：{s['name']} 座標不在北海道")
+    if s.get("status") == "plan":
+        if not s.get("stop") or s["stop"] not in PLAN["places"]: E(f"spots.js：{s['name']} 標成正式行程，但 stop「{s.get('stop')}」不在 plan.json")
+        elif s.get("day") and not any(st["id"] == s["stop"] for st in PLAN["days"].get(s["day"], {}).get("stops", [])): E(f"spots.js：{s['name']} 寫 {s['day']}，但那天的行程沒有 {s['stop']}")
+    elif s.get("stop") and s["stop"] in PLAN["places"] and any(s["stop"] in [st["id"] for st in d["stops"]] for d in PLAN["days"].values()):
+        W(f"spots.js：{s['name']} 其實已經在正式行程裡（{s['stop']}），status 應改成 plan")
+
 print("=== 行程一致性檢查 ===")
-print(f"trip.js {len(days)} 天 · plan.json {len(dayplan)} 天 · scenes.js {len(scenes)} 天 · 完整序幕 {sum(1 for v in scenes.values() if v.get('scenes'))} 天 · food.js {len(food)} 家")
+print(f"trip.js {len(days)} 天 · plan.json {len(dayplan)} 天 · scenes.js {len(scenes)} 天 · 完整序幕 {sum(1 for v in scenes.values() if v.get('scenes'))} 天 · food.js {len(food)} 家 · spots.js {len(spots)} 個景點")
 for e in errors: print("✗", e)
 for w in warns: print("△", w)
 print(f"錯誤 {len(errors)}，警告 {len(warns)}")

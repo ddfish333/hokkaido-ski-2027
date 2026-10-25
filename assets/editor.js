@@ -34,6 +34,14 @@
       state.date = location.hash.replace("#", "") || todayOrFirst();
       if (dates.indexOf(state.date) < 0) state.date = dates[0];
       renderAll();
+      /* 從景點地圖「加入行程」帶過來：?add=<景點 id>，加到目前這一天的最後 */
+      var addId = new URLSearchParams(location.search).get("add"), sp = addId && (window.SPOTS || []).filter(function (x) { return x.id === addId; })[0];
+      if (sp) {
+        var pid = Object.keys(P.plan.places).filter(function (k) { return P.plan.places[k].name === sp.name || (sp.stop && k === sp.stop); })[0] || newPlace(sp.name, sp.lat, sp.lon);
+        day().stops.push({ id: pid, stay: sp.time || 60, note: "從景點收藏加入" + (sp.caution ? "；" + sp.caution.slice(0, 40) : "") });
+        history.replaceState(null, "", location.pathname + location.hash);
+        afterReorder(); renderAll(); msg("已把「" + sp.name + "」加到 " + state.date.slice(5).replace("-", "/") + " 最後一站（停留 " + (sp.time || 60) + " 分）。拖到想去的順序，確認時間後再按「儲存到網站」。");
+      }
     });
   }
   function todayOrFirst() { var t = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); return dates.indexOf(t) >= 0 ? t : dates[0]; }

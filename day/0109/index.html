@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-<link rel="stylesheet" href="../../assets/style.css?v=960ef7af">
+<link rel="stylesheet" href="../../assets/style.css?v=f741140e">
 <script>window.DAY = "2027-01-09"; window.BASE = "../../";</script>
 </head>
 <body class="daypage">
@@ -30,6 +30,7 @@
       <a href="../../#weather">天氣</a>
       <a href="../../#food">吃喝</a>
       <a href="../../food/?day=2027-01-09">美食地圖</a>
+      <a href="../../spots/?day=2027-01-09">景點</a>
       <a href="../../plan/#2027-01-09" class="nav-edit">編輯</a>
     </nav>
     <button type="button" class="curbtn" id="curbtn" aria-label="切換金額顯示">¥＋NT$</button>
@@ -64,6 +65,10 @@
     <div class="wrap" id="dayfood"></div>
   </section>
 
+  <section class="band band-alt" id="dayspots-band">
+    <div class="wrap" id="dayspots"></div>
+  </section>
+
   <section class="band band-alt">
     <div class="wrap"><nav class="daynav" id="daynav" aria-label="前後一天"></nav></div>
   </section>
@@ -80,9 +85,10 @@
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="../../data/trip.js?v=70adea27"></script>
 <script src="../../data/scenes.js?v=b38031d2"></script>
+<script src="../../data/spots.js?v=1a520151"></script>
 <script src="../../data/food.js?v=f61555b9"></script>
 <script src="../../assets/plan.js?v=5437128b"></script>
 <script src="../../assets/film.js?v=d3b7418d"></script>
-<script src="../../assets/app.js?v=f18168d8"></script>
+<script src="../../assets/app.js?v=898c08ad"></script>
 </body>
 </html>

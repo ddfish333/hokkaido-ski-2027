@@ -231,6 +231,7 @@
     html += '</div>';
     $("#dayview").innerHTML = html;
     if (has("dayfood") && !document.querySelector("#dayfood .fp-embed:not([hidden])")) $("#dayfood").innerHTML = foodBlock(d, b);
+    if (has("dayspots") && !document.querySelector("#dayspots .fp-embed:not([hidden])")) $("#dayspots").innerHTML = spotBlock(d, b);
     renderModeSeg();
     var nav = $("#daynav");
     if (nav) {
@@ -700,18 +701,56 @@
     $("#foodstats").innerHTML = '<span class="fs-total"><b>' + FOOD.length + '</b> 家 · ' + rated + ' 家有 Google 評價</span>' +
       order.filter(function (a) { return n[a]; }).map(function (a) { return '<span class="fs-area" style="--mc:' + col[a] + '"><i></i>' + esc(a) + ' <b>' + n[a] + '</b></span>'; }).join("");
   }
+  /* ---------- 景點收藏：清單在 data/spots.js ---------- */
+  var SPOTS = window.SPOTS || [], SPOT_AREAS = window.SPOT_AREAS || {};
+  var SPOT_STATUS = { plan: ["正式行程", "st-gold"], saved: ["收藏", "st-blue"], check: ["待確認", "st-grey"] };
+  function spotBlock(d, b) {
+    if (!SPOTS.length) return "";
+    var wd = new Date(d.date + "T00:00:00").getDay();
+    var todayIds = (window.Plan && Plan.plan ? Plan.schedule(d.date, state.mode).stops : []).map(function (s) { return s.id; });
+    var areas = SPOT_AREAS[d.base] || [];
+    var list = SPOTS.filter(function (s) { return s.status !== "plan" && areas.indexOf(s.area) >= 0; }).map(function (s) {
+      var near = Math.min.apply(null, [haversine(b, s)].concat(todayIds.map(function (id) { var p = Plan.plan.places[id]; return p ? haversine(p, s) : 99; })));
+      return { s: s, near: near };
+    }).filter(function (x) { return x.near < 30; }).sort(function (x, y) { return x.near - y.near; }).slice(0, 8);
+    if (!list.length) return "";
+    var html = '<div class="sec-head"><h2>附近還可以去</h2><p class="sec-note">還沒排進今天、但離今天路線 30 公里內的收藏景點。天氣不好、小孩狀況不對、或提早結束時的備案；點「加入行程」會帶進編輯器。</p></div>' +
+      '<a class="btn btn-ghost fm-link" href="' + BASE + 'spots/?day=' + d.date + '">在景點地圖上看 →</a><ul class="foodpick">';
+    list.forEach(function (x) {
+      var s = x.s, st = SPOT_STATUS[s.status] || SPOT_STATUS.saved, closed = s.closed && s.closed.indexOf(wd) >= 0, g = s.g;
+      var km = x.near * 1.35, min = r5(km / 40 * 60);
+      html += '<li class="fp ' + (s.kids === "best" ? "best" : s.kids === "warn" ? "warn" : "ok") + (closed ? " closed" : "") + '">' +
+        '<div class="fp-top"><b>' + esc(s.name) + '</b><span class="kind">' + esc(s.kind) + '</span><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (closed ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
+        (g && g.rating ? '<div class="fp-rating"><span class="stars"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small></div>' : "") +
+        '<p class="fp-what">' + esc(s.what) + '</p>' + (s.caution ? '<p class="fp-caution">⚠ ' + esc(s.caution) + '</p>' : "") +
+        '<p class="fp-meta">' + esc(s.hours || "") + (s.fee ? ' · ' + esc(s.fee) : "") + (s.time ? ' · 約 ' + s.time + ' 分' : "") + ' · 離今天路線最近約 ' + min + ' 分車程</p>' +
+        '<div class="fp-act">' + (g && g.q ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") +
+        '<a href="' + (g && g.pid ? 'https://www.google.com/maps/place/?q=place_id:' + g.pid : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((s.ja || s.name) + " " + s.area)) + '" target="_blank" rel="noopener">Google Maps →</a>' +
+        '<a class="fp-add" href="' + BASE + 'plan/?add=' + s.id + '#' + d.date + '">加入行程 ＋</a></div><div class="fp-embed" hidden></div></li>';
+    });
+    return html + '</ul>';
+  }
+  function renderSpotStats() {
+    if (!has("spotstats") || !SPOTS.length) return;
+    var n = { plan: 0, saved: 0, check: 0 }; SPOTS.forEach(function (s) { n[s.status]++; });
+    var areas = {}; SPOTS.forEach(function (s) { areas[s.area] = (areas[s.area] || 0) + 1; });
+    $("#spotstats").innerHTML = '<span class="fs-total"><b>' + SPOTS.length + '</b> 個景點 · 正式行程 ' + n.plan + ' · 收藏 ' + n.saved + ' · 待確認 ' + n.check + '</span>' +
+      Object.keys(areas).map(function (a) { return '<span class="fs-area" style="--mc:' + ({ "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" }[a] || "#fff") + '"><i></i>' + esc(a) + ' <b>' + areas[a] + '</b></span>'; }).join("");
+  }
+
   /* 首頁：美食地圖縮圖（不可操作，點整塊進入 food/） */
-  function initFoodTile() {
-    if (!has("foodtilemap") || !window.maplibregl || !FOOD.length) return;
+  function initFoodTile() { initTile("foodtilemap", FOOD); initTile("spottilemap", SPOTS); }
+  function initTile(cid, pts) {
+    if (!has(cid) || !window.maplibregl || !pts.length) return;
     var col = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
     var m;
-    try { m = new maplibregl.Map({ container: "foodtilemap", style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 6.6, interactive: false, attributionControl: false }); } catch (e) { return; }
+    try { m = new maplibregl.Map({ container: cid, style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 6.6, interactive: false, attributionControl: false }); } catch (e) { return; }
     m.on("load", function () {
-      var feats = FOOD.map(function (f) { return { type: "Feature", properties: { c: col[f.area] || "#fff" }, geometry: { type: "Point", coordinates: [f.lon, f.lat] } }; });
+      var feats = pts.map(function (f) { return { type: "Feature", properties: { c: col[f.area] || "#fff" }, geometry: { type: "Point", coordinates: [f.lon, f.lat] } }; });
       m.addSource("ft", { type: "geojson", data: { type: "FeatureCollection", features: feats } });
       m.addLayer({ id: "ft-glow", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 9, "circle-opacity": 0.25, "circle-blur": 0.8 } });
       m.addLayer({ id: "ft-dot", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 4, "circle-stroke-width": 1.5, "circle-stroke-color": "#070B12" } });
-      var bb = new maplibregl.LngLatBounds(); FOOD.forEach(function (f) { bb.extend([f.lon, f.lat]); }); T.bases.forEach(function (b) { bb.extend([b.lon, b.lat]); });
+      var bb = new maplibregl.LngLatBounds(); pts.forEach(function (f) { bb.extend([f.lon, f.lat]); }); T.bases.forEach(function (b) { bb.extend([b.lon, b.lat]); });
       m.fitBounds(bb, { padding: 36, duration: 0 });
     });
   }
@@ -804,7 +843,7 @@
   renderWxTabs();
   renderWxStrip();
   renderClimate();
-  renderFood(); initFoodTile();
+  renderFood(); renderSpotStats(); initFoodTile();
   renderPrep();
   initMap();
   loadWeather();

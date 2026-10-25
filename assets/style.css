@@ -518,4 +518,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .fm-tile .maplibregl-ctrl-bottom-right, .fm-tile .maplibregl-ctrl-bottom-left { display: none; }
 @media (max-width: 760px) { .fm-tile { grid-template-columns: minmax(0, 1fr); } .fm-tile-map { min-height: 200px; } .fm-tile-map::after { background: linear-gradient(180deg, rgba(15,21,32,0) 70%, var(--paper) 100%); } .fm-tile-in { padding: 20px; } }
 .fm-link { margin: 4px 0 14px; display: inline-block; text-decoration: none; }
+.fm-tile + .fm-tile { margin-top: 18px; }
+.fp-caution { margin: 0; font-size: 13px; color: #F0C27B; line-height: 1.65; }
+.fp .badge.st-gold { background: var(--gold); color: #1a1206; }
+.fp .badge.st-blue { background: rgba(106,164,255,.18); color: #9CC6FF; }
+.fp .badge.st-grey { background: rgba(255,255,255,.08); color: var(--muted); }
+.fp-act .fp-add { color: var(--gold); border: 1px solid rgba(232,179,106,.4); border-radius: 999px; padding: 6px 11px; }
 .fp .badge.rec { background: rgba(180,140,255,.18); color: #CDB4FF; }

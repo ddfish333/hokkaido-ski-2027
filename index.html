@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-<link rel="stylesheet" href="assets/style.css?v=960ef7af">
+<link rel="stylesheet" href="assets/style.css?v=f741140e">
 </head>
 <body>
 
@@ -26,6 +26,7 @@
       <a href="#ski">雪場</a>
       <a href="#weather">天氣</a>
       <a href="food/">美食地圖</a>
+      <a href="spots/">景點</a>
       <a href="#prep">準備</a>
       <a href="plan/" class="nav-edit">編輯</a>
     </nav>
@@ -131,6 +132,15 @@
           <div class="fm-tile-stats" id="foodstats"></div>
         </div>
       </a>
+      <a class="fm-tile fm-tile-spots" href="spots/" id="spottile">
+        <div class="fm-tile-map" id="spottilemap" aria-hidden="true"></div>
+        <div class="fm-tile-in">
+          <p class="eyebrow">SPOTS</p>
+          <h3>景點收藏地圖 →</h3>
+          <p class="fm-tile-sub">排進行程的、還沒排的、待確認的，都在同一張地圖上。出發前先認識，到了臨時改行程也找得到附近值得去的地方。</p>
+          <div class="fm-tile-stats" id="spotstats"></div>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -174,8 +184,9 @@
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="data/trip.js?v=70adea27"></script>
 <script src="data/scenes.js?v=b38031d2"></script>
+<script src="data/spots.js?v=1a520151"></script>
 <script src="data/food.js?v=f61555b9"></script>
 <script src="assets/plan.js?v=5437128b"></script>
-<script src="assets/app.js?v=f18168d8"></script>
+<script src="assets/app.js?v=898c08ad"></script>
 </body>
 </html>
