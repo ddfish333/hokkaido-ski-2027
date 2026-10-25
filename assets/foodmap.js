@@ -191,11 +191,27 @@
     li.scrollIntoView({ behavior: "smooth", block: window.innerWidth > 900 ? "center" : "start" });
   }
 
+  /* ---------- 這天怎麼吃（建議／已決定） ---------- */
+  var PICK_SLOT = { breakfast: "早餐", lunch: "午餐", snack: "下午", dinner: "晚餐", late: "大人宵夜" }, PICK_ORDER = ["breakfast", "lunch", "snack", "dinner", "late"];
+  var PICK_STATUS = { proposed: ["建議", "st-blue"], decided: ["已決定", "st-gold"], booked: ["已訂位", "st-ok"] };
+  function byId(id) { return FOOD.filter(function (f) { return f.id === id; })[0]; }
+  function picksHTML(c) {
+    if (!c.d) return "";
+    var picks = (window.FOOD_PICKS || []).filter(function (p) { return p.date === c.d.date; }).sort(function (a, b) { return PICK_ORDER.indexOf(a.slot) - PICK_ORDER.indexOf(b.slot); });
+    if (!picks.length) return "";
+    return '<li class="picks"><p class="picks-h">' + md(c.d.date) + ' 這天怎麼吃 <small>藍色是 Claude 的建議、金色是已決定；點店名跳到卡片。</small></p><ul class="picklist">' + picks.map(function (p) {
+      var f = byId(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
+      var bk = (p.backup || []).map(function (id) { var g = byId(id); return g ? '<button type="button" class="lnk" data-go="' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</button>' : ""; }).filter(Boolean).join("、");
+      return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><button type="button" class="pick-name lnk" data-go="' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</button><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
+        '<p class="pick-why">' + em(p.why) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(p.book) + '</p>' : "") + '</li>';
+    }).join("") + '</ul></li>';
+  }
+
   /* ---------- 全部重畫 ---------- */
   function render(refit) {
     var c = ctx(), list = visible();
     renderTools();
-    $("#fmlist").innerHTML = list.map(function (f) { return card(f, c); }).join("") || '<li class="fm-empty">這個組合沒有店。把類型或「只看適合帶小孩」放寬一點。</li>';
+    $("#fmlist").innerHTML = picksHTML(c) + (list.map(function (f) { return card(f, c); }).join("") || '<li class="fm-empty">這個組合沒有店。把類型或「只看適合帶小孩」放寬一點。</li>');
     var planned = list.filter(function (f) { return isPlanned(f, c); }).length, closed = list.filter(function (f) { return isClosed(f, c); }).length;
     $("#fmcount").textContent = list.length + " 家" + (c.d ? "（" + md(c.d.date) + " " + dow(c.d.date) + "：預計 " + planned + " 家、公休 " + closed + " 家）" : "") + (state.kind !== "全部" ? " · " + state.kind : "");
     if (mapReady) { syncPins(list); if (refit) fitTo(list); }

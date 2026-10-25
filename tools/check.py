@@ -166,6 +166,18 @@ for s in spots:
     elif s.get("stop") and s["stop"] in PLAN["places"] and any(s["stop"] in [st["id"] for st in d["stops"]] for d in PLAN["days"].values()):
         W(f"spots.js：{s['name']} 其實已經在正式行程裡（{s['stop']}），status 應改成 plan")
 
+picks = load_js("data/food.js", "FOOD_PICKS") or []
+food_ids = {f["id"] for f in food}
+for pk in picks:
+    if pk["date"] not in days: E(f"food.js FOOD_PICKS：{pk['date']} 不在行程裡")
+    for i in [pk["pick"]] + pk.get("backup", []):
+        if i not in food_ids: E(f"food.js FOOD_PICKS：{pk['date']} {pk['slot']} 指到不存在的店 {i}")
+    f = next((x for x in food if x["id"] == pk["pick"]), None)
+    if f and f.get("closed") and pk["date"] in days:
+        import datetime as _dt
+        y, m, dd = map(int, pk["date"].split("-")); wd = (_dt.date(y, m, dd).weekday() + 1) % 7
+        if wd in f["closed"]: E(f"food.js FOOD_PICKS：{pk['date']} {pk['slot']} 選的 {f['name']} 那天公休")
+
 print("=== 行程一致性檢查 ===")
 print(f"trip.js {len(days)} 天 · plan.json {len(dayplan)} 天 · scenes.js {len(scenes)} 天 · 完整序幕 {sum(1 for v in scenes.values() if v.get('scenes'))} 天 · food.js {len(food)} 家 · spots.js {len(spots)} 個景點")
 for e in errors: print("✗", e)

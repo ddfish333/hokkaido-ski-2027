@@ -87,3 +87,20 @@ window.FOOD = [
 ];
 /* 每個住宿地，當天會看到哪些區域的店 */
 window.FOOD_AREAS = { villa: ["小樽", "銭函", "Kiroro"], furano: ["富良野", "美瑛・旭川"], sapporo: ["札幌"] };
+
+/* 每一天怎麼吃：Claude 依「8 人帶 4 個幼兒」的條件挑出來的建議，和已經決定的。
+   status：proposed＝Claude 建議（還沒拍板）／decided＝已決定／booked＝已訂位。
+   新的店進來時，會重新比對同一個時段：硬條件（那天有開、坐得下 8 人、不用排很久、走路或有停車）先過，再比特色、評價、來源數、和其他晚上不重複；
+   只有新店在這些條件上贏過現任才會換，而且會在 why 寫清楚換掉誰、為什麼。 */
+window.FOOD_PICKS = [
+  { date: "2027-01-10", slot: "dinner", pick: "naruto", backup: ["toppi", "waraku"], status: "decided", why: "250 席有座敷，8 人帶小孩最穩；とっぴ～有運河旁停車場 120 分免費，想吃壽司就換它。", book: "不用訂，17:00 前到" },
+  { date: "2027-01-16", slot: "dinner", pick: "gardengrill", backup: ["beer"], status: "decided", why: "原本就排ビール園；GARDEN GRILL 是園區裡最安靜、有 10 人包廂的一館，羊豬雞牛都有，開車到、有停車場（飯店沒有）。", book: "0570-098-346 訂 18:00、指定 GARDEN GRILL 個室 8 人（4 幼兒）" },
+  { date: "2027-01-17", slot: "breakfast", pick: "donguri", backup: ["donbe", "ohiso"], status: "proposed", why: "前一晚在狸小路買好，隔天早上在房間吃最省事；想吃海鮮丼早餐就走 10 分到二条市場（週日大磯只到 15:30 沒差）。", book: "不用" },
+  { date: "2027-01-17", slot: "lunch", pick: "toriton", backup: ["matale", "hanamaru_tokeidai"], status: "proposed", why: "親子日如果走圓山（神宮／圓山動物園），トリトン円山店 11:00 開門前到；排隊超過 30 分就改 MATALE。走滝野的話就在園區吃。", book: "開門前 30 分到抽號" },
+  { date: "2027-01-17", slot: "dinner", pick: "kujira", backup: ["soul", "suage"], status: "proposed", why: "在地人的愛店、只有六日開、對家庭友善、小孩吃義大利麵最省事；AOAO 玩完搭市電過去。店小，8 人一定要先問。備案是走路就到的湯咖哩。", book: "打電話問 8 人（4 幼兒）18:00，011-522-6655" },
+  { date: "2027-01-18", slot: "breakfast", pick: "donguri", backup: ["ohiso", "donbe"], status: "proposed", why: "同 1/17。", book: "不用" },
+  { date: "2027-01-18", slot: "lunch", pick: "ippin", backup: ["yoshiyama", "hanamaru_tokeidai"], status: "proposed", why: "Teine 滑完到札幌站採買，日生ビル B1 的いっぴん不用排、小孩吃丼飯快；想吃壽司改時計台前的四季花まる（桌位、不用抽號）。", book: "不用" },
+  { date: "2027-01-18", slot: "snack", pick: "rokkatei", backup: ["kitakaro_cafe"], status: "proposed", why: "札幌站旁的六花亭本店 2F，只有本店有的蘭姆葡萄夾心冰淇淋；桌距寬小孩坐得住。", book: "取號等位" },
+  { date: "2027-01-18", slot: "dinner", pick: "hyosetsu", backup: ["kani"], status: "proposed", why: "最後一晚、走路 8 分回飯店、包廂、帝王蟹一隻五吃——「一定要吃一次帝王蟹」就是這裡。比かに本家貴一倍（約 ¥14,000 vs ¥7,000）；かに本家有兒童會席，預算優先就選它。", book: "現在就訂：011-521-3046，8 人（4 幼兒）包廂、問有沒有兒童餐；評論說要提前 1–2 個月" },
+  { date: "2027-01-16", slot: "late", pick: "shingen", backup: ["keyaki", "araki", "kaishin"], status: "proposed", why: "大人輪流的宵夜／晚餐：信玄、欅開到凌晨，FAV LUX 走 5 分；あら木（天婦羅無菜單）、海森（壽司吧台）要訂位、週日休。", book: "宵夜不用；あら木、海森要訂" }
+];
