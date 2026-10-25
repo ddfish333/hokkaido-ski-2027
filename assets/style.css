@@ -430,6 +430,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .film .rmap-box.light { --a: .55; --blur: 0px; --tint: .08; }
 .film .rmap-box.strong { --a: .95; --blur: 14px; --tint: .42; }
 .film .rmap-box.off { opacity: 0; }
+/* 大螢幕：整頁 backdrop-filter 太重會抖，改成把照片層本身模糊一點；地圖層只留淡色 */
+@media (min-width: 900px) {
+  .film .rmap-box { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .film.rm-mid .scene .ph { filter: blur(2px) brightness(.85); }
+  .film.rm-strong .scene .ph { filter: blur(6px) brightness(.7); }
+  .film .rmap { transform: translateZ(0); }
+}
 .film .rmap { width: 100%; height: 100%; display: block; }
 .film .rm-land { fill: rgba(244,241,234,.045); stroke: rgba(244,241,234,calc(var(--a) * .5)); stroke-linejoin: round; }
 .film .rm-other { fill: none; stroke: rgba(244,241,234,calc(var(--a) * .22)); stroke-linecap: round; stroke-linejoin: round; }
