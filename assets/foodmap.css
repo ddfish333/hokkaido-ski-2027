@@ -86,3 +86,5 @@
 .fm-cam-l { order: -1; font: 500 11px var(--f-body); letter-spacing: .04em; color: #fff; background: rgba(106,164,255,.85); padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
 .fm-pop small.cam { color: var(--glacier); }
 @keyframes camPop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.fp .badge.via { background: rgba(232,179,106,.14); color: var(--gold); }

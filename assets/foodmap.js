@@ -78,7 +78,7 @@
     var min = driveMin(f, c);
     return '<li class="fp ' + fit[1] + (closed ? " closed" : "") + (planned ? " planned" : "") + (state.active === f.id ? " active" : "") + '" id="' + f.id + '" data-fid="' + f.id + '" style="--ac:' + AREA_COLOR[f.area] + '">' +
       '<div class="fp-top"><button type="button" class="fp-name" data-go="' + f.id + '"><i class="dot"></i>' + esc(f.name) + '</button><span class="kind">' + esc(f.kind) + '</span>' +
-      (f.rec ? '<span class="badge rec">推薦 ' + f.rec + '</span>' : "") + (planned ? '<span class="badge gold">' + md(c.d.date) + ' 預計</span>' : "") + (closed ? '<span class="badge red">' + md(c.d.date) + ' 公休</span>' : "") + '</div>' +
+      (f.rec ? '<span class="badge rec">推薦 ' + f.rec + '</span>' : "") + (f.via ? '<span class="badge via">' + esc(f.via) + '</span>' : "") + (planned ? '<span class="badge gold">' + md(c.d.date) + ' 預計</span>' : "") + (closed ? '<span class="badge red">' + md(c.d.date) + ' 公休</span>' : "") + '</div>' +
       '<div class="fp-rating">' + stars + '</div>' +
       '<p class="fp-what">' + em(f.what) + '</p>' +
       '<p class="fp-meta"><span class="area">' + esc(f.area) + '</span> · ' + esc(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (c.b ? ' · 從' + esc(c.b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span>' + (f.approx ? ' · 位置約略' : "") + '</p>' +

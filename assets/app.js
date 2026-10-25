@@ -682,7 +682,7 @@
     var g = f.g, stars = g ? '<span class="stars" aria-label="Google 評價 ' + g.rating + '"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small>' : '<small class="nog">Google 評價待查</small>';
     var mapsUrl = g ? 'https://www.google.com/maps/place/?q=place_id:' + g.pid : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(f.name.replace(/（.*?）/g, "") + " " + (f.area === "Kiroro" ? "キロロ" : f.area));
     return '<li class="fp ' + fit[1] + (closedToday ? " closed" : "") + (planned ? " planned" : "") + '" data-fid="' + f.id + '">' +
-      '<div class="fp-top"><b>' + esc(f.name) + '</b><span class="kind">' + esc(f.kind) + '</span>' + (f.rec ? '<span class="badge rec">推薦 ' + f.rec + '</span>' : "") + (planned ? '<span class="badge gold">今天預計</span>' : "") + (closedToday ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
+      '<div class="fp-top"><b>' + esc(f.name) + '</b><span class="kind">' + esc(f.kind) + '</span>' + (f.rec ? '<span class="badge rec">推薦 ' + f.rec + '</span>' : "") + (f.via ? '<span class="badge via">' + esc(f.via) + '</span>' : "") + (planned ? '<span class="badge gold">今天預計</span>' : "") + (closedToday ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
       '<div class="fp-rating">' + stars + '</div>' +
       '<p class="fp-what">' + em(f.what) + '</p>' +
       '<p class="fp-meta">' + esc(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (b ? ' · 從' + esc(b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span></p>' +
