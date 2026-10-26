@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-<link rel="stylesheet" href="../assets/style.css?v=aa0c43d0">
+<link rel="stylesheet" href="../assets/style.css?v=c1d7b9eb">
 <link rel="stylesheet" href="../assets/foodmap.css?v=1e756420">
 <link rel="stylesheet" href="../assets/skimap.css?v=833a6a20">
 <script>window.BASE = "../";</script>
@@ -20,6 +20,7 @@
 <header class="topbar">
   <div class="wrap topbar-in">
     <a class="brand" href="../" aria-label="回首頁"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">北海道・雪上的大小腳印</span></a>
+    <input type="checkbox" class="nav-tog" id="navtog" aria-label="打開選單"><label class="nav-lab" for="navtog">選單</label>
     <nav class="nav" aria-label="主要區塊">
       <a href="../">首頁</a>
       <a href="./" aria-current="page">滑雪地圖</a>
@@ -56,13 +57,13 @@
     <p class="fm-count" id="skcount" aria-live="polite"></p>
     <div class="resorts" id="sklist"></div>
 
-    <p class="fm-foot">天氣：Open-Meteo 16 天預報，山頂用海拔修正過的模型值，當天請以雪場官網的纜車運行狀況為準；陣風 ≥ 50 km/h 標紅是經驗值，不是官方停駛標準。票價以各官網 2026-27 公告為準，標「2025-26」的是上一季參考價。影片：Onze、BEST DAY EVER 為官網／IG 螢幕錄影（僅供同行家人參考），其餘為 Wikimedia Commons 自由授權素材，出處見 CREDITS。</p>
+    <p class="fm-foot">天氣：Open-Meteo 16 天預報，山頂用海拔修正過的模型值，當天請以雪場官網的纜車運行狀況為準；陣風 ≥ 50 km/h 標紅是經驗值，不是官方停駛標準。票價以各官網 2026-27 公告為準，標「2025-26」的是上一季參考價；台幣是用即時匯率概算、四捨五入到十元。影片：Onze、BEST DAY EVER 為官網／IG 螢幕錄影（僅供同行家人參考），其餘為 Wikimedia Commons 自由授權素材，出處見 CREDITS。</p>
   </section>
 </main>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-<script src="../data/trip.js?v=b6f0b688"></script>
-<script src="../assets/plan.js?v=12940512"></script>
-<script src="../assets/skimap.js?v=a12f64b3"></script>
+<script src="../data/trip.js?v=121f36c3"></script>
+<script src="../assets/plan.js?v=cd375c7f"></script>
+<script src="../assets/skimap.js?v=eba4be63"></script>
 </body>
 </html>

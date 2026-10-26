@@ -46,16 +46,24 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .brand-mark { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 0 0 3px var(--hero); outline: 1.5px solid var(--accent); }
 .brand-name { font-weight: 400; letter-spacing: .18em; font-size: 13px; }
 .nav { display: flex; gap: 2px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
-/* 手機：選單可以左右滑，右邊留一道漸層當提示 */
+/* 手機：連結放不下，改成「選單」按鈕，點開整排都看得到（純 CSS，checkbox 開關） */
+.nav-tog { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.nav-lab { display: none; }
 @media (max-width: 700px) {
-  .topbar-in { position: relative; }
-  .nav { -webkit-overflow-scrolling: touch; padding-right: 28px; mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+  .topbar-in { position: relative; flex-wrap: wrap; }
+  .nav { display: none; order: 10; flex-basis: 100%; flex-wrap: wrap; gap: 4px; margin: 0 0 10px; padding: 0; overflow: visible; }
+  .nav a { padding: 9px 11px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); font-size: 13px; }
+  .nav-tog:checked ~ .nav { display: flex; }
+  .nav-lab { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font: 400 12px/1 var(--f-display); letter-spacing: .14em; color: var(--hero-ink); border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 8px 11px; cursor: pointer; user-select: none; }
+  .nav-lab::before { content: ""; width: 12px; height: 9px; background: linear-gradient(currentColor 0 1.5px, transparent 1.5px 3.75px, currentColor 3.75px 5.25px, transparent 5.25px 7.5px, currentColor 7.5px 9px); opacity: .85; }
+  .nav-tog:checked ~ .nav-lab { background: rgba(255,255,255,.1); }
+  .nav-lab + .curbtn { margin-left: 8px; }
 }
 .nav::-webkit-scrollbar { display: none; }
 .nav a { text-decoration: none; padding: 8px 12px; border-radius: 999px; font-size: 13px; letter-spacing: .08em; color: var(--hero-muted); white-space: nowrap; }
 .nav a:hover { color: var(--hero-ink); background: rgba(255,255,255,.07); }
 .nav .nav-edit { border: 1px solid rgba(255,255,255,.18); }
-@media (max-width: 560px) { .brand-name { display: none; } .nav a { padding: 8px 8px; } }
+@media (max-width: 560px) { .brand-name { display: none; } }
 .curbtn { flex: none; font: 400 11px/1 var(--f-display); letter-spacing: .1em; padding: 8px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: none; color: var(--hero-ink); cursor: pointer; white-space: nowrap; }
 .curbtn:hover { border-color: var(--hero-ink); }
 
@@ -507,7 +515,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .modeseg button { flex: none; padding: 8px 14px; }
 .timeline .tl-leg { padding: 2px 0 2px 20px; font: 400 12.5px/1.6 var(--f-display); letter-spacing: .06em; color: var(--muted); }
 .timeline .tl-leg::before { border-left-style: solid; border-left-color: rgba(244,241,234,.35); }
-.timeline .tl-leg.walk::before, .timeline .tl-leg.shuttle::before { border-left-style: dashed; }
+.timeline .tl-leg.walk::before, .timeline .tl-leg.shuttle::before, .timeline .tl-leg.taxi::before { border-left-style: dashed; }
 .timeline .tl-leg time { display: block; }
 .timeline .tl-leg small { color: var(--muted); font-size: 11px; }
 .timeline time small { display: block; font-size: 11px; color: var(--muted); letter-spacing: .04em; }

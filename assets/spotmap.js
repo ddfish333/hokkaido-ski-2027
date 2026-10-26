@@ -76,10 +76,10 @@
       '<span class="badge st-' + st[1] + '">' + st[0] + (s.day ? ' ' + md(s.day) : "") + '</span>' + (closed ? '<span class="badge red">' + md(c.d.date) + ' 公休</span>' : "") + '</div>' +
       (s.ja && s.ja !== s.name ? '<p class="fp-ja">' + esc(s.ja) + '</p>' : "") +
       '<div class="fp-rating">' + stars + '</div>' +
-      '<p class="fp-what">' + esc(s.what) + '</p>' +
-      (s.caution ? '<p class="fp-caution">⚠ ' + esc(s.caution) + '</p>' : "") +
+      '<p class="fp-what">' + em(s.what) + '</p>' +
+      (s.caution ? '<p class="fp-caution">⚠ ' + em(s.caution) + '</p>' : "") +
       (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(s.photo) + (s.photoAt ? ' <button type="button" class="fp-photoat" data-photo="' + s.id + '">在地圖上看拍攝點</button>' : "") + '</p>' : "") +
-      (s.parking ? '<p class="fp-meta">停車：' + esc(s.parking) + '</p>' : "") +
+      (s.parking ? '<p class="fp-meta">停車：' + em(s.parking) + '</p>' : "") +
       '<p class="fp-meta">' + meta.join(" · ") + '</p>' +
       '<div class="fp-act">' + (g && g.q ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") +
       '<a href="' + mapsUrl + '" target="_blank" rel="noopener">Google Maps →</a>' +
@@ -216,7 +216,7 @@
     var g = s.g;
     popup.setLngLat([s.lon, s.lat]).setHTML('<b>' + esc(s.name) + '</b><span>' + esc(s.kind) + ' · ' + esc(s.area) + (g && g.rating ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
       '<em class="' + (s.status === "plan" ? "gold" : "blue") + '">' + st[0] + (s.day ? " " + md(s.day) : "") + '</em>' +
-      '<small>' + esc(s.what).slice(0, 70) + (s.what.length > 70 ? "…" : "") + '</small>' +
+      '<small>' + esc(s.what.replace(/\*\*/g, "")).slice(0, 70) + (s.what.length > 70 ? "…" : "") + '</small>' +
       (s.photoAt ? '<small class="cam">📷 拍攝點：' + esc(s.photoName) + '（地圖上的相機）</small>' : "") +
       (s.status !== "plan" ? '<a href="' + addUrl(s, c) + '">加入行程 ＋</a>' : "")).addTo(map);
   }

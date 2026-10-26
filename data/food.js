@@ -104,7 +104,7 @@ window.FOOD_AREAS = { villa: ["小樽", "銭函", "Kiroro"], furano: ["富良野
    新的店進來時，會重新比對同一個時段：硬條件（那天有開、坐得下 8 人、不用排很久、走路或有停車）先過，再比特色、評價、來源數、和其他晚上不重複；
    只有新店在這些條件上贏過現任才會換，而且會在 why 寫清楚換掉誰、為什麼。 */
 window.FOOD_PICKS = [
-  { date: "2027-01-08", slot: "dinner", pick: "masazushi", backup: ["toppi", "waraku"], status: "proposed", why: "第一次在小樽吃壽司，選最有名的政寿司本店：個室放得下 8 人、有兒童餐和嬰兒車位、店旁只有 6 個車位，兩台車不一定停得進，滑完雪帶小孩不用找停車。價位高（大人約 ¥5,000–6,000）；想省就改 とっぴ～ 回轉（有停車場、不用訂、¥2,000–3,000）。", book: "0134-64-1101 訂 18:45 個室 8 人（4 幼兒），週三休" },
+  { date: "2027-01-08", slot: "dinner", pick: "masazushi", backup: ["toppi", "waraku"], status: "proposed", why: "第一次在小樽吃壽司，選最有名的政寿司本店：個室放得下 8 人、有兒童餐和嬰兒車位、店旁只有 6 個車位，兩台車不一定停得進，滑完雪帶小孩不用找停車。價位高（大人約 ¥5,000–6,000）；想省就改 とっぴ～ 回轉（有停車場、不用訂、¥2,000–3,000）。", book: "0134-64-1101 訂 {t:masazushi} 個室 8 人（4 幼兒），週三休；不泡湯就提早一小時" },
   { date: "2027-01-10", slot: "dinner", pick: "naruto", backup: ["toppi", "waraku"], status: "decided", why: "小樽半身炸雞的老店，大桌多、小孩愛吃；運河逛完走過去 10 分。", book: "不用訂，17:00 前到" },
   { date: "2027-01-15", slot: "dinner", pick: "furanoya", backup: ["kumagera"], status: "proposed", why: "美瑛玩一整天 18:20 才回到富良野：ふらのや湯咖哩 20:00 前到就好、小孩有不辣的；累了就小木屋自己煮（美瑛選果買的東西）。", book: "不用訂" },
   { date: "2027-01-16", slot: "lunch", pick: "ichigen", backup: ["suage", "hanamaru_tokeidai"], status: "proposed", why: "停好車走 2 分就到，蝦湯拉麵小孩也吃得下，營業到凌晨不怕我們晚到；排隊就改 Suage+（走 3 分）。", book: "不用訂" },

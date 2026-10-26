@@ -10,7 +10,10 @@
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function nf(n) { return Number(n).toLocaleString("en-US"); }
-  function twd(n) { var t = n * T.fx.jpyTwd; return t >= 100 ? Math.round(t / 10) * 10 : Math.round(t); }
+  var RATE = T.fx.jpyTwd;
+  function twd(n) { var t = n * RATE; return t >= 100 ? Math.round(t / 10) * 10 : Math.round(t); }
+  /* 和首頁一樣抓即時匯率，抓不到就用 trip.js 的 */
+  function loadFx() { return fetch("https://open.er-api.com/v6/latest/JPY").then(function (r) { return r.json(); }).then(function (j) { if (j && j.rates && j.rates.TWD) RATE = j.rates.TWD; }).catch(function () { }); }
   /* ¥ 後面補台幣（小字），讓票價一眼看得懂 */
   function money(s) {
     return esc(s).replace(/¥\s?([\d,]+)/g, function (m, a) { var v = parseFloat(a.replace(/,/g, "")); return isNaN(v) ? m : m + '<small class="twd">NT$' + nf(twd(v)) + '</small>'; });
@@ -439,6 +442,7 @@
     initDay();
     var hashRid = (location.hash || "").replace("#", ""); if (resortById[hashRid]) state.focus = hashRid;
     render(true); initMap();
+    loadFx().then(function () { render(false); });
     loadDaily().then(function () { render(false); return loadHourly(focusResort()); }).then(function () { render(false); });
     if (state.focus) setTimeout(function () { var el = document.getElementById(state.focus); if (el) el.scrollIntoView({ block: "start" }); }, 400);
   }

@@ -7,6 +7,7 @@
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function em(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+  function fill(t, date, ctx) { return window.Plan && Plan.fill ? Plan.fill(t, date, ctx) : t; }
   function nf(n) { return Number(n).toLocaleString("zh-Hant-TW"); }
   function r5(x) { return Math.max(5, Math.round(x / 5) * 5); }
   var DOW = ["日", "一", "二", "三", "四", "五", "六"];
@@ -203,7 +204,7 @@
       var f = byId(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
       var bk = (p.backup || []).map(function (id) { var g = byId(id); return g ? '<button type="button" class="lnk" data-go="' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</button>' : ""; }).filter(Boolean).join("、");
       return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><button type="button" class="pick-name lnk" data-go="' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</button><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
-        '<p class="pick-why">' + em(p.why) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(p.book) + '</p>' : "") + '</li>';
+        '<p class="pick-why">' + em(p.why) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date)) + '</p>' : "") + '</li>';
     }).join("") + '</ul></li>';
   }
 
@@ -218,5 +219,6 @@
   }
 
   render(false); initMap();
+  if (window.Plan && Plan.ready) Plan.ready.then(function () { render(false); }).catch(function () { });
   if (state.active) setTimeout(function () { scrollToCard(state.active); }, 300);
 })();

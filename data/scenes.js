@@ -29,7 +29,7 @@ window.SCENES = {
       { t: "下午", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "自己的雪道，滑到纜車收。", s: "教練走了之後，才是真正開始滑的時候。", amb: "quiet", dur: 7000 },
       { stop: "temiya", imgs: ["scene/asari-1.jpg", "scene/otaru-3.jpg"], h: "滑到纜車收，下山泡湯。", s: "小樽的手宮殿，離壽司店四分鐘。小孩這時候跟保姆在山鄉。", amb: "quiet", warm: true, dur: 6500 },
       { stop: "villa", label: "接小孩", imgs: ["scene/villa-5.jpg", "scene/villa-3.jpg"], h: "回山鄉接保姆和小孩。", s: "然後一起去小樽。", amb: "quiet", warm: true, dur: 5500 },
-      { stop: "masazushi", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg"], h: "小樽，壽司。", s: "政寿司的個室，小孩有兒童餐。吃完 20 分鐘就到家。", amb: "snow", warm: true, dur: 7000 },
+      { stop: "masazushi", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg"], h: "小樽，壽司。", s: "政寿司的個室，小孩有兒童餐。吃完，一刻鐘就到家。", amb: "snow", warm: true, dur: 7000 },
       { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "想夜滑的大人走路去 Onze。<br>明天連假，早一點出門。", amb: "fire", warm: true, dur: 8000 }
     ]
   },
@@ -57,7 +57,7 @@ window.SCENES = {
     poster: { img: "poster/0111.jpg", line: "退房往東。旭山動物園的企鵝散步，傍晚到富良野的小木屋。" },
     scenes: [
       { type: "title", eyebrow: "DAY 05 · ASAHIKAWA → FURANO", h: "旭山動物園・富良野", s: "假日拿來移動和看動物。全天開車最久的一天。", imgs: ["scene/zoo-1.jpg", "scene/road-1.jpg", "scene/lodge-1.jpg"], amb: "snow", dur: 5500 },
-      { stop: "zoo", label: "往旭川的路上", imgs: ["scene/road-1.jpg", "scene/road-2.jpg", "scene/coast-3.jpg"], h: "一路往東。", s: "雪原、防風林、很直的路。兩台車跟好。", amb: "drive", dur: 7000 },
+      { stop: "villa", label: "往旭川的路上", imgs: ["scene/road-1.jpg", "scene/road-2.jpg", "scene/coast-3.jpg"], h: "{t} 退房出發，一路往東。", s: "雪原、防風林、很直的路。兩台車跟好。", amb: "drive", dur: 7000 },
       { stop: "zoo", imgs: ["scene/zoo-1.jpg", "scene/zoo-2.jpg", "scene/zoo-3.jpg"], h: "企鵝散步。", s: "往年上午、下午各一場，今年的時間還沒公告。四個小孩大概會看到不想走。", amb: "quiet", dur: 8000 },
       { stop: "lodge", imgs: ["scene/lodge-1.jpg", "scene/lodge-2.jpg", "scene/lodge-3.jpg", "scene/lodge-4.jpg"], h: "傍晚到富良野，小木屋。", s: "接下來五個晚上的家。", amb: "fire", warm: true, dur: 9000 },
       { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "明天開始，富良野。", amb: "fire", warm: true, dur: 7000 }

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "updated": "2026-10-26",
-  "note": "行程的唯一事實來源。stay＝停留分鐘；at＝這個時間開始（早到就等）；by＝最晚要到；via＝drive／walk／shuttle。時間都由前一站離開＋車程推算。",
+  "note": "行程的唯一事實來源。stay＝停留分鐘；at＝這個時間開始（早到就等）；by＝最晚要到；via＝drive／walk／shuttle／taxi（計程車或地鐵，走開車路線但不算開車）。時間都由前一站離開＋車程推算。",
   "places": {
     "cts": {
       "name": "新千歲機場",
@@ -652,12 +652,14 @@
           "id": "beer",
           "at": "18:00",
           "stay": 115,
-          "note": "GARDEN GRILL 館包廂（已決定，要訂）；車不動，搭兩台計程車或地鐵東豐線到東區役所前"
+          "note": "GARDEN GRILL 館包廂（已決定，要訂）；車不動，搭兩台計程車或地鐵東豐線到東區役所前",
+          "via": "taxi"
         },
         {
           "id": "favlux",
           "stay": 0,
-          "note": "回飯店，早點休息"
+          "note": "回飯店，早點休息",
+          "via": "taxi"
         }
       ]
     },

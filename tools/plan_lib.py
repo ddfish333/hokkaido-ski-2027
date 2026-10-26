@@ -17,7 +17,7 @@ DAY_BY_DATE = {d["date"]: d for d in TRIP["days"]}
 def mins(t): h, m = t.split(":"); return int(h) * 60 + int(m)
 def hm(x): return f"{x // 60:02d}:{x % 60:02d}"
 def leg_of(a, b, via):
-    k = f"{a}|{b}" + ("|walk" if via == "walk" else "|shuttle" if via == "shuttle" else "")
+    k = f"{a}|{b}" + ("|walk" if via == "walk" else "|shuttle" if via == "shuttle" else "")  # taxi 用開車那一段
     return LEGS.get(k)
 
 def schedule(date, mode="normal"):

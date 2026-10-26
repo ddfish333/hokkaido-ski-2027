@@ -16,11 +16,16 @@
     var min = via === "walk" ? km / 4 * 60 : via === "shuttle" ? 10 : km / 45 * 60;
     return { km: Math.round(km * 10) / 10, normal: r5(min), snow: r5(via === "walk" ? min * 1.2 : via === "shuttle" ? min : min * 1.3), mode: via || "drive", geom: [[pa.lon, pa.lat], [pb.lon, pb.lat]], est: true };
   }
-  function leg(a, b, via) { return P.legs[legKey(a, b, via)] || estLeg(a, b, via); }
+  /* taxi（計程車／地鐵）：路線和時間用開車那一段，但標成 taxi，不算進「今天開車」 */
+  function leg(a, b, via) {
+    var L = P.legs[legKey(a, b, via)] || estLeg(a, b, via);
+    if (L && via === "taxi") { L = Object.assign({}, L, { mode: "taxi" }); }
+    return L;
+  }
 
   /* 核心：date + mode（normal／snow）→ 時間表 */
   function schedule(date, mode, overrideStops) {
-    var day = P.plan.days[date]; if (!day) return { stops: [], legs: [], total: { km: 0, min: 0 }, end: null };
+    var day = P.plan && P.plan.days[date]; if (!day) return { stops: [], legs: [], total: { km: 0, min: 0 }, end: null };
     var stops = overrideStops || day.stops, out = [], legs = [], t = null, tk = 0, tm = 0;
     for (var i = 0; i < stops.length; i++) {
       var s = stops[i], pl = P.plan.places[s.id] || { name: s.id, lat: 0, lon: 0 }, via = s.via || "drive", L = null, arr;
@@ -29,7 +34,7 @@
         L = leg(stops[i - 1].id, s.id, via);
         var lm = L ? (mode === "snow" ? L.snow : L.normal) : 0;
         legs.push({ frm: stops[i - 1].id, to: s.id, km: L ? L.km : 0, min: lm, normal: L ? L.normal : 0, snow: L ? L.snow : 0, mode: L ? L.mode : via, geom: L ? L.geom : null, est: !!(L && L.est) });
-        if (L && L.mode !== "walk" && L.mode !== "shuttle") { tk += L.km; tm += lm; }
+        if (L && L.mode !== "walk" && L.mode !== "shuttle" && L.mode !== "taxi") { tk += L.km; tm += lm; }
         arr = t + lm;
       }
       var wait = 0, late = 0, at = mins(s.at), by = mins(s.by);
@@ -53,6 +58,7 @@
   var schedCache = {};
   function fill(text, date, ctx) {
     if (!text || String(text).indexOf("{") < 0) return text;
+    if (!P.plan) return text; /* plan.json 還沒載好：先原樣顯示，載好後各頁會重畫 */
     return String(text).replace(TOKEN, function (m, kind, id, nth, md, sun, tpath) {
       var T = window.TRIP || {};
       if (sun) { var d = (T.days || []).filter(function (x) { return x.date === date; })[0]; return d && d.sun ? d.sun[{ rise: 0, set: 1, dark: 2 }[sun]] : m; }

@@ -44,13 +44,13 @@ window.TRIP = {
       summit: null, base: 200 },
     { id: "kiroro", group: "main", name: "Kiroro", ja: "キロロ", tier: "粉雪大雪場", lat: 43.0674, lon: 140.9904,
       season: ["2026-11-28", "2027-05-05"], seasonNote: "旺季 12/12–4/11",
-      hours: "纜車大多 09:00–15:30（2/14 起到 16:00）；Family 吊椅到 16:30、Center Express 到 19:00——25-26 時刻表，26-27 待公告", scale: "23 條雪道、9 條纜車（含 2 條纜車廂）；山頂 1,180 m",
+      hours: "吊椅大多 09:00–15:30（2/14 起到 16:00）；山腳的 Gateway Express 纜車 08:30–16:00、Family 吊椅到 16:30、Center Express 到 19:00；結束時間依日落調整——25-26 官網時刻表，26-27 待公告", scale: "23 條雪道、9 條纜車（含 2 條纜車廂）；山頂 1,180 m",
       tickets: [["1 日券", "¥9,200"], ["4 小時券", "¥7,800"], ["2 日券（可不連續）", "¥18,400"], ["3 日券（可不連續）", "¥27,600"], ["夜滑", "¥3,000"], ["6–12 歲 1 日", "¥5,500"]],
       kids: "5 歲以下免費（需大人陪同，KIROCA 卡押金 ¥500）",
       lessons: "Kids Academy Pink 班 3–4 歲：半天 ¥8,000（本次小孩不上課）",
       gear: "Mountain Shop Vainqueur：賣雪板、雪靴、固定器，打蠟 ¥3,500；雪具寄放櫃 2 天 ¥1,500，之後每天 +¥500",
       tips: ["官方 Webstore 預購最多 95 折", "停車免費約 2,000 台", "山上陣風常超過 50 km/h，纜車可能停駛"],
-      links: [["官網", "https://www.kiroro.co.jp/"], ["票價", "https://www.kiroro.co.jp/lift_price/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31609/"]],
+      links: [["官網", "https://www.kiroro.co.jp/"], ["營業時間", "https://www.kiroro.co.jp/ja/operating_hours/"], ["票價", "https://www.kiroro.co.jp/lift_price/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31609/"]],
       status: "https://www.kiroro.co.jp/dashboard/", cams: "https://www.kiroro.co.jp/livecamera", trailmap: "https://www.kiroro.co.jp/guide_map/", webshop: "https://webstore.kiroro.co.jp/en/", access: "https://www.kiroro.co.jp/access-winter/",
       stops: ["kiroro"], video: "kiroro-hover.mp4", videoSm: "kiroro-hover-sm.mp4", img: "kiroro.jpg", top: [43.0790, 140.9670],
       gates: [
@@ -237,7 +237,7 @@ window.TRIP = {
     { date: "2027-01-17", base: "sapporo", title: "羊之丘・白色戀人", sub: "週日：早上玩雪、中午壽司、下午巧克力工廠，晚餐義大利菜，早點睡", sun: ["07:02", "16:26", "16:58"],
       meals: ["トリトン 円山店（回轉壽司）", "Trattoria KUJIRA（義大利菜）"], alert: "天氣太差就改室內：AOAO 水族館（走路到）＋ 青少年科學館；羊之丘雪上樂園 {close:hitsujigaoka} 關" },
     { date: "2027-01-18", base: "sapporo", title: "札幌散步・螃蟹", sub: "平日：車不開，走路逛札幌、吃豚丼、下午茶、最後採購；晚上螃蟹會席，早點睡", sun: ["07:02", "16:27", "16:59"],
-      meals: ["十勝豚丼 いっぴん", "氷雪の門（螃蟹會席）"], alert: "隔天一早搭機，雪具今晚要弄乾打包。想滑雪的大人：這天不是正式行程，但可以自己開一台車去 Teine 滑半天——那是選項不是行程，其他人照走路的安排（「滑雪地圖」有札幌近郊 5 座的比較），其他人照上面走" },
+      meals: ["十勝豚丼 いっぴん", "氷雪の門（螃蟹會席）"], alert: "隔天一早搭機，雪具今晚要弄乾打包。想滑雪的大人：這天不是正式行程，但可以自己開一台車去 Teine 滑半天——那是選項不是行程（「滑雪地圖」有札幌近郊 5 座的比較），其他人照走路的安排" },
     { date: "2027-01-19", base: "sapporo", title: "回台灣", sub: "{t:favlux} 出發，{T:rental.returnBy} 前還車", sun: ["07:01", "16:28", "17:00"],
       meals: ["便利商店", "機上"], alert: "退稅商品不要拆、不要吃，收據集中" }
   ],
@@ -265,7 +265,7 @@ window.TRIP = {
     hours: "冬季 09:00–18:00（1 月可能 17:30 就關，出發前打電話確認）", returnBy: "10:00",
     pickup: ["入境、領完行李後，出境大廳出來右手邊（經過便利商店）到一樓", "出口右手邊【98 許可車專用】站牌", "人到站牌後再打電話或 LINE 聯絡，接駁車約 15 分鐘到（只能停 10 分鐘）", "到店出示：台灣駕照正本＋日文譯本＋護照（每位駕駛）"],
     ret: ["契約時間內歸還；暴風雪延誤要先通知", "加滿油並附加油收據（未加滿收 ¥5,000–12,000）", "冬季沒有安心險：事故要報警，NOC 自付 ¥3–10 萬"],
-    contact: [["電話", "0123-22-4040"], ["LINE ID", "@jhs4331b"], ["WhatsApp", "+81 90-1521-4040（出發前用訂車確認信核對）"]]
+    contact: [["電話", "0123-22-4040"], ["LINE ID", "@jhs4331b"], ["WhatsApp", "+81 80-8299-4040（官網營業所頁 2026-10-26 核對）"]]
   },
 
   emergency: [

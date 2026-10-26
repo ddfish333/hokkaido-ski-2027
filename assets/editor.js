@@ -89,8 +89,8 @@
       var raw = stops[i], last = i === sch.stops.length - 1, html = "";
       if (i > 0) {
         var l = sch.legs[i - 1];
-        html += '<li class="leg"><span class="legline"></span><span class="legtxt">' + (l.mode === "walk" ? "步行" : l.mode === "shuttle" ? "接駁" : "開車") + ' ' + fmtMin(l.min) + ' · ' + l.km + ' km' + (l.est ? ' <em>直線估算，儲存前會查路網</em>' : "") + '</span>' +
-          '<select class="via" data-i="' + i + '" aria-label="到達方式"><option value="drive"' + (s.via === "drive" ? " selected" : "") + '>開車</option><option value="walk"' + (s.via === "walk" ? " selected" : "") + '>步行</option><option value="shuttle"' + (s.via === "shuttle" ? " selected" : "") + '>接駁</option></select></li>';
+        html += '<li class="leg"><span class="legline"></span><span class="legtxt">' + (l.mode === "walk" ? "步行" : l.mode === "shuttle" ? "接駁" : l.mode === "taxi" ? "計程車／地鐵" : "開車") + ' ' + fmtMin(l.min) + ' · ' + l.km + ' km' + (l.est ? ' <em>直線估算，儲存前會查路網</em>' : "") + '</span>' +
+          '<select class="via" data-i="' + i + '" aria-label="到達方式"><option value="drive"' + (s.via === "drive" ? " selected" : "") + '>開車</option><option value="walk"' + (s.via === "walk" ? " selected" : "") + '>步行</option><option value="shuttle"' + (s.via === "shuttle" ? " selected" : "") + '>接駁</option><option value="taxi"' + (s.via === "taxi" ? " selected" : "") + '>計程車／地鐵</option></select></li>';
       }
       html += '<li class="stopcard' + (s.late ? " is-late" : "") + '" data-i="' + i + '">' +
         '<button type="button" class="handle" aria-label="拖拉改順序" data-i="' + i + '">⋮⋮</button>' +
