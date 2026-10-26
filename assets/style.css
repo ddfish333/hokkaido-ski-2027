@@ -86,6 +86,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hero-title .ht-c { margin-top: 6px; font-size: clamp(17px, 2.4vw, 26px); letter-spacing: .3em; color: var(--hero-ink); opacity: .85; }
 .hero-date { margin: 4px 0 0; font: 400 clamp(12px, 1.3vw, 14px)/1 var(--f-display); letter-spacing: .32em; color: var(--hero-muted); }
 .hero-sub { margin: 0; font-size: clamp(12.5px, 1.3vw, 14px); color: var(--hero-muted); letter-spacing: .06em; }
+.hero-flight { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font: 400 12.5px/1.5 var(--f-mono); color: var(--hero-muted); letter-spacing: .02em; }
+.hero-flight b { font-weight: 500; color: var(--hero-ink); margin-right: 4px; }
+.hero-flight a { color: var(--accent); text-decoration: none; }
+.hero-flight a:hover { text-decoration: underline; }
 .hero-row { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; margin-top: 8px; }
 .hero-count { display: flex; align-items: baseline; gap: 12px; }
 .hero-count .big { font: 300 clamp(48px, 8vw, 84px)/1 var(--f-display); color: var(--hero-ink); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
@@ -557,9 +561,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .sc-top .stay { margin-left: 0; }
 .timeline .tl-note { color: var(--muted); font-size: 13px; }
 .timeline li.is-late time { color: var(--accent); }
-.late, .wait { display: inline-block; font: 400 11px/1 var(--f-display); letter-spacing: .08em; padding: 4px 7px; border-radius: 999px; margin-left: 8px; vertical-align: 1px; }
+.late, .wait, .fixed { display: inline-block; font: 400 11px/1 var(--f-display); letter-spacing: .08em; padding: 4px 7px; border-radius: 999px; margin-left: 8px; vertical-align: 1px; }
 .late { background: rgba(255,90,76,.16); color: var(--accent); }
 .wait { background: rgba(106,164,255,.14); color: var(--glacier); }
+.fixed { background: rgba(232,179,106,.14); color: var(--gold, #E8B36A); }
 .stop.late time { color: var(--accent); }
 
 /* 序幕：全畫面霧玻璃路線圖（canvas，見 film.js）
@@ -716,7 +721,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .m-edit { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); color: var(--hero-ink); text-decoration: none; font: 400 12.5px/1 var(--f-body); letter-spacing: .1em; }
   .m-edit svg { width: 15px; height: 15px; }
   .m-edit + .curbtn { margin-left: 8px; }
-  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); padding: 6px max(6px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-right)); background: rgba(9,13,21,.97); border-top: 1px solid rgba(255,255,255,.08); }
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 6px max(6px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-right)); background: rgba(9,13,21,.97); border-top: 1px solid rgba(255,255,255,.08); }
   .tabbar a { position: relative; display: grid; justify-items: center; gap: 3px; padding: 5px 0 3px; color: var(--hero-muted); text-decoration: none; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
   .tabbar a svg { width: 24px; height: 24px; }
   .tabbar a[aria-current="page"] { color: var(--hero-ink); }

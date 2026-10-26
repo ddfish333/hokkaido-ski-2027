@@ -16,9 +16,13 @@ DAY_BY_DATE = {d["date"]: d for d in TRIP["days"]}
 
 def mins(t): h, m = t.split(":"); return int(h) * 60 + int(m)
 def hm(x): return f"{x // 60:02d}:{x % 60:02d}"
+def r5(x): return max(5, int(round(x / 5)) * 5)
+def taxi_min(m): return max(15, r5(m * 1.5))  # 和 plan.js taxiMin 同：叫車／等車，×1.5、最少 15 分
 def leg_of(a, b, via):
     k = f"{a}|{b}" + ("|walk" if via == "walk" else "|shuttle" if via == "shuttle" else "")  # taxi 用開車那一段
-    return LEGS.get(k)
+    L = LEGS.get(k)
+    if L and via == "taxi": L = dict(L, mode="taxi", normal=taxi_min(L["normal"]), snow=taxi_min(L["snow"]))
+    return L
 
 def schedule(date, mode="normal"):
     """前一站離開＋移動＝抵達；at 早到就等、晚到算遲；by 超過算遲。沒有路段快取的當 0 分（check.py 會另外警告）。"""
@@ -61,6 +65,12 @@ def fill(text, date, ctx_id=None, mode="normal", strict=False):
                 if hits: t = hits[0]["time"]
             return PT["noNanny"] if (t and N.get("bus") and t >= N["bus"]) else PT["withNanny"]
         if lg_a:
+            if not lg_via and date in PLAN["days"]:  # 和 plan.js routeMin 同：那天 a→b 中間有別的站就把沿途路段加總
+                sch = schedule(date, mode); ia = ib = -1
+                for i, x in enumerate(sch):
+                    if x["id"] == lg_a and ia < 0: ia = i
+                    elif x["id"] == lg_b and ia >= 0 and ib < 0: ib = i
+                if ia >= 0 and ib > ia + 1: return str(sum(sch[i]["arr"] - sch[i]["wait"] - sch[i - 1]["dep"] for i in range(ia + 1, ib + 1)))  # 只算開車，不含中途停留
             L = leg_of(lg_a, lg_b, lg_via or "drive")
             if L: return str(L[mode])
             if strict: raise TokenError(f"{m.group(0)}：legs.json 沒有 {lg_a}→{lg_b} 這段路（在編輯器儲存一次會補）")
@@ -95,6 +105,7 @@ def fill(text, date, ctx_id=None, mode="normal", strict=False):
             if strict: raise TokenError(f"{m.group(0)}：plan.json 沒有 {dd}")
             return m.group(0)
         sid = id_ or ctx_id
+        if not id_ and sid and "#" in sid: sid, nth = sid.split("#")  # 序幕的 stop: "canal#2"
         hits = [s for s in schedule(dd, mode) if s["id"] == sid]
         k = int(nth) - 1 if nth else 0
         if k >= len(hits):

@@ -14,8 +14,11 @@
   var plan = (window.Plan && Plan.plan) ? Plan.schedule(date, Plan.mode()) : { stops: [] };
   /* 同一站一天來兩次（例如早上出發、晚上回住宿）：照序幕順序往後找，不會兩幕都拿到早上的時間 */
   var cursor = 0;
+  /* 一天去同一站兩次（1/10 運河：停車、傍晚看煤氣燈）：scenes.js 可以寫 stop: "canal#2" 指定第幾次 */
   function stopOf(id, advance) {
-    var hit = plan.stops.filter(function (x, i) { return x.id === id && i >= cursor; })[0] || plan.stops.filter(function (x) { return x.id === id; })[0];
+    var nth = /#(\d)$/.exec(id); if (nth) { id = id.slice(0, -nth[0].length); nth = +nth[1]; }
+    var hit = nth ? plan.stops.filter(function (x) { return x.id === id; })[nth - 1]
+      : plan.stops.filter(function (x, i) { return x.id === id && i >= cursor; })[0] || plan.stops.filter(function (x) { return x.id === id; })[0];
     if (hit && advance) cursor = hit.i;
     return hit;
   }
@@ -175,7 +178,8 @@
       var near = stops.some(function (st) { return Math.abs(st.lat - p.lat) < 0.004 && Math.abs(st.lon - p.lon) < 0.005; });
       if (!near) label(p.name.replace(/（.*?）/g, ""), p.lon, p.lat, "poi");
     });
-    stops.forEach(function (st, i) { if (i && markers[i] === markers[i - 1]) return; label(st.name.replace(/（.*?）/g, ""), st.lon, st.lat, "stop"); });
+    var named = {};
+    stops.forEach(function (st, i) { if (i && markers[i] === markers[i - 1]) return; var nm = st.name.replace(/（.*?）/g, ""); if (named[nm]) return; named[nm] = 1; label(nm, st.lon, st.lat, "stop"); });
     var box = el("div", "rmap-box " + RM.level);
     RM.glowEl = el("div", "rm-glowdot", "<i></i>"); box.appendChild(RM.glowEl);   /* 光暈在地圖下面，光點本身畫在地圖上 */
     RM.cv = el("canvas", "rmap"); box.appendChild(RM.cv); RM.ctx = RM.cv.getContext("2d");
@@ -225,7 +229,9 @@
     if (RM.other) { cx.strokeStyle = "rgba(244,241,234," + (a * .22) + ")"; cx.lineWidth = 1.2 * RF * px; cx.stroke(RM.other); }
     cx.strokeStyle = "rgba(5,8,15," + (a * .55) + ")"; cx.lineWidth = 6 * RF * px; cx.stroke(RM.route);
     cx.strokeStyle = "rgba(244,241,234," + (a * .85) + ")"; cx.lineWidth = 2.4 * RF * px; cx.stroke(RM.route);
-    if (RM.pos > 0) { cx.setLineDash([RM.pos, RM.total * 2 + 1]); cx.strokeStyle = "#FF5A4C"; cx.globalAlpha = Math.min(1, a + .15); cx.lineWidth = 3.2 * RF * px; cx.stroke(RM.route); cx.setLineDash([]); cx.globalAlpha = 1; }
+    /* 走過的路段：直接組一條「起點到目前位置」的路徑來畫。以前用 setLineDash 切，但路徑單位是經緯度（很小的數），
+       iPhone Safari 會把太小的虛線值當成 0 → 整條路線一開場就全紅；用實際路徑就沒有這個問題 */
+    if (RM.pos > 0) { cx.strokeStyle = "#FF5A4C"; cx.globalAlpha = Math.min(1, a + .15); cx.lineWidth = 3.2 * RF * px; cx.lineCap = "round"; cx.stroke(donePath(RM.pos)); cx.globalAlpha = 1; }
     /* 螢幕座標：站點、光點、地名 */
     cx.setTransform(D, 0, 0, D, 0, 0);
     cx.fillStyle = "rgba(244,241,234," + (a * .95) + ")"; cx.strokeStyle = "rgba(5,8,15,.6)"; cx.lineWidth = 1.2 * RF;
@@ -233,12 +239,31 @@
     var d = pointAt(RM.pos), dx = sx(d), dy = sy(d);
     cx.fillStyle = "#FF5A4C"; cx.strokeStyle = "rgba(255,255,255,.9)"; cx.lineWidth = 1.5 * RF; cx.beginPath(); cx.arc(dx, dy, 4.5 * RF, 0, 6.2832); cx.fill(); cx.stroke();
     var zoomIn = c.w < (PHONE ? 0.36 : 0.5), sp = sprites(), W = RM.bw, H = RM.bh;
-    RM.labels.forEach(function (L, k) {
-      if (L.cls === "poi" && !zoomIn) return;
+    /* 地名互相不疊：站點 > 城鎮 > 其他地點 的順序畫，和已經畫上的字框重疊就不畫（手機上 FAV LUX 附近一堆地名擠在一起） */
+    var drawn = [], anchors = [], order = { stop: 0, t0: 1, town: 2, t2: 3, poi: 4 };
+    RM.labels.map(function (L, k) { return k; }).sort(function (x, y) { return (order[RM.labels[x].cls] || 5) - (order[RM.labels[y].cls] || 5); }).forEach(function (k) {
+      var L = RM.labels[k]; if (L.cls === "poi" && !zoomIn) return;
       var lx = sx(L.q), ly = sy(L.q), S = sp[k]; if (lx < -S.w - 20 || lx > W + 20 || ly < -40 || ly > H + 40) return;
-      cx.drawImage(S.c, Math.round((lx - S.ox) * D) / D, Math.round((ly - S.oy) * D) / D, S.w, S.h);
+      var bx0 = lx - S.ox, by0 = ly - S.oy, bx = bx0, by = by0;
+      function hits(x, y) { return drawn.some(function (b) { return x < b[0] + b[2] && x + S.w > b[0] && y < b[1] + b[3] && y + S.h > b[1]; }); }
+      if (hits(bx, by)) {
+        /* 兩個站點的點本身就擠在一起（28 px 內）時只留第一個名字，拉近之後點分開了才會各自標；點分開但字框疊到的才挪位置 */
+        if (L.cls !== "stop" || anchors.some(function (a) { return Math.hypot(a[0] - lx, a[1] - ly) < 28 * RF; })) return;
+        /* 站點一定要有名字：往下、往上、往右、往左找一個不疊的位置，都沒有就照原位畫 */
+        var tries = [[0, S.h * .9], [0, -S.h * .9], [S.w * .55, 0], [-S.w * .55, 0], [S.w * .55, S.h * .9], [-S.w * .55, -S.h * .9]];
+        for (var t = 0; t < tries.length; t++) { if (!hits(bx0 + tries[t][0], by0 + tries[t][1])) { bx = bx0 + tries[t][0]; by = by0 + tries[t][1]; break; } }
+      }
+      drawn.push([bx, by, S.w, S.h]); if (L.cls === "stop") anchors.push([lx, ly]);
+      cx.drawImage(S.c, Math.round(bx * D) / D, Math.round(by * D) / D, S.w, S.h);
     });
     var gt = "translate3d(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px,0)"; if (gt !== RM.glowT) { RM.glowT = gt; RM.glowEl.style.transform = gt; }
+  }
+  function donePath(dist) {
+    var pts = RM.pts, cum = RM.cum, p = new Path2D(); if (!pts.length) return p;
+    dist = Math.max(0, Math.min(RM.total, dist)); p.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < cum.length && cum[i] <= dist; i++) p.lineTo(pts[i][0], pts[i][1]);
+    var q = pointAt(dist); if (q) p.lineTo(q[0], q[1]);
+    return p;
   }
   function pointAt(dist) {
     var pts = RM.pts, cum = RM.cum; if (!pts.length) return null;
@@ -279,7 +304,11 @@
   var sceneStop = [], lastIdx = 0;
   scenes.forEach(function (sc) {
     var idx = null;
-    if (sc.stop && sched) { for (var k = lastIdx; k < sched.stops.length; k++) if (sched.stops[k].id === sc.stop) { idx = k; break; } if (idx == null) idx = lastIdx; lastIdx = idx; }
+    if (sc.stop && sched) {
+      var nth = /#(\d)$/.exec(sc.stop), sid = nth ? sc.stop.slice(0, -nth[0].length) : sc.stop, seen = 0;
+      for (var k = nth ? 0 : lastIdx; k < sched.stops.length; k++) if (sched.stops[k].id === sid && (!nth || ++seen === +nth[1])) { idx = k; break; }
+      if (idx == null) idx = lastIdx; lastIdx = idx;
+    }
     sceneStop.push(idx);
   });
   function nextStopAfter(i) { for (var k = i + 1; k < sceneStop.length; k++) if (sceneStop[k] != null) return sceneStop[k]; return null; }

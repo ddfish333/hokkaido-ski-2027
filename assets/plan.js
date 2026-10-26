@@ -16,12 +16,48 @@
     var min = via === "walk" ? km / 4 * 60 : via === "shuttle" ? 10 : km / 45 * 60;
     return { km: Math.round(km * 10) / 10, normal: r5(min), snow: r5(via === "walk" ? min * 1.2 : via === "shuttle" ? min : min * 1.3), mode: via || "drive", geom: [[pa.lon, pa.lat], [pb.lon, pb.lat]], est: true };
   }
-  /* taxi（計程車／地鐵）：路線和時間用開車那一段，但標成 taxi，不算進「今天開車」 */
+  /* taxi（計程車／地鐵）：路線用開車那一段，時間加上叫車／等車（×1.5、最少 15 分），標成 taxi，不算進「今天開車」 */
+  function taxiMin(m) { return Math.max(15, r5(m * 1.5)); }
   function leg(a, b, via) {
     var L = P.legs[legKey(a, b, via)] || estLeg(a, b, via);
-    if (L && via === "taxi") { L = Object.assign({}, L, { mode: "taxi" }); }
+    if (L && via === "taxi") { L = Object.assign({}, L, { mode: "taxi", normal: taxiMin(L.normal), snow: taxiMin(L.snow) }); }
     return L;
   }
+  /* 座標 → plan.json 的站點 id（150 m 內），住宿／餐廳／景點和站點對得起來就能用 legs.json 的真實路段 */
+  function placeNear(pt) {
+    if (!P.plan || !pt) return null; if (pt.id && P.plan.places[pt.id]) return pt.id;
+    var best = null, bd = 0.15; for (var k in P.plan.places) { var d = hav(P.plan.places[k], pt); if (d < bd) { bd = d; best = k; } } return best;
+  }
+  /* ---------- 共用：從住宿到某個地點要多久。美食頁、景點頁、首頁車程表、單日頁都用這一份，各頁數字才會一樣 ----------
+     順序：1) 住宿→雪場用 trip.js 的 drive 表（雪場頁同一張表） 2) 兩端都對得到站點就用 legs.json 的真實路段 3) 直線估算（和 estLeg 同一個算法）
+     札幌（車停三晚不動）：2.5 km 內走路，再遠就計程車／地鐵。回傳 { km, min, mode, label } */
+  P.travelMin = function (base, to, opts) {
+    opts = opts || {}; if (!base || !to) return null;
+    var T0 = window.TRIP, snow = (opts.mode || P.mode()) === "snow", km = hav(base, to);
+    /* 札幌：車進城就停著不動，所以預設走路／計程車；但那天的時間表如果有從飯店開車出去的路段（1/17 羊之丘、1/19 還車），就照開車算 */
+    var carFree = base.id === "sapporo", out = null;
+    if (carFree && opts.date && P.plan && P.plan.days[opts.date]) {
+      var sd = schedule(opts.date, "normal"), bid = placeNear(base);
+      if (sd.legs.some(function (l) { return l.frm === bid && l.mode === "drive"; })) carFree = false;
+    }
+    var rs = T0 && (T0.resorts || []).filter(function (r) { return hav(r, to) < 0.3; })[0], d = rs && T0.drive && T0.drive[base.id] && T0.drive[base.id][rs.id];
+    if (d) out = { km: d[0], min: snow ? d[2] : d[1], mode: "drive" };
+    else {
+      var via = carFree && km * 1.3 < 2.5 ? "walk" : "drive", a = placeNear(base), b = placeNear(to), L = null;
+      if (a && b && a !== b) L = (P.legs && P.legs[legKey(a, b, via)]) || estLeg(a, b, via);
+      if (!L) { var k = km * (via === "walk" ? 1.3 : 1.35), m = via === "walk" ? k / 4 * 60 : k / 45 * 60; L = { km: Math.round(k * 10) / 10, normal: r5(m), snow: r5(via === "walk" ? m * 1.2 : m * 1.3), mode: via }; }
+      out = { km: L.km, min: snow ? L.snow : L.normal, mode: L.mode };
+    }
+    if (carFree && out.mode === "drive") out = { km: out.km, min: taxiMin(out.min), mode: "taxi" };
+    out.label = (out.mode === "walk" ? "走路約 " : out.mode === "taxi" ? "計程車約 " : "開車約 ") + out.min + " 分";
+    return out;
+  };
+  /* 航班（trip.js flight 唯一來源）：某一天有沒有飛機 → 一行字，首頁、機場站、準備頁共用 */
+  P.flightOn = function (date) {
+    var F = window.TRIP && TRIP.flight; if (!F) return null;
+    var f = F.out.date === date ? F.out : F.back.date === date ? F.back : null; if (!f) return null;
+    return { no: f.no, line: f.no + " " + f.from + " " + f.dep + " → " + f.to + " " + f.arr, dir: f === F.out ? "去程" : "回程", f: f };
+  };
 
   /* 核心：date + mode（normal／snow）→ 時間表 */
   function schedule(date, mode, overrideStops) {
@@ -41,7 +77,7 @@
       if (i > 0 && at != null) { if (arr < at) { wait = at - arr; arr = at; } else if (arr > at) late = arr - at; }
       if (by != null && arr > by) late = Math.max(late, arr - by);
       var stay = i === stops.length - 1 ? 0 : (+s.stay || 0), dep = arr + stay;
-      out.push({ i: i, id: s.id, name: pl.name, ja: pl.ja || "", lat: pl.lat, lon: pl.lon, arr: arr, dep: dep, stay: stay, wait: wait, late: late, at: s.at || "", by: s.by || "", via: via, note: s.note || "", alts: s.alts || null, altNotes: s.altNotes || null, time: hm(arr), timeDep: hm(dep) });
+      out.push({ i: i, id: s.id, name: pl.name, ja: pl.ja || "", lat: pl.lat, lon: pl.lon, arr: arr, dep: dep, stay: stay, wait: wait, late: late, at: s.at || "", atLabel: s.atLabel || "", by: s.by || "", via: via, note: s.note || "", alts: s.alts || null, altNotes: s.altNotes || null, time: hm(arr), timeDep: hm(dep) });
       t = dep;
     }
     return { stops: out, legs: legs, total: { km: Math.round(tk), min: tm }, end: out.length ? out[out.length - 1].arr : null };
@@ -54,6 +90,16 @@
        {t}        這一幕／這一站自己的抵達時間（ctx）
        {open:zoo} {close:zoo}  plan.json places 的開門／關門    {at:beer} {by:rental}  站點的固定時間
        {sun:rise|set|dark}  trip.js 當天的日出／日落／天黑    {T:rental.hours}  trip.js 任一欄位 */
+  /* {leg:a|b}：先看那天的時間表，a 到 b 中間有沒有別的站（例如 1/11 山鄉→砂川 SA→動物園）；有就把沿途路段加起來，沒有才拿單一路段 */
+  function routeMin(date, a, b, via) {
+    var snow = P.mode() === "snow";
+    if (!via && date && P.plan && P.plan.days[date]) {
+      var sch = schedule(date, snow ? "snow" : "normal"), ia = -1, ib = -1;
+      sch.stops.forEach(function (s, i) { if (s.id === a && ia < 0) ia = i; if (s.id === b && ia >= 0 && i > ia && ib < 0) ib = i; });
+      if (ia >= 0 && ib > ia + 1) { var sum = 0; for (var i = ia; i < ib; i++) sum += sch.legs[i].min; return sum; }
+    }
+    var L = leg(a, b, via); return L ? (snow ? L.snow : L.normal) : null;
+  }
   var TOKEN = /\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}|\{leg:([\w-]+)\|([\w-]+)(?:\|(walk|shuttle|taxi))?\}|\{(party)\}/g;
   var schedCache = {};
   function fill(text, date, ctx) {
@@ -62,7 +108,7 @@
     return String(text).replace(TOKEN, function (m, kind, id, nth, md, sun, tpath, lgA, lgB, lgVia, party) {
       var T = window.TRIP || {};
       if (party) return partyOf(date, ctx); /* {party}＝這天（這一站）的人數：保姆在就 9 人 */
-      if (lgA) { var LG = leg(lgA, lgB, lgVia); return LG ? String(P.mode() === "snow" ? LG.snow : LG.normal) : m; } /* {leg:a|b}＝這段路現在路況的分鐘數 */
+      if (lgA) { var lgm = routeMin(date, lgA, lgB, lgVia); return lgm == null ? m : String(lgm); } /* {leg:a|b}＝這段路現在路況的分鐘數（那天 a、b 之間有中途站就把中途路段加總） */
       if (sun) { var d = (T.days || []).filter(function (x) { return x.date === date; })[0]; return d && d.sun ? d.sun[{ rise: 0, set: 1, dark: 2 }[sun]] : m; }
       if (tpath) { var v = T; tpath.split(".").forEach(function (k) { v = v == null ? v : v[k]; }); return v == null ? m : String(v); }
       var dd = md ? date.slice(0, 5) + md : date;
@@ -157,27 +203,26 @@
   };
 
   /* ---------- 手機底部分頁列 ----------
-     「行程」連到：正在看的那天 → 旅程中的今天 → 上次看的那天 → 第一天；標籤帶日期。
+     「行程」連到：正在看的那天 → 旅程中的今天 → 第一天（不記上次看的那天，免得一直停在最後一天）；標籤帶日期。
      滑雪／美食／景點：正在看某一天、或旅程中，就帶 ?day= 過去（地圖會先顯示那天附近）。 */
   function navInit() {
     var bar = document.querySelector(".tabbar"), T0 = window.TRIP; if (!bar || !T0) return;
     var days = T0.days.map(function (d) { return d.date; }), root = bar.dataset.root || "";
     var q = new URLSearchParams(location.search).get("day"), here = window.DAY || (days.indexOf(q) >= 0 ? q : null);
     var today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), inTrip = days.indexOf(today) >= 0 ? today : null;
-    if (here) lsSet("snow13-lastday", here);
-    var last = lsGet("snow13-lastday"), d = here || inTrip || (days.indexOf(last) >= 0 ? last : days[0]), ctx = here || inTrip;
+    var d = here || inTrip || days[0], ctx = here || inTrip;
     bar.querySelectorAll("a[data-tab]").forEach(function (a) {
       var t = a.dataset.tab;
       if (t === "day") { if (!window.DAY || window.DAY !== d) a.href = root + "day/" + d.slice(5).replace("-", "") + "/"; a.querySelector("span").textContent = "行程 " + (+d.slice(5, 7)) + "/" + (+d.slice(8)); }
-      else if (t !== "home" && ctx) a.href = root + t + "/?day=" + ctx;
+      else if (["ski", "food", "spots"].indexOf(t) >= 0 && ctx) a.href = root + t + "/?day=" + ctx;
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", navInit); else navInit();
 
-  /* ---------- 雪場票：停多久就給對應的票（半天給 4 小時券），單日頁、替代方案共用 ---------- */
+  /* ---------- 雪場票：停多久就給對應的票（在雪場不到 4 小時才給 4 小時券；滿 4 小時就 1 日券），單日頁、雪場頁、替代方案共用 ---------- */
   P.ticketFor = function (rs, stay) {
     var t = (rs && rs.tickets) || []; if (!t.length) return null;
-    if (stay && stay <= 300) { var h = t.filter(function (x) { return /4\s*小時|半日|半天/.test(x[0]); })[0]; if (h) return h; }
+    if (stay && stay < 240) { var h = t.filter(function (x) { return /4\s*小時|半日|半天/.test(x[0]); })[0]; if (h) return h; }
     return t[0];
   };
   P.resortOf = function (id) { return ((window.TRIP && TRIP.resorts) || []).filter(function (r) { return (r.stops || []).indexOf(id) >= 0; })[0] || null; };

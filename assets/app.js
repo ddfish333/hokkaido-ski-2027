@@ -125,6 +125,7 @@
       var on = TODAY >= b.from && TODAY < b.to;
       return '<li style="--n:' + b.nights + '" class="' + (on ? "on" : "") + '"><b>' + esc(b.short) + ' ' + b.nights + ' 晚</b><span>' + md(b.from) + '–' + md(b.to) + '</span></li>';
     }).join("");
+    if (has("heroflight")) $("#heroflight").innerHTML = [T.flight.out, T.flight.back].map(function (f) { var fl = Plan.flightOn(f.date); return '<span><b>' + esc(fl.dir) + '</b> ' + em(fl.line) + '</span>'; }).join("") + '<a href="#flights">' + esc(T.flight.airline) + ' · 準備 →</a>';
     var f = T.days[focusDayIndex()], cta = $("#herocta");
     if (cta) cta.innerHTML = '<a class="cta" href="' + dayHref(f) + '"><span>' + (TODAY < T.start ? "從第一天開始看" : TODAY <= T.end ? "今天 " + md(f.date) : "最後一天") + '</span><b>' + esc(f.title) + '</b></a>';
   }
@@ -278,10 +279,13 @@
   }
   function stopFacts(s, d) {
     if (s.id === d.base || baseById[s.id] || ["villa", "lodge", "favlux"].indexOf(s.id) >= 0) return "";
-    var sp = (window.SPOTS || []).filter(function (x) { return x.id === s.id; })[0], fd = (window.FOOD || []).filter(function (x) { return x.id === s.id; })[0];
+    /* 景點／餐廳卡片要「id 相同而且就在同一個地方（300 m 內）」才算同一個，免得 plan.json 和 spots.js 剛好撞名（例如 temiya 溫泉 vs 舊手宮線） */
+    function same(x) { return x.id === s.id && haversine(x, s) < 0.3; }
+    var sp = (window.SPOTS || []).filter(same)[0], fd = (window.FOOD || []).filter(same)[0];
     var rs = T.resorts.filter(function (r) { return (r.stops || []).indexOf(s.id) >= 0; })[0];
-    var parts = [], wd = new Date(d.date + "T00:00:00").getDay(), href = "";
-    if (rs) {
+    var parts = [], wd = new Date(d.date + "T00:00:00").getDay(), href = "", fl = Plan.flightOn(d.date);
+    if (s.id === "cts" && fl) { parts.push("✈ " + fl.dir + " " + fl.line + "（" + T.flight.airline + "）"); href = BASE + "#flights"; }
+    else if (rs) {
       var tk = Plan.ticketFor(rs, s.stay); parts.push(rs.hours); if (tk) parts.push(tk[0] + " " + tk[1]); parts.push(rs.kids);
       href = BASE + "ski/?day=" + d.date + "#" + rs.id;
     } else if (sp) {
@@ -298,7 +302,7 @@
       if (pl && pl.note) parts.push(pl.note);
     }
     if (!parts.length) return "";
-    return '<br><span class="tl-facts">' + parts.map(function (x) { return em(x); }).join(" · ") + (href ? ' <a href="' + href + '">' + (rs ? '滑雪地圖 →' : '卡片 →') + '</a>' : "") + '</span>';
+    return '<br><span class="tl-facts">' + parts.map(function (x) { return em(x); }).join(" · ") + (href ? ' <a href="' + href + '">' + (rs ? '滑雪地圖 →' : fl && s.id === "cts" ? '航班與準備 →' : '卡片 →') + '</a>' : "") + '</span>';
   }
   /* 保姆：上班時間、幾點回到住宿、加班多久，從 trip.js nanny 和當天時間表算 */
   function nannyCard(d, sch) {
@@ -396,7 +400,13 @@
   var isDark = true;
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#5A687A"; }
   function dayPlan() { return (window.Plan && Plan.plan) ? Plan.schedule(T.days[state.day].date, state.mode) : { stops: [], legs: [], total: { km: 0, min: 0 } }; }
-  function lateTag(s) { return s.late ? '<span class="late">晚 ' + s.late + ' 分' + (s.by ? '（最晚 ' + s.by + '）' : s.at ? '（' + s.at + ' 開始）' : '') + '</span>' : s.wait ? '<span class="wait">等 ' + s.wait + ' 分（' + s.at + ' 開始）</span>' : ''; }
+  /* 固定時間的標籤：plan.json 站點可以給 atLabel（例如「訂位」），有的話顯示「17:30 訂位（早到 15 分）」，沒有就是「等 15 分（17:30 開始）」 */
+  function lateTag(s) {
+    var what = s.atLabel ? s.at + " " + s.atLabel : "";
+    if (s.late) return '<span class="late">晚 ' + s.late + ' 分' + (s.by ? '（最晚 ' + s.by + '）' : what ? '（' + what + '）' : s.at ? '（' + s.at + ' 開始）' : '') + '</span>';
+    if (s.wait) return what ? '<span class="wait">' + esc(what) + '（早到 ' + s.wait + ' 分）</span>' : '<span class="wait">等 ' + s.wait + ' 分（' + s.at + ' 開始）</span>';
+    return what ? '<span class="fixed">' + esc(what) + '</span>' : '';
+  }
   function renderModeSeg() {
     document.querySelectorAll(".modeseg").forEach(function (box) {
       box.innerHTML = [["normal", "一般路況"], ["snow", "下雪路況"]].map(function (m) { return '<button type="button" role="tab" aria-selected="' + (state.mode === m[0]) + '" data-mode="' + m[0] + '">' + m[1] + '</button>'; }).join("");
@@ -964,13 +974,14 @@
     if (!has("todo")) return;
     var done = store("snow13-todo") || [];
     $("#todo").innerHTML = T.todo.map(function (t, i) {
-      return '<li><label><input type="checkbox" id="todo-' + i + '" data-i="' + i + '"' + (done.indexOf(i) >= 0 ? " checked" : "") + '><span class="when">' + esc(t[0]) + '</span><span class="what">' + esc(t[1]) + '</span></label></li>';
+      return '<li><label><input type="checkbox" id="todo-' + i + '" data-i="' + i + '"' + (done.indexOf(i) >= 0 ? " checked" : "") + '><span class="when">' + esc(t[0]) + '</span><span class="what">' + esc(Plan.fill(t[1], T.start)) + '</span></label></li>';
     }).join("");
     $("#todo").onchange = function () {
       var arr = []; Array.prototype.forEach.call(document.querySelectorAll("#todo input"), function (c) { if (c.checked) arr.push(+c.dataset.i); });
       store("snow13-todo", arr);
     };
-    $("#flights").innerHTML = T.flights.map(function (f) { return '<li><span>' + esc(f[0]) + ' ' + esc(f[1]) + '</span><span class="v">' + esc(f[2]) + '</span></li>'; }).join("");
+    $("#flights").innerHTML = [T.flight.out, T.flight.back].map(function (f) { var fl = Plan.flightOn(f.date); return '<li><span>' + md(f.date) + '（' + DOW[new Date(f.date + "T00:00:00").getDay()] + '）' + esc(fl.dir) + '</span><span class="v">' + em(fl.line) + '</span></li>'; }).join("") +
+      '<li><span>航空公司</span><span class="v">' + esc(T.flight.airline) + '</span></li>';
     $("#pickup").innerHTML = T.rental.pickup.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join("");
     $("#return").innerHTML = T.rental.ret.map(function (s) { return '<li>' + em(s) + '</li>'; }).join("");
     $("#rentalcontact").innerHTML = '<li><span>' + esc(T.rental.company) + '</span><span class="v">' + esc(T.rental.hours) + '</span></li>' +

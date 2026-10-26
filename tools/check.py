@@ -208,13 +208,16 @@ for d, sc in scenes.items():
     if not p: W(f"{d}：沒有海報圖片")
     elif not os.path.exists(os.path.join(img_root, p)): E(f"{d}：海報圖片不存在 assets/img/{p}")
     for i, s in enumerate(sc.get("scenes") or [], 1):
-        if s.get("stop") and s["stop"] not in stop_ids:
+        sid = re.sub(r"#\d$", "", s.get("stop") or "")  # stop: "canal#2" ＝ 當天第二次到 canal
+        if sid and sid not in stop_ids:
             E(f"{d}：序幕第 {i} 幕指向站點「{s['stop']}」，但當天站點只有 {stop_ids}（行程改了，腳本沒跟上）")
+        if sid and "#" in (s.get("stop") or "") and stop_ids.count(sid) < int(s["stop"][-1]):
+            E(f"{d}：序幕第 {i} 幕指向「{s['stop']}」，但當天只去 {sid} {stop_ids.count(sid)} 次")
         for im in ([s["img"]] if s.get("img") else []) + list(s.get("imgs") or []):
             if not os.path.exists(os.path.join(img_root, im)): E(f"{d}：序幕第 {i} 幕圖片不存在 assets/img/{im}")
         if s.get("video") and not os.path.exists(os.path.join(ROOT, "assets", "video", s["video"])):
             E(f"{d}：序幕第 {i} 幕影片不存在 assets/video/{s['video']}")
-    covered = {s.get("stop") for s in sc.get("scenes") or []}
+    covered = {re.sub(r"#\d$", "", s.get("stop") or "") for s in sc.get("scenes") or []}
     if sc.get("scenes"):
         missing = [x for x in stop_ids if x not in covered and place_of.get(x) and not str(place_of.get(x)).startswith("hotels/")]
         if missing: W(f"{d}：序幕沒有提到這些站點：{missing}")
@@ -308,6 +311,34 @@ for s in spots:
 
 picks = load_js("data/food.js", "FOOD_PICKS") or []
 food_ids = {f["id"] for f in food}
+
+# 0g. 卡片文字裡不能自己寫「從住宿多少分」和「日落幾點」——這兩個都由程式算（Plan.travelMin／{sun:set}），
+#     手寫的數字各頁會不一樣（10/26 第五輪：景點頁札幌國際 20 分 vs 雪場頁 50 分、日落 16:20 vs 16:18）
+import math
+def _hav(a, b):
+    k = math.pi / 180; dla = (b["lat"] - a["lat"]) * k; dlo = (b["lon"] - a["lon"]) * k
+    h = math.sin(dla / 2) ** 2 + math.cos(a["lat"] * k) * math.cos(b["lat"] * k) * math.sin(dlo / 2) ** 2
+    return 2 * 6371 * math.asin(math.sqrt(h))
+BASE_MIN = re.compile(r"(?:FAV LUX|山鄉|小木屋|薄野(?!站)|飯店|住宿|市區)[^。；，、]{0,10}?(?:約|只要|要)?\s?\d+\s?分")
+SUNSET = re.compile(r"日落[約 ]*\d{1,2}:\d\d")
+for lst, name in ((spots, "spots.js"), (food, "food.js")):
+    for x in lst:
+        if x.get("kind") == "停車": continue  # 停車場卡片的重點就是「離飯店走幾分」，這個允許手寫
+        for k in ("what", "caution", "parking", "photo", "hours", "price"):
+            t = x.get(k)
+            if not isinstance(t, str): continue
+            m = BASE_MIN.search(TOKEN.sub("", t))
+            if m: E(f"{name}：{x['name']} {k} 自己寫了車程「{m.group(0)}」——卡片上「從住宿開多久」由程式算，文字裡刪掉")
+            m = SUNSET.search(t)
+            if m: E(f"{name}：{x['name']} {k} 寫死日落「{m.group(0)}」，改成 {{sun:set}}（卡片有 day 才換得出來）")
+            if "{sun:" in t and not x.get("day"): E(f"{name}：{x['name']} {k} 用了 {{sun:}} 但卡片沒有 day，換不出來")
+# 0h. plan.json 的站點 id 和 spots.js／food.js 的 id 相同時，必須是同一個地方（300 m 內）——
+#     撞名會讓單日頁抓到別張卡（10/26：temiya 溫泉抓到舊手宮線「全天・免費」）
+for lst, name in ((spots, "spots.js"), (food, "food.js")):
+    for x in lst:
+        pl = PLAN["places"].get(x["id"])
+        if pl and pl.get("lat") and _hav(pl, x) > 0.3:
+            E(f"{name}：id「{x['id']}」和 plan.json 的站點「{pl['name']}」撞名但不是同一個地方（差 {_hav(pl, x):.1f} km），其中一邊改 id")
 for pk in picks:
     if pk["date"] not in days: E(f"food.js FOOD_PICKS：{pk['date']} 不在行程裡")
     for i in [pk.get("pick")] + pk.get("backup", []):

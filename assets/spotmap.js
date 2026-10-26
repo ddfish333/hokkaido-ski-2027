@@ -8,17 +8,13 @@
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function em(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+  /* 文字裡的 {sun:set}（日落）等標記：景點有排進行程就用那一天，沒有就用卡片自己的 day；都沒有就不換 */
+  function txt(t, s, c) { var d = (c && c.d && c.d.date) || s.day; return window.Plan && Plan.fill && d ? Plan.fill(t, d) : t; }
   function nf(n) { return Number(n).toLocaleString("zh-Hant-TW"); }
-  function r5(x) { return Math.max(5, Math.round(x / 5) * 5); }
   var DOW = ["日", "一", "二", "三", "四", "五", "六"];
   function dow(s) { var p = s.split("-").map(Number); return DOW[new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay()]; }
   function wday(s) { var p = s.split("-").map(Number); return new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay(); }
   function md(s) { var p = s.split("-").map(Number); return p[1] + "/" + p[2]; }
-  function hav(a, b) {
-    var R = 6371, toR = Math.PI / 180, dLa = (b.lat - a.lat) * toR, dLo = (b.lon - a.lon) * toR;
-    var h = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a.lat * toR) * Math.cos(b.lat * toR) * Math.sin(dLo / 2) * Math.sin(dLo / 2);
-    return 2 * R * Math.asin(Math.sqrt(h));
-  }
 
   var AREA_COLOR = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
   var AREA_ORDER = ["Kiroro", "銭函", "小樽", "札幌", "富良野", "美瑛・旭川"];
@@ -36,7 +32,8 @@
   function ctx() { var d = state.day ? dayById[state.day] : null, b = d ? baseById[d.base] : null; return { d: d, b: b, wd: d ? wday(d.date) : -1 }; }
   function isToday(s, c) { return !!(c.d && s.day === c.d.date); }
   function isClosed(s, c) { return !!(s.closed && c.wd >= 0 && s.closed.indexOf(c.wd) >= 0); }
-  function driveMin(s, c) { if (!c.b) return 0; return r5(hav(c.b, s) * 1.35 / 40 * 60); }
+  /* 從住宿過去要多久：和美食頁、雪場頁、單日頁同一個算法（Plan.travelMin），數字才不會各頁不同 */
+  function travel(s, c) { return c.b && window.Plan && Plan.travelMin ? Plan.travelMin(c.b, s, { date: c.d && c.d.date }) : null; }
   function nearby(c) { return c.d ? (SPOT_AREAS[c.d.base] || []) : []; }
 
   function visible() {
@@ -69,7 +66,7 @@
     if (s.closed && s.closed.length) meta.push('週' + s.closed.map(function (x) { return DOW[x]; }).join("、") + '休');
     if (s.fee) meta.push(em(s.fee));
     if (s.time) meta.push('約 ' + s.time + ' 分');
-    if (c.b) meta.push('從' + esc(c.b.short.split("・").pop()) + '開約 ' + driveMin(s, c) + ' 分');
+    var tv = travel(s, c); if (tv) meta.push('從' + esc(c.b.short.split("・").pop()) + tv.label);
     meta.push('<span class="fit">' + kids[0] + '</span>');
     if (s.approx) meta.push('位置約略');
     return '<li class="fp ' + kids[1] + (closed ? " closed" : "") + (today ? " planned" : "") + (state.active === s.id ? " active" : "") + '" id="' + s.id + '" data-fid="' + s.id + '" style="--ac:' + AREA_COLOR[s.area] + '">' +
@@ -77,9 +74,9 @@
       '<span class="badge st-' + st[1] + '">' + st[0] + (s.day ? ' ' + md(s.day) : "") + '</span>' + (closed ? '<span class="badge red">' + md(c.d.date) + ' 公休</span>' : "") + '</div>' +
       (s.ja && s.ja !== s.name ? '<p class="fp-ja">' + esc(s.ja) + '</p>' : "") +
       '<div class="fp-rating">' + stars + '</div>' +
-      '<p class="fp-what">' + em(s.what) + '</p>' +
-      (s.caution ? '<p class="fp-caution">⚠ ' + em(s.caution) + '</p>' : "") +
-      (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(s.photo) + (s.photoAt ? ' <button type="button" class="fp-photoat" data-photo="' + s.id + '">在地圖上看拍攝點</button>' : "") + '</p>' : "") +
+      '<p class="fp-what">' + em(txt(s.what, s, c)) + '</p>' +
+      (s.caution ? '<p class="fp-caution">⚠ ' + em(txt(s.caution, s, c)) + '</p>' : "") +
+      (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(txt(s.photo, s, c)) + (s.photoAt ? ' <button type="button" class="fp-photoat" data-photo="' + s.id + '">在地圖上看拍攝點</button>' : "") + '</p>' : "") +
       (s.parking ? '<p class="fp-meta">停車：' + em(s.parking) + '</p>' : "") +
       '<p class="fp-meta">' + meta.join(" · ") + '</p>' +
       '<div class="fp-act">' + (g && g.q ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") +
@@ -223,7 +220,7 @@
     var g = s.g;
     popup.setLngLat([s.lon, s.lat]).setHTML('<b>' + esc(s.name) + '</b><span>' + esc(s.kind) + ' · ' + esc(s.area) + (g && g.rating ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
       '<em class="' + (s.status === "plan" ? "gold" : "blue") + '">' + st[0] + (s.day ? " " + md(s.day) : "") + '</em>' +
-      '<small>' + em(s.what.replace(/\*\*/g, "")).slice(0, 70) + (s.what.length > 70 ? "…" : "") + '</small>' +
+      '<small>' + em(txt(s.what, s, c).replace(/\*\*/g, "")).slice(0, 70) + (s.what.length > 70 ? "…" : "") + '</small>' +
       (s.photoAt ? '<small class="cam">📷 拍攝點：' + esc(s.photoName) + '（地圖上的相機）</small>' : "") +
       (s.status !== "plan" ? '<a href="' + addUrl(s, c) + '">加入行程 ＋</a>' : "")).addTo(map);
   }
