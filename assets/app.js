@@ -157,11 +157,12 @@
   }
   function refreshPosterWx() { document.querySelectorAll("[data-pw]").forEach(function (el) { var d = T.days.filter(function (x) { return x.date === el.dataset.pw; })[0]; if (d) el.innerHTML = posterWx(d); }); }
   var CHAPTER_IMG = { villa: "otaru", furano: "furano", sapporo: "sapporo" };
-  /* 三章：海と雪、山と雪、街と雪——照片、日文標題、一段話（文案 2026-10-26 由 Sean 提供） */
+  /* 三章：海之雪、山之雪、街之雪——照片、主題小標、地名大標、日文短句、一段話 */
+  /* 三層：主題小標（海之雪）／地名大標（小樽 OTARU）／細明朝日文短句；文案 2026-10-26 由 Sean 定稿 */
   var CHAPTER = {
-    villa: { en: "CHAPTER 01 — OTARU · 4 NIGHTS", jp: "海と雪", line: "第一站，住進小樽近郊的山鄉。白天往 Kiroro 滑雪，留一個下午給小樽運河與堺町通。雪山、海岸、溫泉與壽司，構成最初的四晚。" },
-    furano: { en: "CHAPTER 02 — FURANO · 5 NIGHTS", jp: "山と雪", line: "五晚住在北之峰，這裡是旅程的滑雪重心。從小木屋出發，探索富良野的兩個滑雪區；也安排旭山動物園、美瑛雪原與青池點燈。" },
-    sapporo: { en: "CHAPTER 03 — SAPPORO · 3 NIGHTS", jp: "街と雪", line: "最後三晚回到札幌。把車停好，走進城市裡的餐廳、商店與冬日街景。想滑雪還能再上山，其餘時間就留給美食與自由探索。" }
+    villa: { en: "CHAPTER 01 · 4 NIGHTS", theme: "海之雪", place: "小樽", en2: "OTARU", jp: "雪国のはじまり", line: "第一站，住進小樽近郊的山鄉。白天往 Kiroro 滑雪，留一個下午給小樽運河與堺町通。雪山、海岸、溫泉與壽司，構成最初的四晚。" },
+    furano: { en: "CHAPTER 02 · 5 NIGHTS", theme: "山之雪", place: "富良野", en2: "FURANO", jp: "雪山で過ごす日々", line: "五晚住在北之峰，這裡是旅程的滑雪重心。從小木屋出發，探索富良野的兩個滑雪區；也安排旭山動物園、美瑛雪原與青池點燈。" },
+    sapporo: { en: "CHAPTER 03 · 3 NIGHTS", theme: "街之雪", place: "札幌", en2: "SAPPORO", jp: "街を楽しむ", line: "最後三晚回到札幌。把車停好，走進城市裡的餐廳、商店與冬日街景。想滑雪還能再上山，其餘時間就留給美食與自由探索。" }
   };
   var LINK_ICON = {
     "官網": '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>',
@@ -182,8 +183,10 @@
         '<div class="ch-img' + (b.video ? " has-video" : "") + '"><img src="' + BASE + 'assets/img/chapter/' + k + '.jpg" alt="" loading="lazy">' + vid + '</div>' +
         '<div class="ch-body">' +
         '<p class="ch-k">' + esc(c.en) + '</p>' +
+        '<p class="ch-theme">' + esc(c.theme || "") + '</p>' +
+        '<h3 class="ch-place">' + esc(c.place || b.area) + ' <small>' + esc(c.en2 || "") + '</small></h3>' +
         '<p class="ch-jp">' + esc(c.jp) + '</p>' +
-        '<p class="ch-area">' + esc(b.short) + '｜' + md(b.from) + '–' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
+        '<p class="ch-area">' + esc(b.short.split("・").pop()) + '｜' + md(b.from) + '–' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
         '<p class="ch-line">' + em(c.line) + '</p>' +
         '<p class="ch-stay">' + esc(b.name) + (b.checkin ? ' · 入住 ' + esc(fill(b.checkin, b.from)) : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
         '<p class="ch-links">' + (site ? arrowLink("官網", site[1]) : "") + arrowLink("導航", navUrl(b.lat, b.lon)) + '</p>' +
