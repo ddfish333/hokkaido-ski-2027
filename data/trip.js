@@ -13,15 +13,18 @@ window.TRIP = {
     { id: "villa", name: "山郷 春 Villa -SHUN-", short: "小樽・山鄉", area: "小樽", lat: 43.1467841, lon: 141.1354924,
       from: "2027-01-07", to: "2027-01-11", nights: 4, checkin: "15:00–20:00", checkout: "11:00",
       notes: ["**走路 5 分到 Onze 雪場**（夜滑到 22:45），面海滑雪；開車 35 分上 Kiroro、25 分進札幌", "145 m² 一棟包：挑高大窗對著森林、檜木浴缸、森林景觀的廚房；洗烘衣機、洗碗機", "三五工務店蓋的「像住在北海道一樣」的房子，用的是北海道的木頭；停車每棟 2 格、免費"],
-      links: [["官網", "https://mt-sango.com/stay/shun/"], ["一休訂房頁", "https://www.ikyu.com/00051685/"]], g: { rating: 5.0, n: 2, pid: "ChIJv-YvGwDfCl8Rybz1BtgpE2w" } },
+      facts: ["走路 5 分到 Onze", "145 m² 一棟包", "檜木浴缸・洗烘衣機", "停車 2 格"],
+      links: [["官網", "https://mt-sango.com/stay/shun/"], ["訂房", "https://www.ikyu.com/00051685/"]], g: { rating: 5.0, n: 2, pid: "ChIJv-YvGwDfCl8Rybz1BtgpE2w" } },
     { id: "furano", name: "BEST DAY EVER FURANO LODGES", short: "富良野・北之峰", area: "富良野", lat: 43.3325009, lon: 142.3631996,
       from: "2027-01-11", to: "2027-01-16", nights: 5, checkin: "15:00", checkout: "10:00",
       notes: ["開車 5 分到北之峰纜車、10 分到富良野市區；主戰場的 5 晚", "126 m² 小木屋、4 間臥室；全套廚房＋微波爐、洗衣機、陽台", "Google 5.0（48 則）：一進門是木頭香、乾淨得像新的、老闆自己是滑雪人，屋裡到處是雪板的小細節；停車免費"],
-      links: [["官網", "https://bestdayeverfurano.com/"], ["訂房頁", "https://tour.l-tike.com/hotels/domestic/hotel/75033723/"]], g: { rating: 5.0, n: 48, pid: "ChIJPY_8pplTc18Rq5OgungIGww" } },
+      facts: ["開車 5 分到北之峰纜車", "126 m²・4 間臥室", "全套廚房・洗衣機", "停車免費"],
+      links: [["官網", "https://bestdayeverfurano.com/"], ["訂房", "https://tour.l-tike.com/hotels/domestic/hotel/75033723/"]], g: { rating: 5.0, n: 48, pid: "ChIJPY_8pplTc18Rq5OgungIGww" } },
     { id: "sapporo", name: "FAV LUX 札幌薄野", short: "札幌・薄野", area: "札幌", lat: 43.0523778, lon: 141.3485722,
       from: "2027-01-16", to: "2027-01-19", nights: 3, checkin: "15:00", checkout: "10:00",
       notes: ["2025 年 7 月新開幕、84 間：**上下舖的 4–6 人家庭房**、房內洗衣機、兩個洗手台、小客廳、冰箱微波爐，小孩有自己的小桌子；住客專用大浴場＋三溫暖（Google 4.3，306 則）", "**在札幌盡量走路**：街很美、什麼都在 10 分鐘內，札幌站–大通–薄野一路地下街不用踩雪；市電「東本願寺前」走 3 分", "車子 1/16 停好就三晚不動——停哪裡、怎麼導航，看單日頁的「車停哪裡」", "退房 10:00，1/19 同時要還車：**08:45 前離開**"],
-      links: [["官網", "https://fav-hotels.com/hotels/lux/sapporosusukino/"], ["Jalan", "https://www.jalan.net/yad333573/"]], g: { rating: 4.3, n: 306, pid: "ChIJDeSbhZMpC18RgWu851Dm37E" } }
+      facts: ["上下舖家庭房", "房內洗衣機", "大浴場・三溫暖", "走路逛札幌，車停好三晚不動"],
+      links: [["官網", "https://fav-hotels.com/hotels/lux/sapporosusukino/"], ["訂房", "https://www.jalan.net/yad333573/"]], g: { rating: 4.3, n: 306, pid: "ChIJDeSbhZMpC18RgWu851Dm37E" } }
   ],
 
   resorts: [
@@ -56,17 +59,17 @@ window.TRIP = {
     { id: "teine", group: "sapporo", rec: "兩夫妻帶女兒：首選", name: "札幌 Teine（手稻）", ja: "サッポロテイネ", tier: "札幌近郊・1972 奧運場地", lat: 43.0944, lon: 141.2112, pid: "ChIJ6zkmLHPYCl8RYqZuc-S35qw",
       season: ["2026-11-21", "2027-05-05"], seasonNote: "預定 11/21 開季", openLabel: "預定 11/21 開季",
       hours: "Highland 吊椅 09:00–15:30（1/18 前；1/19 起到 15:45）｜Eight Gondola 09:00–15:30｜夜滑 Olympia 白樺第 1 吊椅 16:00–20:00（最後 19:40）",
-      scale: "兩區：Olympia（下方，初學・家庭・夜滑）＋ Highland（上方，City View Cruise 1,200 m 平均 13°，看得到石狩灣）；15 條雪道、8 吊椅＋1 纜車廂",
+      scale: "Olympia（下方：初學、家庭、夜滑）＋ Highland（上方：City View Cruise 1,200 m，看得到海）；15 條雪道",
       tixSeason: "2026-27 官網公告・大人（現場／WEB 預購）",
       tickets: [["1 日券（含夜滑）", "¥9,800", "WEB 預購 ¥8,800"], ["5 小時券（連續 5 小時）", "¥7,600", "WEB 預購 ¥6,600"], ["夜滑券 16:00–20:00", "¥3,900", "WEB 預購 ¥2,900"], ["3 點券（纜車廂上山 1 趟）", "¥2,300"], ["Snow Land 入場（雪橇・雪圈）", "¥2,300"], ["Debut Escalator（魔毯初學區）", "¥2,300"], ["Snow Play（Snow Land＋魔毯）", "¥3,900"]],
-      kids: "3 歲以下吊椅免費，**滿 4 歲就要票**（4–12 歲票價官網這頁沒列，Webshop 查）。Snow Land 和魔毯初學區都在 Olympia、要另外買票；Olympia Ski Center 3 樓有**授乳室**（尿布台＋沙發）",
+      kids: "3 歲以下免費、**滿 4 歲要票**（4–12 歲票價在 Webshop）；Snow Land、魔毯區另外買票，都在 Olympia；Olympia 3 樓有**授乳室**",
       lessons: "Teine Olympia 滑雪學校有 Junior 班；本次不上課",
       gear: "Olympia 3 樓「HEAD Sports Station」（HEAD／BURTON）08:30–20:00，建議網路預約；IG 說租借偏貴",
       gates: [
         { name: "Olympia Ski Center", sub: "家庭・魔毯・Snow Land・夜滑；帶小孩停這邊", ja: "オリンピアスキーセンター", lat: 43.0944, lon: 141.2112, pid: "ChIJ6zkmLHPYCl8RYqZuc-S35qw", note: "手稲本町 593-17。從這裡搭 Eight Gondola 上 Highland。" },
         { name: "Highland Ski Center", sub: "直接上高地；只滑 Highland 的人停這邊", ja: "ハイランドスキーセンター", lat: 43.0843, lon: 141.2053, pid: "ChIJLRLJ7xfYCl8R_MltyFlEiys", note: "手稲金山 172。另一條山路上去，約多 10 分；兩邊停車場不相通。" }
       ],
-      tips: ["11/21 開季（官網 10/17 公告）；正式雪季 12/19–3/7，3/29 起只開 Highland", "**錯過 Eight Gondola 最後一班（15:30）就回不到 Olympia**——車停 Olympia 的人 15:00 前要下山", "如果真的去滑（1/16–1/18 都不是正式行程）：1/18 前 Highland 吊椅只到 15:30，上午一位滑 Highland，下午那位用夜滑券（WEB ¥2,900）滑 Olympia 到 20:00，兩個人都滑得到", "官網：札幌市中心約 15 km、車約 40 分（FAV LUX 出發我們抓 25–35 分）；停車免費", "IG 貼文：票、租借、點餐都掃 QR；旁邊有座摩天輪可以當拍照背景（官網沒提，到了再看）"],
+      tips: ["11/21 開季（官網 10/17 公告）；正式雪季 12/19–3/7，3/29 起只開 Highland", "**錯過 Eight Gondola 最後一班（15:30）就回不到 Olympia**——車停 Olympia 的人 15:00 前要下山", "如果真的去滑（1/16–1/18 都不是正式行程）：1/18 前 Highland 吊椅只到 15:30，上午一位滑 Highland，下午那位用夜滑券（WEB ¥2,900）滑 Olympia 到 20:00，兩個人都滑得到", "官網：札幌市中心約 15 km、車約 40 分（FAV LUX 出發我們抓 25–35 分）；停車免費", "票、租借、點餐都掃 QR（IG）"],
       links: [["官網", "https://sapporo-teine.com/snow/"], ["票價・吊椅時間", "https://sapporo-teine.com/snow/lift-time"], ["雪道", "https://sapporo-teine.com/snow/course"], ["開車", "https://sapporo-teine.com/snow/access/by-car"], ["Olympia Ski Center", "https://sapporo-teine.com/snow/facilities/olympia-ski-center"], ["Webshop", "https://teine.axess.shop/ja/Products/Tickets"]],
       summit: 1023, base: 300 },
     { id: "kokusai", group: "sapporo", rec: "有人顧小孩時：寬坡首選", name: "札幌國際滑雪場", ja: "札幌国際スキー場", tier: "札幌近郊・定山溪・雪最多", lat: 43.0722, lon: 141.0828, pid: "ChIJOSclPs7bCl8REMJOyvKws-o",

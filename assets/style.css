@@ -126,10 +126,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .ch-line { margin: 0; font-size: 15px; line-height: 1.9; }
 .ch-stay { margin: 0; font-size: 13px; color: var(--muted); }
 .ch-notes { margin: 0; padding-left: 1.1em; font-size: 13px; color: var(--muted); display: grid; gap: 3px; }
-.ch-links { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
-.ch-links a { color: var(--gold); text-decoration: none; letter-spacing: .04em; }
-.ch-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.ch-links a.nav { color: var(--ink); }
+.staycard { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.stay-name { margin: 0; font: 500 15px/1.4 var(--f-body); letter-spacing: .04em; }
+.stay-meta { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--muted); }
+.ch-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.ch-links a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px 6px 9px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; letter-spacing: .04em; color: var(--ink); text-decoration: none; transition: border-color .25s, background .25s; }
+.ch-links a:hover { border-color: var(--ink); background: rgba(255,255,255,.04); }
+.ch-links svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; opacity: .75; }
+.ch-links b { font-weight: 500; color: var(--gold); }
 .ch-days { display: flex; flex-wrap: wrap; gap: 6px; }
 .ch-days a { font-size: 12.5px; letter-spacing: .04em; text-decoration: none; padding: 7px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); }
 .ch-days a:hover { border-color: var(--ink); }
@@ -318,6 +322,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .linkrow { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; }
 .linkrow a { color: var(--glacier); text-decoration: none; }
 .linkrow a:hover { text-decoration: underline; }
+.resort .ch-links { margin-top: auto; }
+.r-more { border-top: 1px solid var(--line); padding-top: 6px; }
+.r-more > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink); padding: 6px 0; }
+.r-more > summary::-webkit-details-marker { display: none; }
+.r-more > summary small { color: var(--muted); font-size: 12px; }
+.r-more > summary::after { content: ""; margin-left: auto; width: 7px; height: 7px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); transition: transform .25s; }
+.r-more[open] > summary::after { transform: rotate(-135deg); }
+.r-more-in { display: grid; gap: 14px; padding: 8px 0 4px; }
 
 /* 天氣 */
 .wxstrip { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(84px, 1fr); gap: 8px; overflow-x: auto; padding-bottom: 8px; }

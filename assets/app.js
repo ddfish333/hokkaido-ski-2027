@@ -153,24 +153,31 @@
   function refreshPosterWx() { document.querySelectorAll("[data-pw]").forEach(function (el) { var d = T.days.filter(function (x) { return x.date === el.dataset.pw; })[0]; if (d) el.innerHTML = posterWx(d); }); }
   var CHAPTER_IMG = { villa: "otaru", furano: "furano", sapporo: "sapporo" };
   var CHAPTER_LINE = {
-    villa: "旅程從一棟很美的房子開始。山郷的春 Villa 一棟包，挑高的大窗整面對著森林，泡的是檜木浴缸；走出門五分鐘就是 Onze 雪場，面著海滑雪——到北海道的第一天就能上雪，是個很好的開始。",
-    furano: "主戰場。北之峰的小木屋，住過的人都在誇：一進門是木頭的香味、乾淨得像新的、老闆自己也滑雪，屋裡到處是雪板的小細節。開車五分鐘到纜車，平日早上的壓雪寬坡留給 carving；美瑛和動物園在滑雪的空檔。",
-    sapporo: "最後三晚回到城市。FAV LUX 是 2025 年才開的新飯店，上下舖的家庭房、房內就有洗衣機、還有住客專用的大浴場和三溫暖——滑了十天雪，最後三晚好好泡一泡。札幌盡量走路：街很美、什麼都在十分鐘內，車停好就三晚不動。"
+    villa: "從一棟很美的房子開始。走出門五分鐘就是 Onze，面著海滑雪。",
+    furano: "主戰場。木頭香的小木屋，五分鐘到纜車；平日早上的壓雪坡留給 carving。",
+    sapporo: "最後三晚回到城市。新飯店、大浴場，街很美——用走的。"
   };
+  var LINK_ICON = {
+    "官網": '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>',
+    "訂房": '<svg viewBox="0 0 24 24"><path d="M3 18V8a2 2 0 012-2h14a2 2 0 012 2v10M3 14h18M7 10h4v4H7z"/></svg>',
+    "評論": '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+    "導航": '<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20l7.5-4 7.5 4z"/></svg>'
+  };
+  function linkPill(label, url, sub) { return '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + (LINK_ICON[label] || "") + '<span>' + esc(label) + (sub ? ' <b>' + esc(sub) + '</b>' : "") + '</span></a>'; }
   function renderChapters() {
     var box = $("#chapterlist"); if (!box) return;
     box.innerHTML = T.bases.map(function (b, i) {
       var k = CHAPTER_IMG[b.id], days = T.days.filter(function (d) { return d.base === b.id; });
-      var links = (b.links || []).map(function (l) { return '<a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a>'; }).join("") +
-        (b.g && b.g.pid ? '<a href="https://www.google.com/maps/place/?q=place_id:' + b.g.pid + '" target="_blank" rel="noopener">Google 評論' + (b.g.rating ? ' ★ ' + b.g.rating.toFixed(1) + '（' + b.g.n + ' 則）' : "") + ' ↗</a>' : "") +
-        '<a class="nav" href="' + navUrl(b.lat, b.lon) + '" target="_blank" rel="noopener">開車導航 ↗</a>';
+      var links = (b.links || []).map(function (l) { return linkPill(l[0], l[1]); }).join("") +
+        (b.g && b.g.pid ? linkPill("評論", "https://www.google.com/maps/place/?q=place_id:" + b.g.pid, b.g.rating ? "★ " + b.g.rating.toFixed(1) : "") : "") +
+        linkPill("導航", navUrl(b.lat, b.lon));
       return '<article class="chapter">' +
         '<div class="ch-img"><img src="' + BASE + 'assets/img/chapter/' + k + '.jpg" alt="" loading="lazy"></div>' +
         '<div class="ch-body"><p class="ch-k">第 ' + ["一", "二", "三"][i] + ' 章 · ' + md(b.from) + ' – ' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
         '<h3 class="ch-h">' + esc(b.short) + '</h3><p class="ch-line">' + esc(CHAPTER_LINE[b.id]) + '</p>' +
-        '<p class="ch-stay">住 ' + esc(b.name) + (b.checkin ? ' · 入住 ' + b.checkin : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
-        '<div class="ch-links">' + links + '</div>' +
-        '<ul class="ch-notes">' + b.notes.map(function (n) { return '<li>' + em(n) + '</li>'; }).join("") + '</ul>' +
+        '<div class="staycard"><p class="stay-name">' + esc(b.name) + '</p>' +
+        '<p class="stay-meta">' + (b.checkin ? '入住 ' + b.checkin + ' · ' : "") + (b.checkout ? '退房 ' + b.checkout : "") + (b.facts ? ' · ' + b.facts.map(esc).join(" · ") : "") + '</p>' +
+        '<div class="ch-links">' + links + '</div></div>' +
         '<div class="ch-days">' + days.map(function (d) { return '<a href="' + dayHref(d) + '">' + md(d.date) + ' ' + esc(d.title) + '</a>'; }).join("") + '</div>' +
         '<div class="ch-gal">' + [1, 2, 3, 4].map(function (n) { return '<img src="' + BASE + 'assets/img/stay/' + b.id + '-' + n + '.jpg" alt="" loading="lazy">'; }).join("") + '</div>' +
         '</div></article>';
@@ -604,30 +611,37 @@
     return h ? '<div class="r-wx">' + h + '</div>' : "";
   }
   var RESORT_GROUPS = [
-    ["main", "正式行程的三座", "Onze 走路到、Kiroro 一天、富良野四天。票價是 2026-27 季官方公告。"],
-    ["sapporo", "札幌近郊・1/16–1/18 的彈性選擇", "沒有排進任何一天。如果兩夫妻想自己帶女兒去滑、或兩家分組，到時看雪況、風速和大人怎麼分再挑一天。標「2026-27」的是官網本季公告；標「2025-26 參考」的是上一季票價，出發前再查。Teine 以外的車程是地圖估算。"],
+    ["main", "正式行程的三座", "Onze 走路到、Kiroro 一天、富良野四天。"],
+    ["sapporo", "札幌近郊・不在行程裡", "想滑的話，1/16–1/18 看雪況和大人怎麼分組再挑一天。標 2025-26 的是上一季票價，出發前再查。"],
     ["otaru", "小樽近郊備案", "回程順路泡湯的小雪場。"]
   ];
   function resortCard(r) {
     var minor = r.group !== "main" && r.group !== "sapporo" || r.id === "fus" || r.id === "asari";
     var d = T.drive, est = r.est ? '<small class="est">（估算）</small>' : "";
     var dist = "山鄉 " + fmtMin(d.villa[r.id][1]) + "｜富良野 " + fmtMin(d.furano[r.id][1]) + "｜札幌 " + fmtMin(d.sapporo[r.id][1]) + est;
+    function tixRows(list) { return list.map(function (t) { return '<tr><td>' + esc(t[0]) + '</td><td>' + money(esc(t[1])).replace("（", "<br><small>").replace("）", "</small>") + (t[2] ? '<br><small class="alt">' + money(esc(t[2])) + '</small>' : "") + '</td></tr>'; }).join(""); }
+    var mainTix = r.tickets.slice(0, 4), moreTix = r.tickets.slice(4);
     var gates = r.gates && r.gates.length ? '<div class="gates"><p class="g-k">入口・停車（兩邊不相通）</p><ul>' + r.gates.map(function (g) {
       var url = g.pid ? 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(g.ja || g.name) + '&destination_place_id=' + g.pid : navUrl(g.lat, g.lon);
       return '<li><div><b>' + esc(g.name) + '</b>' + (g.sub ? '<span class="g-sub">' + esc(g.sub) + '</span>' : "") + (g.note ? '<span class="g-note">' + em(g.note) + (g.approx ? "（位置概略）" : "") + '</span>' : "") + '</div><a href="' + url + '" target="_blank" rel="noopener">導航 ↗</a></li>';
     }).join("") + '</ul></div>' : "";
+    /* 其他票種、雪具、課程、提醒收在「更多」裡，卡片才不會一長條 */
+    var more = (moreTix.length ? '<table class="tix"><tbody>' + tixRows(moreTix) + '</tbody></table>' : "") +
+      '<dl class="r-dl">' + (r.gear && r.gear !== "—" ? '<div><dt>雪具</dt><dd>' + em(r.gear) + '</dd></div>' : "") + (r.lessons && r.lessons !== "—" ? '<div><dt>課程</dt><dd>' + em(r.lessons) + '</dd></div>' : "") + '</dl>' +
+      (r.tips.length ? '<ul class="bullets">' + r.tips.map(function (t) { return '<li>' + em(t) + '</li>'; }).join("") + '</ul>' : "");
+    var moreN = moreTix.length + (r.tips || []).length;
     return '<article class="card resort' + (minor ? " minor" : "") + '" id="resort-' + r.id + '">' +
       '<div class="r-top"><div><h3 class="r-name">' + esc(r.name) + '</h3><p class="r-ja">' + esc(r.ja) + '・' + esc(r.tier) + '</p></div>' + seasonPill(r) + '</div>' +
       (r.rec ? '<p class="r-rec">' + esc(r.rec) + '</p>' : "") +
       '<p class="r-meta">' + esc(r.scale) + '<br>' + esc(r.hours) + '<br><span class="num">' + dist + '</span></p>' +
       '<div data-rwx="' + r.id + '">' + resortWx(r) + '</div>' +
       (r.tixSeason ? '<p class="tix-season">票價：' + esc(r.tixSeason) + '</p>' : "") +
-      '<table class="tix"><tbody>' + r.tickets.map(function (t) { return '<tr><td>' + esc(t[0]) + '</td><td>' + money(esc(t[1])).replace("（", "<br><small>").replace("）", "</small>") + (t[2] ? '<br><small class="alt">' + money(esc(t[2])) + '</small>' : "") + '</td></tr>'; }).join("") + '</tbody></table>' +
+      '<table class="tix"><tbody>' + tixRows(mainTix) + '</tbody></table>' +
+      '<dl class="r-dl"><div><dt>小孩</dt><dd>' + em(r.kids) + '</dd></div></dl>' +
       gates +
-      '<dl class="r-dl"><div><dt>小孩</dt><dd>' + em(r.kids) + '</dd></div><div><dt>雪具</dt><dd>' + em(r.gear) + '</dd></div>' + (r.lessons !== "—" ? '<div><dt>課程</dt><dd>' + em(r.lessons) + '</dd></div>' : "") + '</dl>' +
-      (r.tips.length ? '<ul class="bullets">' + r.tips.map(function (t) { return '<li>' + em(t) + '</li>'; }).join("") + '</ul>' : "") +
-      '<div class="linkrow">' + r.links.map(function (l) { return '<a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a>'; }).join("") +
-      (r.gates && r.gates.length ? "" : '<a href="' + navUrl(r.lat, r.lon) + '" target="_blank" rel="noopener">導航 ↗</a>') + '</div>' +
+      (moreN ? '<details class="r-more"><summary>更多<small>' + (moreTix.length ? '其他票種 ' + moreTix.length + ' · ' : "") + '雪具・提醒 ' + (r.tips || []).length + '</small></summary><div class="r-more-in">' + more + '</div></details>' : "") +
+      '<div class="ch-links">' + r.links.map(function (l) { return linkPill(l[0], l[1]); }).join("") +
+      (r.gates && r.gates.length ? "" : linkPill("導航", navUrl(r.lat, r.lon))) + '</div>' +
       '</article>';
   }
   function renderResorts() {
