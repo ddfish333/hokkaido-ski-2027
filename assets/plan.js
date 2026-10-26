@@ -36,7 +36,7 @@
       if (i > 0 && at != null) { if (arr < at) { wait = at - arr; arr = at; } else if (arr > at) late = arr - at; }
       if (by != null && arr > by) late = Math.max(late, arr - by);
       var stay = i === stops.length - 1 ? 0 : (+s.stay || 0), dep = arr + stay;
-      out.push({ i: i, id: s.id, name: pl.name, lat: pl.lat, lon: pl.lon, arr: arr, dep: dep, stay: stay, wait: wait, late: late, at: s.at || "", by: s.by || "", via: via, note: s.note || "", time: hm(arr), timeDep: hm(dep) });
+      out.push({ i: i, id: s.id, name: pl.name, ja: pl.ja || "", lat: pl.lat, lon: pl.lon, arr: arr, dep: dep, stay: stay, wait: wait, late: late, at: s.at || "", by: s.by || "", via: via, note: s.note || "", time: hm(arr), timeDep: hm(dep) });
       t = dep;
     }
     return { stops: out, legs: legs, total: { km: Math.round(tk), min: tm }, end: out.length ? out[out.length - 1].arr : null };

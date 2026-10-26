@@ -56,6 +56,8 @@
   }
   function em(s) { return esc(money(s)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
   /* 文字裡的 {t:站點}／{sun:set}／{T:欄位} 標記 → 推算的時間（見 assets/plan.js） */
+  /* 日文名：到了當地看招牌、問路、Google Maps 都靠它 */
+  function jaTag(ja, name) { return ja && ja !== name ? '<span class="ja">' + esc(ja) + '</span>' : ""; }
   function fill(text, date, ctx) { return window.Plan && Plan.fill ? Plan.fill(text, date, ctx) : text; }
 
   /* 今天／下一天：出發前指向 1/7，旅程中指向當天，結束後停在最後一天 */
@@ -266,7 +268,7 @@
         var row = "";
         if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg ' + l.mode + '"><time></time><span>' + (l.mode === "walk" ? "步行" : l.mode === "shuttle" ? "接駁車" : "開車") + ' ' + fmtMin(l.min) + ' <small>· ' + l.km + ' km' + (l.est ? ' · 直線估算' : '') + '</small></span></li>'; }
         var last = i === sch.stops.length - 1;
-        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(fill(s.note, d.date, s)) + '</span>' : "") + '</span></li>';
+        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + jaTag(s.ja, s.name) + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(fill(s.note, d.date, s)) + '</span>' : "") + '</span></li>';
         return row;
       }).join("") + '</ol></div>';
     html += '<div class="side">';
@@ -342,14 +344,14 @@
     var a = '<a href="' + navUrl(p.lat, p.lon) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
     if (p.link) a = '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' + a;
     if (p.baseId) a += '<button type="button" data-origin="' + p.baseId + '">從這裡算車程</button>';
-    return '<p class="pop-t">' + esc(p.name) + '</p>' + (p.sub ? '<p class="pop-s">' + esc(p.sub) + '</p>' : '') + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
+    return '<p class="pop-t">' + esc(p.name) + jaTag(p.ja, p.name) + '</p>' + (p.sub ? '<p class="pop-s">' + esc(p.sub) + '</p>' : '') + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
   }
   /* 探索地圖的點：景點來自 data/spots.js、餐廳來自 data/food.js（和景點地圖、美食地圖同一份資料），其他類別來自 trip.js */
   function explorePois() {
     var list = [];
     var ST = { plan: "正式行程", saved: "收藏", check: "待確認" };
     (window.SPOTS || []).forEach(function (s) {
-      list.push({ type: "sight", name: s.name, lat: s.lat, lon: s.lon, approx: s.approx, sub: ST[s.status] + (s.day ? " " + md(s.day) : "") + " · " + s.kind + (s.g && s.g.rating ? " · ★ " + s.g.rating.toFixed(1) : ""), note: s.what.length > 90 ? s.what.slice(0, 90) + "…" : s.what, link: BASE + "spots/#" + s.id, linkText: "景點地圖 →" });
+      list.push({ type: "sight", name: s.name, ja: s.ja, lat: s.lat, lon: s.lon, approx: s.approx, sub: ST[s.status] + (s.day ? " " + md(s.day) : "") + " · " + s.kind + (s.g && s.g.rating ? " · ★ " + s.g.rating.toFixed(1) : ""), note: s.what.length > 90 ? s.what.slice(0, 90) + "…" : s.what, link: BASE + "spots/#" + s.id, linkText: "景點地圖 →" });
     });
     (window.FOOD || []).forEach(function (f) {
       list.push({ type: "food", name: f.name, lat: f.lat, lon: f.lon, approx: f.approx, sub: f.kind + " · " + f.hours + (f.g && f.g.rating ? " · ★ " + f.g.rating.toFixed(1) : ""), note: f.what.length > 90 ? f.what.slice(0, 90) + "…" : f.what, link: BASE + "food/#" + f.id, linkText: "美食地圖 →" });
@@ -360,7 +362,7 @@
   function keyPoints() {
     var pts = [];
     T.bases.forEach(function (b) { pts.push({ type: "stay", label: b.short.split("・").pop() + " " + b.nights + " 晚", name: b.name, lat: b.lat, lon: b.lon, note: md(b.from) + "–" + md(b.to) + " " + b.nights + " 晚。" + b.notes.join("；"), baseId: b.id }); });
-    T.resorts.forEach(function (r) { pts.push({ type: "ski", label: SKI_LABEL[r.id] || r.name, name: r.name, lat: r.lat, lon: r.lon, note: r.tier + "。" + (r.hours || "") }); });
+    T.resorts.forEach(function (r) { pts.push({ type: "ski", label: SKI_LABEL[r.id] || r.name, name: r.name, ja: r.ja, lat: r.lat, lon: r.lon, note: r.tier + "。" + (r.hours || "") }); });
     pts.push({ type: "ski", label: "富良野（富良野區）", name: "富良野滑雪場 富良野區", lat: 43.3266, lon: 142.3394, note: "富良野纜車（新富良野王子飯店旁）" });
     return pts;
   }
@@ -547,7 +549,7 @@
           : '<a href="' + navUrl(s.lat, s.lon, prev) + '" target="_blank" rel="noopener">導航</a>';
         html += '<li class="hop"><span>' + (l.mode === "walk" ? "步行 " : l.mode === "shuttle" ? "接駁 " : "") + l.km + ' km · ' + fmtMin(l.min) + (l.mode === "drive" ? '<em>' + (state.mode === "snow" ? "一般 " + fmtMin(l.normal) : "雪 " + fmtMin(l.snow)) + '</em>' : "") + '</span>' + nav + '</li>';
       }
-      html += '<li class="stop' + role + (s.late ? " late" : "") + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + '</div><div class="sn">' + (s.stay && i < plan.stops.length - 1 ? '<span class="stay" style="margin:0 8px 4px 0">停 ' + fmtMin(s.stay) + ' → ' + s.timeDep + '</span>' : "") + lateTag(s) + em(fill(s.note, d.date, s)) + '</div></div></li>';
+      html += '<li class="stop' + role + (s.late ? " late" : "") + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + jaTag(s.ja, s.name) + '</div><div class="sn">' + (s.stay && i < plan.stops.length - 1 ? '<span class="stay" style="margin:0 8px 4px 0">停 ' + fmtMin(s.stay) + ' → ' + s.timeDep + '</span>' : "") + lateTag(s) + em(fill(s.note, d.date, s)) + '</div></div></li>';
     });
     html += '</ol>';
     $("#stoppanel").innerHTML = html;
@@ -601,9 +603,9 @@
   function inBounds(p, b) { return !b || (p.lon >= b[0][0] && p.lon <= b[1][0] && p.lat >= b[0][1] && p.lat <= b[1][1]); }
   function driveTargets() {
     var list = [], b = areaBounds();
-    if (catOn.ski) T.resorts.forEach(function (r) { list.push({ type: "ski", name: r.name, sub: r.tier, lat: r.lat, lon: r.lon }); });
+    if (catOn.ski) T.resorts.forEach(function (r) { list.push({ type: "ski", name: r.name, ja: r.ja, sub: r.tier, lat: r.lat, lon: r.lon }); });
     if (catOn.stay) T.bases.forEach(function (x) { if (x.id !== state.origin) list.push({ type: "stay", name: x.name, sub: x.short, lat: x.lat, lon: x.lon }); });
-    POIS.forEach(function (p) { if (p.type !== "ski" && p.type !== "stay" && catOn[p.type]) list.push({ type: p.type, name: p.name, sub: p.sub, lat: p.lat, lon: p.lon, link: p.link, linkText: p.linkText }); });
+    POIS.forEach(function (p) { if (p.type !== "ski" && p.type !== "stay" && catOn[p.type]) list.push({ type: p.type, name: p.name, ja: p.ja, sub: p.sub, lat: p.lat, lon: p.lon, link: p.link, linkText: p.linkText }); });
     return list.filter(function (p) { return inBounds(p, b); });
   }
   function fetchDrive(ok, o, missing) {
@@ -639,7 +641,7 @@
     var LIM = 25, shown = driveShowAll ? rows : rows.slice(0, LIM);
     $("#drivelist").innerHTML = shown.map(function (x) {
       var p = x.p;
-      return '<li><div><div class="nm"><i class="dot" style="--mc:var(--' + (p.type === "stay" ? "accent" : "c-" + p.type) + ')"></i>' + esc(p.name) + '</div><div class="km">' + esc(CAT_NAME[p.type]) + (p.sub ? ' · ' + esc(p.sub) : '') + ' · ' + x.km + ' km' + (x.est ? '（直線估算）' : '') + '</div></div>' +
+      return '<li><div><div class="nm"><i class="dot" style="--mc:var(--' + (p.type === "stay" ? "accent" : "c-" + p.type) + ')"></i>' + esc(p.name) + jaTag(p.ja, p.name) + '</div><div class="km">' + esc(CAT_NAME[p.type]) + (p.sub ? ' · ' + esc(p.sub) : '') + ' · ' + x.km + ' km' + (x.est ? '（直線估算）' : '') + '</div></div>' +
         '<div class="t">' + fmtMin(x.n) + '<small>下雪 ' + fmtMin(x.s) + '</small></div>' +
         '<span class="lk">' + (p.link ? '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' : '') + '<a href="' + navUrl(p.lat, p.lon, o) + '" target="_blank" rel="noopener">開 Google Maps 導航 →</a></span></li>';
     }).join("") + (rows.length > shown.length ? '<li class="more"><button type="button" id="drivemore">還有 ' + (rows.length - shown.length) + ' 個，全部顯示</button></li>' : "");
