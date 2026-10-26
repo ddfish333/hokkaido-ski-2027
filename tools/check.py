@@ -92,6 +92,20 @@ for d, v in PLAN["days"].items():
         if int(s.get("stay") or 0) >= 180 and not (s.get("at") or s.get("by")) and not is_resort_or_base(s["id"]) and not PLAN["places"].get(s["id"], {}).get("open"):
             W(f"{d}：第 {i} 站「{PLAN['places'].get(s['id'], {}).get('name', s['id'])}」停 {s['stay']} 分又沒有固定時間——是不是把別的事塞在同一站？拆成兩站比較清楚")
 
+# 0d. 防止用舊檔案蓋掉別人的修正：這些修正一定要在（被蓋掉就是有人沒先拉最新版）
+GUARDS = {
+    "assets/app.js": [("showOrigin(", "換出發地時地圖飛回該區（10/26）"), ("inHokkaido(", "不在北海道時定位不把地圖飛走（10/26）"), ("driveTargets(", "車程表跟著圖層和地圖範圍走（10/26）"), ("Plan.fill", "文字時間標記（10/26）")],
+    "assets/film.js": [("Plan.fill", "序幕時間標記（10/26）"), ("cursor", "同一站一天兩次照順序取時間（10/26）")],
+    "assets/plan.js": [("P.fill", "時間標記解析（10/26）")],
+    "assets/skimap.js": [("Plan.fill", "滑雪地圖時間標記（10/26）")],
+}
+for f, marks in GUARDS.items():
+    fp = os.path.join(ROOT, f)
+    if not os.path.exists(fp): continue
+    src = open(fp, encoding="utf-8").read()
+    for mark, what in marks:
+        if mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被舊檔案蓋掉了，先 git pull 再改")
+
 # 1. 三份資料的日期要一致
 for d in days:
     if d not in dayplan: E(f"{d}：trip.js 有這天，plan.json 沒有站點")
