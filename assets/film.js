@@ -75,7 +75,7 @@
     }
     if (sc.type === "drive" && !(sc.video && !reduce)) { var c = el("canvas", "drive"); c.id = "drive"; s.appendChild(c); }
     if (sc.type === "title") {
-      s.appendChild(el("div", "title", '<div><p class="eyebrow">' + esc(sc.eyebrow || "") + '</p><h2 class="big">' + esc(sc.h) + '</h2><p class="sub">' + esc(sc.s || "") + '</p></div>'));
+      s.appendChild(el("div", "title", '<div><p class="eyebrow">' + esc(sc.eyebrow || "") + '</p><h2 class="big">' + sc.h + '</h2><p class="sub">' + esc(sc.s || "") + '</p></div>'));
     } else if (sc.type === "end") {
       s.appendChild(el("div", "endcard", '<div><p class="t">' + esc(sc.t || "") + '</p><h2 class="h">' + sc.h + '</h2>' + (sc.s ? '<p class="s">' + esc(sc.s) + '</p>' : "") +
         '<div class="endbtns"><button class="fbtn" id="toplan" type="button">看今天的行程 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button><button class="fbtn ghost" id="freplay" type="button">再看一次</button></div></div>'));

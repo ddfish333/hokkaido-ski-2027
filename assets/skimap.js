@@ -10,10 +10,8 @@
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function nf(n) { return Number(n).toLocaleString("en-US"); }
-  var RATE = T.fx.jpyTwd;
-  function twd(n) { var t = n * RATE; return t >= 100 ? Math.round(t / 10) * 10 : Math.round(t); }
-  /* 和首頁一樣抓即時匯率，抓不到就用 trip.js 的 */
-  function loadFx() { return fetch("https://open.er-api.com/v6/latest/JPY").then(function (r) { return r.json(); }).then(function (j) { if (j && j.rates && j.rates.TWD) RATE = j.rates.TWD; }).catch(function () { }); }
+  function twd(n) { return Plan && Plan.twd ? Plan.twd(n) : Math.round(n * T.fx.jpyTwd / 10) * 10; }
+  function loadFx() { return Plan && Plan.loadFx ? Plan.loadFx() : Promise.resolve(); }
   /* ¥ 後面補台幣（小字），讓票價一眼看得懂 */
   function money(s) {
     return esc(s).replace(/¥\s?([\d,]+)/g, function (m, a) { var v = parseFloat(a.replace(/,/g, "")); return isNaN(v) ? m : m + '<small class="twd">NT$' + nf(twd(v)) + '</small>'; });
@@ -206,7 +204,7 @@
     if (!k && !state.focus) {
       /* 這天沒排滑雪：列最近的雪場 */
       var near = T.resorts.filter(function (r) { return r.id !== "asari" || d.base === "villa"; }).map(function (r) { return { r: r, dr: driveFrom(d.base, r) }; }).filter(function (x) { return x.dr; }).sort(function (x, y) { return x.dr.min - y.dr.min; }).slice(0, 4);
-      return '<section class="sk-hero card none">' + head + '<h2>這天沒有排滑雪</h2><p class="sk-sub">' + esc(d.sub) + '</p>' +
+      return '<section class="sk-hero card none">' + head + '<h2>這天沒有排滑雪</h2><p class="sk-sub">' + em(d.sub) + '</p>' +
         (d.base === "sapporo" ? '<p class="sk-note">想滑的大人：Teine 是帶小孩的首選（魔毯、Snow Land、授乳室都在 Olympia）；盤溪最近、半天剛好。選一張卡看票價和入口。</p>' : d.base === "villa" ? '<p class="sk-note">住山鄉的晚上：走路 5 分到 Onze，夜滑到約 22:45，大人輪流去。</p>' : "") +
         '<ul class="sk-nearlist">' + near.map(function (x) { return '<li><button type="button" class="lnk" data-focus="' + x.r.id + '">' + esc(x.r.name) + '</button><span class="num">' + fmtMin(x.dr.min) + (x.r.est ? '<small>估</small>' : "") + '</span></li>'; }).join("") + '</ul></section>';
     }
@@ -225,14 +223,14 @@
     var isPlan = k && k.rid === r.id;
     return '<section class="sk-hero card" id="sk-hero">' + head +
       '<h2>' + (isPlan ? '今天滑 ' : '') + esc(r.name) + ' <small>' + esc(r.ja) + '</small></h2>' +
-      '<div class="sk-hero-meta">' + seasonPill(r) + (r.rec ? '<span class="r-rec">' + esc(r.rec) + '</span>' : "") + '</div>' +
+      '<div class="sk-hero-meta">' + seasonPill(r) + (r.rec ? '<span class="r-rec">' + em(r.rec) + '</span>' : "") + '</div>' +
       (isPlan ? planLine(k) : '<p class="sk-note">這天行程裡沒有這座雪場；下面是從' + esc(b.short.split("・").pop()) + '出發的車程與天氣。</p>') +
       (k && k.stop.note && isPlan ? '<p class="sk-note">' + em(fill(k.stop.note, state.day, k.stop)) + '</p>' : "") +
-      '<p class="sk-drive">' + driveTxt + (g ? '<br><span class="muted">停：' + esc(g.name) + (g.sub ? '｜' + esc(g.sub) : "") + '</span>' : "") + '</p>' +
+      '<p class="sk-drive">' + driveTxt + (g ? '<br><span class="muted">停：' + esc(g.name) + (g.sub ? '｜' + em(g.sub) : "") + '</span>' : "") + '</p>' +
       '<div class="sk-actions"><a class="btn" href="' + nav + '" target="_blank" rel="noopener">導航' + (g ? '：' + esc(g.name.replace(/（.*?）/g, "")) : "") + ' ↗</a>' + links + '</div>' +
       '<div class="sk-wxhead"><p class="sk-k">天氣 ' + md(state.day) + (sun ? ' <span class="sun">' + sun + '</span>' : "") + '</p>' + (inRange ? wxTabs(r) : "") + '</div>' + wx +
       (inRange ? wxStrip(r, state.day) : "") +
-      '<p class="sk-k">營業</p><p class="sk-hours">' + esc(r.hours) + '</p>' +
+      '<p class="sk-k">營業</p><p class="sk-hours">' + em(r.hours) + '</p>' +
       '<p class="sk-k">票</p><p class="sk-tixline">' + tix + '</p><p class="sk-kids">' + em(r.kids) + '</p>' +
       '</section>';
   }
@@ -244,7 +242,7 @@
     return out.join("");
   }
   function seasonPill(r) {
-    if (!r.season) return '<span class="pill">' + esc(r.seasonNote) + '</span>';
+    if (!r.season) return '<span class="pill">' + em(r.seasonNote) + '</span>';
     if (TODAY < r.season[0]) return '<span class="pill soon">' + (r.openLabel ? esc(r.openLabel) : '預定 ' + md(r.season[0]) + ' 開季') + '</span>';
     if (TODAY <= r.season[1]) return '<span class="pill open">雪季營業中・到 ' + md(r.season[1]) + '</span>';
     return '<span class="pill">本季已結束</span>';
@@ -258,7 +256,7 @@
     var items = [
       '<li><b>纜車有沒有開</b>' + (r.status ? '<a href="' + esc(r.status) + '" target="_blank" rel="noopener">' + esc(r.name) + ' 雪況・纜車運行 ↗</a>' : "") + (r.cams ? '<a href="' + esc(r.cams) + '" target="_blank" rel="noopener">即時影像 ↗</a>' : "") + '<span>山頂陣風超過 50 km/h 常停上段纜車；上面天氣卡會標紅。</span></li>',
       '<li><b>警報・路況</b><a href="' + jma[1] + '" target="_blank" rel="noopener">氣象廳 ' + jma[0] + ' 警報 ↗</a>' + T.links.slice(0, 3).map(function (l) { return '<a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a>'; }).join("") + '<span>暴風雪警報或道央道封路就改室內行程，不要硬開山路。</span></li>',
-      '<li><b>票</b>' + (r.webshop ? '<a href="' + esc(r.webshop) + '" target="_blank" rel="noopener">網路購票 ↗</a>' : "") + '<span>' + esc(r.tickets.slice(0, 2).map(function (t) { return t[0] + " " + t[1] + (t[2] ? "（" + t[2] + "）" : ""); }).join("、")) + '；' + esc(r.kids.replace(/\*\*/g, "")) + '</span></li>',
+      '<li><b>票</b>' + (r.webshop ? '<a href="' + esc(r.webshop) + '" target="_blank" rel="noopener">網路購票 ↗</a>' : "") + '<span>' + esc(r.tickets.slice(0, 2).map(function (t) { return t[0] + " " + t[1] + (t[2] ? "（" + t[2] + "）" : ""); }).join("、")) + '；' + em(r.kids.replace(/\*\*/g, "")) + '</span></li>',
       '<li><b>帶出門</b><span>IC 卡（回程記得退押金）、護目鏡、手套、暖暖包、保溫瓶、小孩的 AirTag 放雪衣內袋、一點現金（租借與寄物有時只收現金）。</span></li>'
     ];
     if (after.length) items.push('<li><b>滑完之後</b><span>' + after.map(function (s) { return s.time + " " + s.name; }).join(" → ") + '</span></li>');
@@ -280,7 +278,7 @@
     var wb = wxDay("b_" + r.id, state.day), wt = r.top ? wxDay("t_" + r.id, state.day) : null;
     var wxline = wb ? '<p class="sk-cardwx">' + md(state.day) + ' 山腳 <b>' + Math.round(wb.hi) + '° / ' + Math.round(wb.lo) + '°</b> ' + wmo(wb.code)[0] + '・新雪 ' + wb.snow.toFixed(0) + ' cm' + (wt ? '｜山頂 <b>' + Math.round(wt.hi) + '°</b> <span class="' + gustClass(wt.gust) + '">陣風 ' + Math.round(wt.gust) + (gustClass(wt.gust) === "bad" ? " ⚠" : "") + '</span>' : '｜<span class="' + gustClass(wb.gust) + '">陣風 ' + Math.round(wb.gust) + '</span>') + '</p>' : "";
     var gates = r.gates && r.gates.length ? '<div class="gates"><p class="g-k">入口・停車' + (r.gates.length > 1 ? '（分開的停車場）' : "") + '</p><ul>' + r.gates.map(function (g) {
-      return '<li><div><b>' + esc(g.name) + '</b>' + (g.sub ? '<span class="g-sub">' + esc(g.sub) + '</span>' : "") + (g.note ? '<span class="g-note">' + em(g.note) + (g.approx ? "（位置概略）" : "") + '</span>' : "") + '</div><a href="' + gateUrl(g) + '" target="_blank" rel="noopener">導航 ↗</a></li>';
+      return '<li><div><b>' + esc(g.name) + '</b>' + (g.sub ? '<span class="g-sub">' + em(g.sub) + '</span>' : "") + (g.note ? '<span class="g-note">' + em(g.note) + (g.approx ? "（位置概略）" : "") + '</span>' : "") + '</div><a href="' + gateUrl(g) + '" target="_blank" rel="noopener">導航 ↗</a></li>';
     }).join("") + '</ul></div>' : "";
     var mainTix = r.tickets.slice(0, 4), moreTix = r.tickets.slice(4);
     var more = (moreTix.length ? '<table class="tix"><tbody>' + tixRows(moreTix) + '</tbody></table>' : "") +
@@ -289,14 +287,14 @@
     var moreN = moreTix.length + (r.tips || []).length;
     var others = T.bases.filter(function (x) { return x.id !== d.base; }).map(function (x) { var o = driveFrom(x.id, r); return o ? esc(x.short.split("・").pop()) + ' ' + fmtMin(o.min) : ""; }).filter(Boolean).join("｜");
     return '<article class="card resort sk-card' + (today ? " today" : "") + (state.focus === r.id ? " active" : "") + '" id="' + r.id + '" data-rid="' + r.id + '" style="--gc:' + GROUP_COLOR[r.group || "main"] + '">' + media +
-      '<div class="r-top"><div><h3 class="r-name"><button type="button" class="lnk" data-focus="' + r.id + '">' + esc(r.name) + '</button></h3><p class="r-ja">' + esc(r.ja) + '・' + esc(r.tier) + '</p></div>' + (r.img ? "" : seasonPill(r)) + '</div>' +
-      (r.rec ? '<p class="r-rec">' + esc(r.rec) + '</p>' : "") +
-      '<p class="r-meta">' + esc(r.scale) + '<br>' + esc(r.hours) + '</p>' +
+      '<div class="r-top"><div><h3 class="r-name"><button type="button" class="lnk" data-focus="' + r.id + '">' + esc(r.name) + '</button></h3><p class="r-ja">' + esc(r.ja) + '・' + em(r.tier) + '</p></div>' + (r.img ? "" : seasonPill(r)) + '</div>' +
+      (r.rec ? '<p class="r-rec">' + em(r.rec) + '</p>' : "") +
+      '<p class="r-meta">' + em(r.scale) + '<br>' + em(r.hours) + '</p>' +
       (dr ? '<p class="sk-drive">從' + esc(b.short.split("・").pop()) + ' <b>' + fmtMin(dr.min) + '</b> <small>' + dr.km + ' km・' + (state.mode === "snow" ? '一般 ' + fmtMin(dr.normal) : '下雪 ' + fmtMin(dr.snow)) + (r.est ? '・估算' : "") + '</small><br><span class="muted">' + others + '</span></p>' : "") +
       wxline +
       '<details class="r-more sk-wxmore" id="wx-' + r.id + '"' + (OPEN["wx-" + r.id] === undefined && state.focus === r.id ? " open" : "") + '><summary>天氣預報<small>' + (dateInForecast(state.day, r) ? "山腳／山頂・16 天" : "還沒進入 16 天預報範圍") + '</small></summary><div class="r-more-in" data-wx="' + r.id + '">' + (dateInForecast(state.day, r) ? wxTabs(r) + wxStrip(r, state.day) : '<p class="sk-wxmsg">' + climateLine(r) + '。' + (wb || state.wx["b_" + r.id] ? '目前能看的是最近 16 天：' : "") + '</p>' + (state.wx["b_" + r.id] ? wxTabs(r) + wxStrip(r, TODAY) : "")) + '</div></details>' +
       '<div class="ch-links sk-links">' + quickLinks(r, null, false) + (r.gates && r.gates.length ? "" : '<a href="' + navUrl(r.lat, r.lon) + '" target="_blank" rel="noopener">導航 ↗</a>') + '</div>' +
-      (r.tixSeason ? '<p class="tix-season">票價：' + esc(r.tixSeason) + '</p>' : "") +
+      (r.tixSeason ? '<p class="tix-season">票價：' + em(r.tixSeason) + '</p>' : "") +
       '<table class="tix"><tbody>' + tixRows(mainTix) + '</tbody></table>' +
       '<dl class="r-dl"><div><dt>小孩</dt><dd>' + em(r.kids) + '</dd></div></dl>' + gates +
       (moreN ? '<details class="r-more" id="more-' + r.id + '"><summary>更多<small>' + (moreTix.length ? '其他票種 ' + moreTix.length + ' · ' : "") + '雪具・提醒 ' + (r.tips || []).length + '</small></summary><div class="r-more-in">' + more + '</div></details>' : "") +
@@ -411,7 +409,7 @@
     if (scroll) { var el = document.getElementById(rid); if (el) el.scrollIntoView({ behavior: "smooth", block: innerWidth > 900 ? "start" : "start" }); }
     if (pop && map) {
       var d = dayById[state.day], dr = driveFrom(d.base, r), wb = wxDay("b_" + r.id, state.day);
-      popup.setLngLat([r.lon, r.lat]).setHTML('<b>' + esc(r.name) + '</b><span>' + esc(r.tier) + '</span>' + (dr ? '<small>從' + esc(baseById[d.base].short.split("・").pop()) + ' ' + fmtMin(dr.min) + '・' + dr.km + ' km</small>' : "") +
+      popup.setLngLat([r.lon, r.lat]).setHTML('<b>' + esc(r.name) + '</b><span>' + em(r.tier) + '</span>' + (dr ? '<small>從' + esc(baseById[d.base].short.split("・").pop()) + ' ' + fmtMin(dr.min) + '・' + dr.km + ' km</small>' : "") +
         (wb ? '<small>' + md(state.day) + ' ' + Math.round(wb.hi) + '° / ' + Math.round(wb.lo) + '° ' + wmo(wb.code)[0] + '・新雪 ' + wb.snow.toFixed(0) + ' cm</small>' : "") +
         '<a href="#' + r.id + '" data-go="' + r.id + '">看卡片 ↓</a>').addTo(map);
     }

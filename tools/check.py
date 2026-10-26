@@ -8,7 +8,7 @@
 import json, os, re, subprocess, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
-from plan_lib import TRIP as trip, PLAN, LEGS, load_js, mins, hm, leg_of, schedule, fill, hardcoded_times, TokenError
+from plan_lib import TRIP as trip, PLAN, LEGS, load_js, mins, hm, leg_of, schedule, fill, hardcoded_times, TokenError, TOKEN
 scenes = load_js("data/scenes.js", "SCENES")
 # 相容舊的變數名：dayplan[date]["stops"] 需要 id/time/name
 dayplan = {d: {"stops": [dict(id=s["id"], time=hm(x["arr"]), name=PLAN["places"].get(s["id"], {}).get("name", s["id"])) for s, x in zip(v["stops"], schedule(d, "normal"))]} for d, v in PLAN["days"].items()}
@@ -37,6 +37,8 @@ for d, v in PLAN["days"].items():
 #   (d) 標記一定要換得出來
 #   (e) 金額不能寫「¥5–6 千」這種換算不了的格式；內容不能出現內部用語「Claude」
 MONEY_BAD = re.compile(r"¥\s?[\d,.]+(?:\s*[–-]\s*¥?[\d,.]+)?\s*千")
+# 說明類欄位（可能含 **粗體** 或標記）在 JS 裡只准走 em()
+PROSE_ESC = re.compile(r"\besc\(\w+\.(?:what|caution|parking|photo|note|why|tips|kids|gear|notes|alert|book|sub|line|hours|scale|fee|entry|lessons|rec|seasonNote|tier|tixSeason)\b")
 def text_fields():
     for d in trip["days"]:
         for k in ("title", "sub", "alert"):
@@ -50,12 +52,21 @@ def text_fields():
     for d, v in PLAN["days"].items():
         for i, s in enumerate(v["stops"], 1):
             if s.get("note"): yield f"plan.json {d} 第 {i} 站 {s['id']} note", s["note"], d, s["id"], True
+    for b in trip.get("bases", []):
+        for k in ("checkin", "checkout"):  # 官方入住時間是事實，可以寫死；但裡面的標記一定要換得出來
+            if b.get(k) and "{" in str(b[k]): yield f"trip.js bases {b['id']} {k}", b[k], b["from"], None, False
+        for i, n in enumerate(b.get("notes") or []): yield f"trip.js bases {b['id']} notes[{i}]", n, b["from"], None, True
+    for i, p in enumerate(load_js("data/food.js", "FOOD_PICKS") or []):
+        for k in ("why", "book"):
+            if p.get(k): yield f"food.js FOOD_PICKS[{i}] {p.get('pick')} {k}", p[k], p["date"], None, True
 for d in trip["days"]:
     for k in ("plan", "legs"):
         if k in d: E(f"trip.js {d['date']}：還有 {k} 陣列——時間表只能在 plan.json，請刪掉")
-for where, text, d, ctx, _ in text_fields():
-    hc = hardcoded_times(text)
+for where, text, d, ctx, no_fixed in text_fields():
+    hc = hardcoded_times(text) if no_fixed else []
     if hc: E(f"{where}：寫死的時間 {hc}，改用標記（{{t:站點}}／{{open:站點}}／{{sun:set}}／{{T:欄位}}）→「{text[:60]}」")
+    dur = re.findall(r"[一二三四五六七八九十兩半\d]+\s*(?:分鐘|分)(?:就到|到家|車程|的車程|就回)", TOKEN.sub("", str(text)))
+    if dur: E(f"{where}：寫死的車程 {dur}，改用 {{leg:起點|終點}} 標記（會跟著路況模式變）→「{text[:60]}」")
     if (where.startswith("plan.json") or where.startswith("scenes.js")) and re.search(r"¥|NT\$", text): E(f"{where}：不要在這裡寫價格，價格只放地點卡（spots／food／places／resorts）→「{text[:60]}」")
     try: fill(text, d, ctx, strict=True)
     except TokenError as ex: E(f"{where}：{ex}")
@@ -63,6 +74,9 @@ for where, text, d, ctx, _ in text_fields():
 def walk(o, path):
     if isinstance(o, str):
         if MONEY_BAD.search(o): E(f"{path}：金額「{MONEY_BAD.search(o).group(0)}」換算不了，寫成 ¥5,000–6,000")
+        clauses = [c.strip() for c in re.split(r"[，。；：！？、（）()—\n]", o) if len(c.strip()) >= 6]
+        dup = {c for c in clauses if clauses.count(c) > 1}
+        if dup: E(f"{path}：同一段文字裡有重複的句子 {sorted(dup)}（改了一半忘了刪另一半）")
         if "Claude" in o and not path.endswith("note") and "comment" not in path: E(f"{path}：內容出現「Claude」，同行的人會看到")
     elif isinstance(o, dict):
         for k, v in o.items(): walk(v, f"{path}.{k}")
@@ -74,6 +88,9 @@ for f in ("assets/app.js", "assets/foodmap.js", "assets/spotmap.js", "assets/ski
     if not os.path.exists(os.path.join(ROOT, f)): continue
     for ln, line in enumerate(open(os.path.join(ROOT, f), encoding="utf-8"), 1):
         if "Claude" in line and ("'" in line or '"' in line) and "Co-Authored" not in line and not line.strip().startswith(("/*", "*", "//")): E(f"{f}:{ln}：畫面文字出現「Claude」")
+        m = PROSE_ESC.search(line) if f != "assets/editor.js" else None  # 編輯器的輸入框要原樣
+        if m: E(f"{f}:{ln}：說明文字 {m.group(0)}） 只用 esc()，會把 **粗體** 原樣印出來——改用 em()")
+        if f == "assets/film.js" and 'esc(sc.h)' in line: E(f"{f}:{ln}：序幕的 h 可以有 <br>，不要用 esc()")
 
 # 0c. 開門／關門：抵達早於開門會乾等、離開晚於關門是來不及；長時間停留又沒有 at／by／open 的站點提醒一下
 resort_pts = [(r["lat"], r["lon"]) for r in trip.get("resorts", [])] + [(b["lat"], b["lon"]) for b in trip.get("bases", [])]

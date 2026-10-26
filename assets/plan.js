@@ -54,13 +54,14 @@
        {t}        這一幕／這一站自己的抵達時間（ctx）
        {open:zoo} {close:zoo}  plan.json places 的開門／關門    {at:beer} {by:rental}  站點的固定時間
        {sun:rise|set|dark}  trip.js 當天的日出／日落／天黑    {T:rental.hours}  trip.js 任一欄位 */
-  var TOKEN = /\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}/g;
+  var TOKEN = /\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}|\{leg:([\w-]+)\|([\w-]+)(?:\|(walk|shuttle|taxi))?\}/g;
   var schedCache = {};
   function fill(text, date, ctx) {
     if (!text || String(text).indexOf("{") < 0) return text;
     if (!P.plan) return text; /* plan.json 還沒載好：先原樣顯示，載好後各頁會重畫 */
-    return String(text).replace(TOKEN, function (m, kind, id, nth, md, sun, tpath) {
+    return String(text).replace(TOKEN, function (m, kind, id, nth, md, sun, tpath, lgA, lgB, lgVia) {
       var T = window.TRIP || {};
+      if (lgA) { var LG = leg(lgA, lgB, lgVia); return LG ? String(P.mode() === "snow" ? LG.snow : LG.normal) : m; } /* {leg:a|b}＝這段路現在路況的分鐘數 */
       if (sun) { var d = (T.days || []).filter(function (x) { return x.date === date; })[0]; return d && d.sun ? d.sun[{ rise: 0, set: 1, dark: 2 }[sun]] : m; }
       if (tpath) { var v = T; tpath.split(".").forEach(function (k) { v = v == null ? v : v[k]; }); return v == null ? m : String(v); }
       var dd = md ? date.slice(0, 5) + md : date;
@@ -74,6 +75,26 @@
     });
   }
   P.fill = fill; P.clearCache = function () { schedCache = {}; };
+
+  /* 共用：跳脫、**粗體**、標記 → HTML。所有頁面的說明文字都走這一個，才不會有的頁面漏掉粗體或時間標記 */
+  P.esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  P.text = function (s, date, ctx) { return P.esc(date ? fill(s, date, ctx) : s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); };
+
+  /* 共用：日圓→台幣。trip.js 的匯率先用，上次抓到的即時匯率其次，載入後抓 open.er-api 更新；四捨五入到十元 */
+  var T0 = window.TRIP || { fx: { jpyTwd: 0.21, date: "" } };
+  P.fx = { rate: T0.fx.jpyTwd, date: T0.fx.date, live: false };
+  try { var cfx = JSON.parse(localStorage.getItem("snow13-fx")); if (cfx && cfx.rate > 0.1 && cfx.rate < 0.4) { P.fx.rate = cfx.rate; P.fx.date = cfx.date; } } catch (e) { }
+  P.twd = function (n) { var t = n * P.fx.rate; return t >= 100 ? Math.round(t / 10) * 10 : Math.round(t); };
+  P.loadFx = function () {
+    return fetch("https://open.er-api.com/v6/latest/JPY").then(function (r) { return r.json(); }).then(function (j) {
+      if (!(j && j.rates && j.rates.TWD)) return P.fx;
+      var changed = Math.abs(j.rates.TWD - P.fx.rate) > 1e-6;
+      P.fx.rate = j.rates.TWD; P.fx.live = true;
+      if (j.time_last_update_unix) P.fx.date = new Date(j.time_last_update_unix * 1000).toISOString().slice(0, 10);
+      try { localStorage.setItem("snow13-fx", JSON.stringify({ rate: P.fx.rate, date: P.fx.date })); } catch (e) { }
+      P.fx.changed = changed; return P.fx;
+    }).catch(function () { P.fx.changed = false; return P.fx; });
+  };
 
   function fetchJSON(u) { return fetch(u, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }); }
   P.ready = Promise.all([fetchJSON(BASE + "data/plan.json"), fetchJSON(BASE + "data/legs.json")]).then(function (r) { P.plan = r[0]; P.legs = r[1]; return P; });

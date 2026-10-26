@@ -41,7 +41,7 @@ def schedule(date, mode="normal"):
         t = arr + stay
     return out
 
-TOKEN = re.compile(r"\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}")
+TOKEN = re.compile(r"\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}|\{leg:([\w-]+)\|([\w-]+)(?:\|(walk|shuttle|taxi))?\}")
 HHMM = re.compile(r"(?<![\d:])\d{1,2}:\d{2}(?![\d:])")
 
 class TokenError(Exception): pass
@@ -50,7 +50,12 @@ def fill(text, date, ctx_id=None, mode="normal", strict=False):
     """把 {t:villa}、{dep:kiroro}、{t:favlux@01-19}、{open:zoo}、{sun:set}、{T:rental.hours} 換成實際值。strict=True 時換不出來就丟 TokenError。"""
     if not text or "{" not in str(text): return text
     def rep(m):
-        kind, id_, nth, md, sun, tpath = m.groups()
+        kind, id_, nth, md, sun, tpath, lg_a, lg_b, lg_via = m.groups()
+        if lg_a:
+            L = leg_of(lg_a, lg_b, lg_via or "drive")
+            if L: return str(L[mode])
+            if strict: raise TokenError(f"{m.group(0)}：legs.json 沒有 {lg_a}→{lg_b} 這段路（在編輯器儲存一次會補）")
+            return m.group(0)
         if sun:
             d = DAY_BY_DATE.get(date)
             if d and d.get("sun"): return d["sun"][{"rise": 0, "set": 1, "dark": 2}[sun]]

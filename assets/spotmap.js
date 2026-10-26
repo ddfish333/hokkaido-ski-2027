@@ -64,9 +64,9 @@
     var mapsUrl = g && g.pid ? 'https://www.google.com/maps/place/?q=place_id:' + g.pid : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((s.ja || s.name) + " " + s.area);
     var meta = [];
     meta.push('<span class="area">' + esc(s.area) + '</span>');
-    if (s.hours) meta.push(esc(s.hours));
+    if (s.hours) meta.push(em(s.hours));
     if (s.closed && s.closed.length) meta.push('週' + s.closed.map(function (x) { return DOW[x]; }).join("、") + '休');
-    if (s.fee) meta.push(esc(s.fee));
+    if (s.fee) meta.push(em(s.fee));
     if (s.time) meta.push('約 ' + s.time + ' 分');
     if (c.b) meta.push('從' + esc(c.b.short.split("・").pop()) + '開約 ' + driveMin(s, c) + ' 分');
     meta.push('<span class="fit">' + kids[0] + '</span>');
@@ -216,7 +216,7 @@
     var g = s.g;
     popup.setLngLat([s.lon, s.lat]).setHTML('<b>' + esc(s.name) + '</b><span>' + esc(s.kind) + ' · ' + esc(s.area) + (g && g.rating ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
       '<em class="' + (s.status === "plan" ? "gold" : "blue") + '">' + st[0] + (s.day ? " " + md(s.day) : "") + '</em>' +
-      '<small>' + esc(s.what.replace(/\*\*/g, "")).slice(0, 70) + (s.what.length > 70 ? "…" : "") + '</small>' +
+      '<small>' + em(s.what.replace(/\*\*/g, "")).slice(0, 70) + (s.what.length > 70 ? "…" : "") + '</small>' +
       (s.photoAt ? '<small class="cam">📷 拍攝點：' + esc(s.photoName) + '（地圖上的相機）</small>' : "") +
       (s.status !== "plan" ? '<a href="' + addUrl(s, c) + '">加入行程 ＋</a>' : "")).addTo(map);
   }

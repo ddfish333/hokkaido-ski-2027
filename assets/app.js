@@ -39,9 +39,9 @@
   /* ---------- 日圓／台幣 ---------- */
   var CUR_MODES = ["both", "twd", "jpy"], CUR_LABEL = { both: "¥＋NT$", twd: "NT$", jpy: "¥" };
   state.cur = CUR_MODES.indexOf(store("snow13-cur")) >= 0 ? store("snow13-cur") : "both";
-  state.rate = T.fx.jpyTwd; state.rateDate = T.fx.date;
-  (function () { var c = store("snow13-fx"); if (c && c.rate > 0.1 && c.rate < 0.4) { state.rate = c.rate; state.rateDate = c.date; } })();   // 上次抓到的即時匯率先用，載入後不會跳
-  function twd(n) { var t = n * state.rate; return t >= 100 ? Math.round(t / 10) * 10 : Math.round(t); }
+  var FX = window.Plan ? Plan.fx : { rate: T.fx.jpyTwd, date: T.fx.date };
+  state.rate = FX.rate; state.rateDate = FX.date;
+  function twd(n) { return window.Plan ? Plan.twd(n) : Math.round(n * state.rate / 10) * 10; }
   function nf(n) { return n.toLocaleString("en-US"); }
   function money(s) {
     s = String(s == null ? "" : s);
@@ -184,7 +184,7 @@
         '<p class="ch-k">' + esc(c.en) + '</p>' +
         '<p class="ch-jp">' + esc(c.jp) + '</p>' +
         '<p class="ch-area">' + esc(b.short) + '｜' + md(b.from) + '–' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
-        '<p class="ch-line">' + esc(c.line) + '</p>' +
+        '<p class="ch-line">' + em(c.line) + '</p>' +
         '<p class="ch-stay">' + esc(b.name) + (b.checkin ? ' · 入住 ' + esc(fill(b.checkin, b.from)) : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
         '<p class="ch-links">' + (site ? arrowLink("官網", site[1]) : "") + arrowLink("導航", navUrl(b.lat, b.lon)) + '</p>' +
         '</div></article>';
@@ -277,7 +277,7 @@
       var plots = (window.SPOTS || []).filter(function (x) { return x.kind === "停車"; });
       html += '<div class="card parkcard"><p class="panel-label">車停哪裡（飯店沒有停車場）</p><ul class="parklist">' + plots.map(function (x) {
         var url = x.g && x.g.pid ? 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(x.ja || x.name) + '&destination_place_id=' + x.g.pid : navUrl(x.lat, x.lon);
-        return '<li class="' + (x.status === "check" ? "no" : "") + '"><a href="' + url + '" target="_blank" rel="noopener"><b>' + esc(x.name) + '</b><span>' + esc(x.fee || "") + (x.caution ? ' · ' + esc(x.caution) : "") + '</span></a></li>';
+        return '<li class="' + (x.status === "check" ? "no" : "") + '"><a href="' + url + '" target="_blank" rel="noopener"><b>' + esc(x.name) + '</b><span>' + em(x.fee || "") + (x.caution ? ' · ' + em(x.caution) : "") + '</span></a></li>';
       }).join("") + '</ul><p class="park-note">點店名直接開 Google Maps 導航到停車場入口。1/16 13:00 前先停パラカ，三晚不動。</p></div>';
     }
     html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>' + (state.mode === "snow" ? "下雪" : "一般") + '</span><b>' + fmtMin(sch.total.min) + '</b></div><div><span>' + (state.mode === "snow" ? "一般" : "下雪") + '</span><b>' + fmtMin(alt.total.min) + '</b></div><div><span>距離</span><b>' + sch.total.km + ' km</b></div>' + (sch.end != null ? '<div><span>最後到達</span><b>' + Plan.hm(sch.end) + '</b></div>' : "") + '</div></div>';
@@ -344,7 +344,7 @@
     var a = '<a href="' + navUrl(p.lat, p.lon) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
     if (p.link) a = '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' + a;
     if (p.baseId) a += '<button type="button" data-origin="' + p.baseId + '">從這裡算車程</button>';
-    return '<p class="pop-t">' + esc(p.name) + jaTag(p.ja, p.name) + '</p>' + (p.sub ? '<p class="pop-s">' + esc(p.sub) + '</p>' : '') + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
+    return '<p class="pop-t">' + esc(p.name) + jaTag(p.ja, p.name) + '</p>' + (p.sub ? '<p class="pop-s">' + em(p.sub) + '</p>' : '') + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
   }
   /* 探索地圖的點：景點來自 data/spots.js、餐廳來自 data/food.js（和景點地圖、美食地圖同一份資料），其他類別來自 trip.js */
   function explorePois() {
@@ -361,7 +361,7 @@
   }
   function keyPoints() {
     var pts = [];
-    T.bases.forEach(function (b) { pts.push({ type: "stay", label: b.short.split("・").pop() + " " + b.nights + " 晚", name: b.name, lat: b.lat, lon: b.lon, note: md(b.from) + "–" + md(b.to) + " " + b.nights + " 晚。" + b.notes.join("；"), baseId: b.id }); });
+    T.bases.forEach(function (b) { pts.push({ type: "stay", label: b.short.split("・").pop() + " " + b.nights + " 晚", name: b.name, lat: b.lat, lon: b.lon, note: md(b.from) + "–" + md(b.to) + " " + b.nights + " 晚。" + b.notes.map(function (n) { return fill(n, b.from); }).join("；"), baseId: b.id }); });
     T.resorts.forEach(function (r) { pts.push({ type: "ski", label: SKI_LABEL[r.id] || r.name, name: r.name, ja: r.ja, lat: r.lat, lon: r.lon, note: r.tier + "。" + (r.hours || "") }); });
     pts.push({ type: "ski", label: "富良野（富良野區）", name: "富良野滑雪場 富良野區", lat: 43.3266, lon: 142.3394, note: "富良野纜車（新富良野王子飯店旁）" });
     return pts;
@@ -642,7 +642,7 @@
     var LIM = 25, shown = driveShowAll ? rows : rows.slice(0, LIM);
     $("#drivelist").innerHTML = shown.map(function (x) {
       var p = x.p;
-      return '<li><div><div class="nm"><i class="dot" style="--mc:var(--' + (p.type === "stay" ? "accent" : "c-" + p.type) + ')"></i>' + esc(p.name) + jaTag(p.ja, p.name) + '</div><div class="km">' + esc(CAT_NAME[p.type]) + (p.sub ? ' · ' + esc(p.sub) : '') + ' · ' + x.km + ' km' + (x.est ? '（直線估算）' : '') + '</div></div>' +
+      return '<li><div><div class="nm"><i class="dot" style="--mc:var(--' + (p.type === "stay" ? "accent" : "c-" + p.type) + ')"></i>' + esc(p.name) + jaTag(p.ja, p.name) + '</div><div class="km">' + esc(CAT_NAME[p.type]) + (p.sub ? ' · ' + em(p.sub) : '') + ' · ' + x.km + ' km' + (x.est ? '（直線估算）' : '') + '</div></div>' +
         '<div class="t">' + fmtMin(x.n) + '<small>下雪 ' + fmtMin(x.s) + '</small></div>' +
         '<span class="lk">' + (p.link ? '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' : '') + '<a href="' + navUrl(p.lat, p.lon, o) + '" target="_blank" rel="noopener">開 Google Maps 導航 →</a></span></li>';
     }).join("") + (rows.length > shown.length ? '<li class="more"><button type="button" id="drivemore">還有 ' + (rows.length - shown.length) + ' 個，全部顯示</button></li>' : "");
@@ -774,7 +774,7 @@
       '<div class="fp-top"><b>' + esc(f.name) + '</b><span class="kind">' + esc(f.kind) + '</span>' + (f.rec ? '<span class="badge rec">推薦 ' + f.rec + '</span>' : "") + (f.via ? '<span class="badge via">' + esc(f.via) + '</span>' : "") + (planned ? '<span class="badge gold">今天預計</span>' : "") + (closedToday ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
       '<div class="fp-rating">' + stars + '</div>' +
       '<p class="fp-what">' + em(f.what) + '</p>' +
-      '<p class="fp-meta">' + esc(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (b ? ' · 從' + esc(b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span></p>' +
+      '<p class="fp-meta">' + em(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (b ? ' · 從' + esc(b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span></p>' +
       '<div class="fp-act">' + (g ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") + '<a href="' + mapsUrl + '" target="_blank" rel="noopener">在 Google Maps 開啟 →</a></div>' +
       '<div class="fp-embed" hidden></div></li>';
   }
@@ -795,7 +795,7 @@
       var f = foodById(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
       var bk = (p.backup || []).map(function (id) { var g = foodById(id); return g ? '<a href="' + linkBase + '#' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</a>' : ""; }).filter(Boolean).join("、");
       return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><a class="pick-name" href="' + linkBase + '#' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</a><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
-        '<p class="pick-why">' + em(p.why) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date)) + '</p>' : "") + '</li>';
+        '<p class="pick-why">' + em(fill(p.why, p.date)) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date)) + '</p>' : "") + '</li>';
     }).join("") + '</ul></div>';
   }
   /* 可收合的長清單：標題列永遠看得到，內容預設收起；打開狀態在重新渲染後保留 */
@@ -859,7 +859,7 @@
         '<div class="fp-top"><b>' + esc(s.name) + '</b><span class="kind">' + esc(s.kind) + '</span><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (closed ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
         (g && g.rating ? '<div class="fp-rating"><span class="stars"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small></div>' : "") +
         '<p class="fp-what">' + em(s.what) + '</p>' + (s.caution ? '<p class="fp-caution">⚠ ' + em(s.caution) + '</p>' : "") + (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(s.photo) + '</p>' : "") +
-        '<p class="fp-meta">' + esc(s.hours || "") + (s.fee ? ' · ' + esc(s.fee) : "") + (s.time ? ' · 約 ' + s.time + ' 分' : "") + ' · 離今天路線最近約 ' + min + ' 分車程</p>' +
+        '<p class="fp-meta">' + em(s.hours || "") + (s.fee ? ' · ' + em(s.fee) : "") + (s.time ? ' · 約 ' + s.time + ' 分' : "") + ' · 離今天路線最近約 ' + min + ' 分車程</p>' +
         '<div class="fp-act">' + (g && g.q ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") +
         '<a href="' + (g && g.pid ? 'https://www.google.com/maps/place/?q=place_id:' + g.pid : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((s.ja || s.name) + " " + s.area)) + '" target="_blank" rel="noopener">Google Maps →</a>' +
         '<a class="fp-add" href="' + BASE + 'plan/?add=' + s.id + '#' + d.date + '">加入行程 ＋</a></div><div class="fp-embed" hidden></div></li>';
@@ -929,15 +929,8 @@
     rerenderMoney();
   });
   function loadFx() {
-    fetch("https://open.er-api.com/v6/latest/JPY").then(function (r) { return r.json(); }).then(function (j) {
-      if (j && j.rates && j.rates.TWD) {
-        if (j.time_last_update_unix) state.rateDate = new Date(j.time_last_update_unix * 1000).toISOString().slice(0, 10);
-        store("snow13-fx", { rate: j.rates.TWD, date: state.rateDate });
-        if (Math.abs(j.rates.TWD - state.rate) < 1e-6) return;
-        state.rate = j.rates.TWD;
-        rerenderMoney();
-      }
-    }).catch(function () { /* 用內建匯率 */ });
+    if (!window.Plan || !Plan.loadFx) return;
+    Plan.loadFx().then(function (fx) { state.rate = fx.rate; state.rateDate = fx.date; if (fx.changed) rerenderMoney(); });
   }
 
 

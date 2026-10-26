@@ -29,7 +29,7 @@ window.SCENES = {
       { t: "下午", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "自己的雪道，滑到纜車收。", s: "教練走了之後，才是真正開始滑的時候。", amb: "quiet", dur: 7000 },
       { stop: "temiya", imgs: ["scene/asari-1.jpg", "scene/otaru-3.jpg"], h: "滑到纜車收，下山泡湯。", s: "小樽的手宮殿，離壽司店四分鐘。小孩這時候跟保姆在山鄉。", amb: "quiet", warm: true, dur: 6500 },
       { stop: "villa", label: "接小孩", imgs: ["scene/villa-5.jpg", "scene/villa-3.jpg"], h: "回山鄉接保姆和小孩。", s: "然後一起去小樽。", amb: "quiet", warm: true, dur: 5500 },
-      { stop: "masazushi", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg"], h: "小樽，壽司。", s: "政寿司的個室，小孩有兒童餐。吃完，一刻鐘就到家。", amb: "snow", warm: true, dur: 7000 },
+      { stop: "masazushi", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg"], h: "小樽，壽司。", s: "政寿司的個室，小孩有兒童餐。吃完，{leg:masazushi|villa} 分鐘就到家。", amb: "snow", warm: true, dur: 7000 },
       { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "想夜滑的大人走路去 Onze。<br>明天連假，早一點出門。", amb: "fire", warm: true, dur: 8000 }
     ]
   },

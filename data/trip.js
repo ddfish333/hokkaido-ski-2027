@@ -12,7 +12,7 @@ window.TRIP = {
   bases: [
     { id: "villa", name: "山郷 春 Villa -SHUN-", short: "小樽・山鄉", area: "小樽", lat: 43.1467841, lon: 141.1354924,
       from: "2027-01-07", to: "2027-01-11", nights: 4, checkin: "15:00 起（官網沒寫最晚時間；1/7 預計 {t:villa@01-07} 到，先跟房東說）", checkout: "11:00",
-      notes: ["**走路 5 分到 Onze 雪場**（夜滑到 22:45），面海滑雪；開車 35 分上 Kiroro、25 分進札幌", "145 m² 一棟包：挑高大窗對著森林、檜木浴缸、森林景觀的廚房；洗烘衣機、洗碗機", "三五工務店蓋的「像住在北海道一樣」的房子，用的是北海道的木頭；停車每棟 2 格、免費"],
+      notes: ["**走路 5 分到 Onze 雪場**（夜滑到 {close:onze}），面海滑雪；開車 35 分上 Kiroro、25 分進札幌", "145 m² 一棟包：挑高大窗對著森林、檜木浴缸、森林景觀的廚房；洗烘衣機、洗碗機", "三五工務店蓋的「像住在北海道一樣」的房子，用的是北海道的木頭；停車每棟 2 格、免費"],
       facts: ["走路 5 分到 Onze", "145 m² 一棟包", "檜木浴缸・洗烘衣機", "停車 2 格"],
       video: "villa-hover.mp4", videoSm: "villa-hover-sm.mp4",
       links: [["官網", "https://mt-sango.com/stay/shun/"], ["訂房", "https://www.ikyu.com/00051685/"]], g: { rating: 5.0, n: 2, pid: "ChIJv-YvGwDfCl8Rybz1BtgpE2w" } },
@@ -24,7 +24,7 @@ window.TRIP = {
       links: [["官網", "https://bestdayeverfurano.com/"], ["訂房", "https://tour.l-tike.com/hotels/domestic/hotel/75033723/"]], g: { rating: 5.0, n: 48, pid: "ChIJPY_8pplTc18Rq5OgungIGww" } },
     { id: "sapporo", name: "FAV LUX 札幌薄野", short: "札幌・薄野", area: "札幌", lat: 43.0523778, lon: 141.3485722,
       from: "2027-01-16", to: "2027-01-19", nights: 3, checkin: "15:00", checkout: "10:00",
-      notes: ["2025 年 7 月新開幕、84 間：**上下舖的 4–6 人家庭房**、房內洗衣機、兩個洗手台、小客廳、冰箱微波爐，小孩有自己的小桌子；住客專用大浴場＋三溫暖（Google 4.3，306 則）", "**在札幌盡量走路**：街很美、什麼都在 10 分鐘內，札幌站–大通–薄野一路地下街不用踩雪；市電「東本願寺前」走 3 分", "車子 1/16 停好就三晚不動——停哪裡、怎麼導航，看單日頁的「車停哪裡」", "退房 10:00，1/19 同時要還車：**08:45 前離開**"],
+      notes: ["2025 年 7 月新開幕、84 間：**上下舖的 4–6 人家庭房**、房內洗衣機、兩個洗手台、小客廳、冰箱微波爐，小孩有自己的小桌子；住客專用大浴場＋三溫暖（Google 4.3，306 則）", "**在札幌盡量走路**：街很美、什麼都在 10 分鐘內，札幌站–大通–薄野一路地下街不用踩雪；市電「東本願寺前」走 3 分", "車子 1/16 停好就三晚不動——停哪裡、怎麼導航，看單日頁的「車停哪裡」", "退房 {T:bases.2.checkout}，1/19 同時要還車：**{t:favlux@01-19} 前離開**"],
       facts: ["上下舖家庭房", "房內洗衣機", "大浴場・三溫暖", "走路逛札幌，車停好三晚不動"],
       video: "sapporo-hover.mp4", videoSm: "sapporo-hover-sm.mp4",
       links: [["官網", "https://fav-hotels.com/hotels/lux/sapporosusukino/"], ["訂房", "https://www.jalan.net/yad333573/"]], g: { rating: 4.3, n: 306, pid: "ChIJDeSbhZMpC18RgWu851Dm37E" } }
