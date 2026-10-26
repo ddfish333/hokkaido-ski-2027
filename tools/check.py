@@ -43,9 +43,6 @@ def text_fields():
     for d in trip["days"]:
         for k in ("title", "sub", "alert"):
             if d.get(k): yield f"trip.js {d['date']} {k}", d[k], d["date"], None, True
-        for i, m in enumerate(d.get("meals") or []): yield f"trip.js {d['date']} meals[{i}]", m, d["date"], None, True
-        if d.get("breakfast"): yield f"trip.js {d['date']} breakfast", d["breakfast"], d["date"], None, True
-        else: W(f"trip.js {d['date']}：沒寫早餐（breakfast）")
     for d, sc in scenes.items():
         if (sc.get("poster") or {}).get("line"): yield f"scenes.js {d} poster.line", sc["poster"]["line"], d, None, True
         for i, s in enumerate(sc.get("scenes") or [], 1):
@@ -59,8 +56,8 @@ def text_fields():
             if b.get(k) and "{" in str(b[k]): yield f"trip.js bases {b['id']} {k}", b[k], b["from"], None, False
         for i, n in enumerate(b.get("notes") or []): yield f"trip.js bases {b['id']} notes[{i}]", n, b["from"], None, True
     for i, p in enumerate(load_js("data/food.js", "FOOD_PICKS") or []):
-        for k in ("why", "book"):
-            if p.get(k): yield f"food.js FOOD_PICKS[{i}] {p.get('pick')} {k}", p[k], p["date"], None, True
+        for k in ("why", "book", "what"):
+            if p.get(k): yield f"food.js FOOD_PICKS[{i}] {p.get('pick') or p.get('what')} {k}", p[k], p["date"], None, True
 for d in trip["days"]:
     for k in ("plan", "legs"):
         if k in d: E(f"trip.js {d['date']}：還有 {k} 陣列——時間表只能在 plan.json，請刪掉")
@@ -161,7 +158,8 @@ if "{{SUB}}" in open(os.path.join(ROOT, "tools/day.template.html"), encoding="ut
 for f, marks in {"assets/editor.js": [("/git/refs/heads/main", "一次儲存一個 commit、快轉更新（10/26）"), ("merge3(", "多人同時改以天為單位合併（10/26）"), ("readPlan(commitSha)", "存完讀回比對才顯示已儲存（10/26）"), ("stopsSig(", "改數字只更新字、不重畫正在輸入的欄位（10/26 時間轉輪會跳掉）"), ("function candidates(", "新增站點用選的，資料讀 trip／spots／food（10/26）")],
                  "assets/plan.js": [("fromGitHub(", "有金鑰的手機直接讀 GitHub 最新版（10/26）"), ("snow13-saved", "剛存的手機先用自己存的版本（10/26）")],
                  "plan/index.html": [("id=\"toast\"", "儲存狀態固定在畫面底部（10/26）")],
-                 "assets/app.js": [("Plan.legHTML(", "路段一行（交通方式顏色）單日頁和編輯器共用一份（10/26）")]}.items():
+                 "assets/app.js": [("Plan.legHTML(", "路段一行（交通方式顏色）單日頁和編輯器共用一份（10/26）"), ("Plan.mealCardHTML(", "吃什麼卡讀 FOOD_PICKS（10/26）")],
+                 "assets/foodmap.js": [("Plan.picksHTML(", "美食地圖的這天怎麼吃讀同一份（10/26）")]}.items():
     src = open(os.path.join(ROOT, f), encoding="utf-8").read()
     for mark, what in marks:
         if what and mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被拿掉或被舊檔案蓋掉了")
@@ -243,19 +241,32 @@ else:
 food = load_js("data/food.js", "FOOD") or []
 food_areas = load_js("data/food.js", "FOOD_AREAS") or {}
 all_areas = {a for v in food_areas.values() for a in v}
-all_meals = "".join("".join(d.get("meals", [])) + (d.get("breakfast") or "") for d in trip["days"])
+picks_all = load_js("data/food.js", "FOOD_PICKS") or []
+picked_ids = {i for p in picks_all for i in [p.get("pick")] + (p.get("backup") or []) if i}
 seen = set()
 for f in food:
     if f["id"] in seen: E(f"food.js：id {f['id']} 重複")
     seen.add(f["id"])
     if not (41 < f.get("lat", 0) < 46 and 139 < f.get("lon", 0) < 146): E(f"food.js：{f['name']} 座標不在北海道")
-    if f.get("area") not in all_areas: E(f"food.js：{f['name']} 地區「{f.get('area')}」不在 FOOD_AREAS 裡，日頁不會顯示")
-    if f.get("key") and f["key"] not in all_meals: W(f"food.js：{f['name']} 的 key「{f['key']}」沒有對到任何一天的餐點，「今天預計」不會亮")
+    if f.get("area") not in all_areas and f["id"] not in picked_ids: E(f"food.js：{f['name']} 地區「{f.get('area')}」不在 FOOD_AREAS 裡，也沒有被任何一餐選到，日頁不會顯示")
+    if "key" in f: E(f"food.js：{f['name']} 還有 key——「今天預計」改由 FOOD_PICKS 決定，key 刪掉")
+# 餐點的唯一來源是 FOOD_PICKS（10/26：trip.js 自由文字和美食地圖對不起來，「早上又機上又 AEON」）
 for d in trip["days"]:
-    for i, m in enumerate(d.get("meals", [])):
-        if i == 0 and "山上" in m: continue
-        if not any(f.get("key") and f["key"] in m for f in food) and not re.search(r"自理|便利商店|超市|飯店|民宿|機場|機上|飛機|Villa|簡單|自己煮|路上|途中|雪場|附近|市區|^回", m):
-            W(f"{d['date']}：餐點「{m}」在 food.js 沒有對應的店（美食地圖不會標「預計」）")
+    for k in ("breakfast", "meals"):
+        if k in d: E(f"trip.js {d['date']}：還有 {k}——餐點只寫在 food.js FOOD_PICKS，這裡刪掉")
+    have = {p["slot"] for p in picks_all if p["date"] == d["date"]}
+    for slot, name in (("breakfast", "早餐"), ("lunch", "午餐"), ("dinner", "晚餐")):
+        if slot not in have: E(f"{d['date']}：FOOD_PICKS 沒有{name}——每天三餐都要寫（不是餐廳就 pick: null＋what）")
+    stops_today = [s["id"] for s in PLAN["days"].get(d["date"], {}).get("stops", [])]
+    for p in picks_all:
+        if p["date"] != d["date"]: continue
+        if not p.get("pick") and not p.get("what"): E(f"{d['date']} {p['slot']}：pick 是空的就要寫 what（例如「機上」「小木屋自己煮」）")
+        if p.get("stop") and p["stop"] not in stops_today: W(f"{d['date']} {p['slot']}：stop「{p['stop']}」不是這天的站點，時間帶不出來")
+        if p["slot"] not in ("breakfast", "lunch", "snack", "dinner", "late"): E(f"{d['date']}：FOOD_PICKS slot「{p['slot']}」不認得")
+dup = {}
+for p in picks_all: dup.setdefault((p["date"], p["slot"]), 0); dup[(p["date"], p["slot"])] += 1
+for (dt, sl), n in dup.items():
+    if n > 1: E(f"{dt} {sl}：FOOD_PICKS 同一餐寫了 {n} 次")
 
 # 景點收藏（data/spots.js）：狀態合法、正式行程的 stop 真的在 plan.json、座標在北海道、id 不重複
 spots = load_js("data/spots.js", "SPOTS") or []
@@ -275,13 +286,15 @@ picks = load_js("data/food.js", "FOOD_PICKS") or []
 food_ids = {f["id"] for f in food}
 for pk in picks:
     if pk["date"] not in days: E(f"food.js FOOD_PICKS：{pk['date']} 不在行程裡")
-    for i in [pk["pick"]] + pk.get("backup", []):
-        if i not in food_ids: E(f"food.js FOOD_PICKS：{pk['date']} {pk['slot']} 指到不存在的店 {i}")
-    f = next((x for x in food if x["id"] == pk["pick"]), None)
-    if f and f.get("closed") and pk["date"] in days:
+    for i in [pk.get("pick")] + pk.get("backup", []):
+        if i and i not in food_ids: E(f"food.js FOOD_PICKS：{pk['date']} {pk['slot']} 指到不存在的店 {i}")
+    if pk["date"] in days:
         import datetime as _dt
         y, m, dd = map(int, pk["date"].split("-")); wd = (_dt.date(y, m, dd).weekday() + 1) % 7
-        if wd in f["closed"]: E(f"food.js FOOD_PICKS：{pk['date']} {pk['slot']} 選的 {f['name']} 那天公休")
+        for j, i in enumerate([pk.get("pick")] + pk.get("backup", [])):
+            f = next((x for x in food if x["id"] == i), None)
+            if f and f.get("closed") and wd in f["closed"]:
+                (E if j == 0 else W)(f"food.js FOOD_PICKS：{pk['date']} {pk['slot']} {'選的' if j == 0 else '備案'} {f['name']} 那天公休")
 
 print("=== 行程一致性檢查 ===")
 print(f"trip.js {len(days)} 天 · plan.json {len(dayplan)} 天 · scenes.js {len(scenes)} 天 · 完整序幕 {sum(1 for v in scenes.values() if v.get('scenes'))} 天 · food.js {len(food)} 家 · spots.js {len(spots)} 個景點")

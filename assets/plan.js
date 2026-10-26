@@ -113,6 +113,49 @@
     taxi: '<rect x="6" y="3.5" width="12" height="13" rx="3"/><path d="M6 10h12M9 16.5L7.5 20M15 16.5l1.5 3.5"/><circle cx="9" cy="13.3" r=".6"/><circle cx="15" cy="13.3" r=".6"/>'
   };
   function legMin(m) { m = Math.round(m); if (m < 60) return m + " 分"; var h = Math.floor(m / 60), r = m % 60; return h + " 小時" + (r ? " " + r + " 分" : ""); }
+  /* ---------- 每一天怎麼吃（唯一來源：food.js 的 FOOD_PICKS） ----------
+     單日頁的「吃什麼」卡、「這天怎麼吃」、美食地圖的「預計」都用這一份；trip.js 不再寫餐點。 */
+  var SLOTS = ["breakfast", "lunch", "snack", "dinner", "late"];
+  P.SLOT = { breakfast: "早", lunch: "午", snack: "點心", dinner: "晚", late: "宵夜" };
+  P.SLOT_LONG = { breakfast: "早餐", lunch: "午餐", snack: "點心", dinner: "晚餐", late: "大人宵夜" };
+  var PICK_STATUS = { proposed: ["建議", "st-blue"], decided: ["已決定", "st-gold"], booked: ["已訂位", "st-ok"] };
+  P.food = function (id) { return id ? (window.FOOD || []).filter(function (f) { return f.id === id; })[0] : null; };
+  P.meals = function (date) { return (window.FOOD_PICKS || []).filter(function (p) { return p.date === date; }).sort(function (a, b) { return SLOTS.indexOf(a.slot) - SLOTS.indexOf(b.slot); }); };
+  P.plannedIds = function (date) { return P.meals(date).map(function (p) { return p.pick; }).filter(Boolean); };
+  P.mealIds = function (date) { var o = []; P.meals(date).forEach(function (p) { if (p.pick) o.push(p.pick); (p.backup || []).forEach(function (b) { o.push(b); }); }); return o; };
+  function shortName(f) { return f.name.replace(/（.*?）/g, ""); }
+  P.mealName = function (p) { var f = P.food(p.pick); return f ? shortName(f) : (p.what || ""); };
+  /* 這一餐幾點：餐廳本身就是那一站（或在那站 200 m 內、不是待一整天的站）才帶時間 */
+  P.mealTime = function (p) {
+    if (!p.stop || !P.plan) return "";
+    var sch = P.schedule(p.date, P.mode()), st = sch.stops.filter(function (s) { return s.id === p.stop; }), f = P.food(p.pick);
+    if (!st.length) return "";
+    var s = p.slot === "breakfast" ? st[0] : st[st.length - 1];
+    if (p.stop === p.pick || (f && hav(f, s) < 0.2 && (s.stay || 0) <= 180)) return s.time;
+    return "";
+  };
+  /* link(id, 文字)：各頁自己決定連到哪（單日頁連美食地圖、美食地圖捲到卡片） */
+  P.mealCardHTML = function (date, link) {
+    var ms = P.meals(date); if (!ms.length) return "";
+    return '<ul class="meals">' + ms.map(function (p) {
+      var f = P.food(p.pick), t = P.mealTime(p), bk = (p.backup || []).map(function (id) { var g = P.food(id); return g ? link(id, shortName(g)) : ""; }).filter(Boolean).join("、");
+      return '<li><span>' + P.SLOT[p.slot] + '</span><div class="meal-b"><b>' + (f ? link(f.id, shortName(f)) : P.esc(p.what || "")) + '</b>' + (t ? ' <time>' + t + '</time>' : "") +
+        (bk ? '<small class="meal-bk">備案 ' + bk + '</small>' : "") + '</div></li>';
+    }).join("") + '</ul>';
+  };
+  P.picksHTML = function (date, link) {
+    var ms = P.meals(date); if (!ms.length) return "";
+    return '<ul class="picklist">' + ms.map(function (p) {
+      var f = P.food(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed, t = P.mealTime(p);
+      var bk = (p.backup || []).map(function (id) { var g = P.food(id); return g ? link(id, shortName(g)) : ""; }).filter(Boolean).join("、");
+      return '<li class="pick ' + st[1] + (f ? "" : " pick-self") + '"><div class="pick-top"><span class="pick-slot">' + P.SLOT_LONG[p.slot] + (t ? " " + t : "") + '</span>' +
+        (f ? link(f.id, P.esc(f.name), "pick-name") : '<span class="pick-name">' + P.esc(p.what || "") + '</span>') +
+        '<span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
+        (p.why ? '<p class="pick-why">' + P.text(p.why, p.date, { slot: p.slot }) + '</p>' : "") + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") +
+        (p.book ? '<p class="pick-book">📞 ' + P.esc(fill(p.book, p.date, { slot: p.slot })) + '</p>' : "") + '</li>';
+    }).join("") + '</ul>';
+  };
+
   P.legMode = function (l) { return P.LEGMODE[l && l.mode] ? l.mode : "drive"; };
   P.legHTML = function (l) {
     var m = P.legMode(l);

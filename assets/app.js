@@ -324,7 +324,8 @@
     html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>' + (state.mode === "snow" ? "下雪" : "一般") + '</span><b>' + fmtMin(sch.total.min) + '</b></div><div><span>' + (state.mode === "snow" ? "一般" : "下雪") + '</span><b>' + fmtMin(alt.total.min) + '</b></div><div><span>距離</span><b>' + sch.total.km + ' km</b></div>' + (sch.end != null ? '<div><span>最後到達</span><b>' + Plan.hm(sch.end) + '</b></div>' : "") + '</div></div>';
     html += '<div class="card"><p class="panel-label">天氣</p>' + dayWeather(d) + '</div>';
     html += '<div class="card"><p class="panel-label">日照</p><div class="sunrow"><div><span>日出</span><b>' + d.sun[0] + '</b></div><div><span>日落</span><b>' + d.sun[1] + '</b></div><div><span>天黑</span><b>' + d.sun[2] + '</b></div></div></div>';
-    html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals">' + (d.breakfast ? '<li><span>早</span>' + em(fill(d.breakfast, d.date)) + '</li>' : "") + '<li><span>午</span>' + em(fill(d.meals[0], d.date)) + '</li><li><span>晚</span>' + em(fill(d.meals[1], d.date)) + '</li></ul><a class="jump" href="#dayfood">看附近有哪些店 ↓</a></div>';
+    /* 吃什麼：讀 food.js FOOD_PICKS（和下面「這天怎麼吃」、美食地圖同一份），不再手寫 */
+    html += '<div class="card"><p class="panel-label">吃什麼</p>' + Plan.mealCardHTML(d.date, function (id, t) { return '<a href="' + BASE + 'food/?day=' + d.date + '#' + id + '">' + esc(t) + '</a>'; }) + '<a class="jump" href="#dayfood">每一餐為什麼這樣選、附近還有哪些店 ↓</a></div>';
     html += nannyCard(d, sch);
     html += '</div>';
     $("#dayview").innerHTML = html;
@@ -817,7 +818,7 @@
   var FIT = { best: ["很適合我們這團帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
   function foodItem(f, d, b) {
     var wd = d ? new Date(d.date + "T00:00:00").getDay() : -1, closedToday = f.closed && f.closed.indexOf(wd) >= 0;
-    var planned = !!(d && f.key && d.meals.join("").indexOf(f.key) >= 0);
+    var planned = !!(d && Plan.plannedIds(d.date).indexOf(f.id) >= 0);
     var km = b ? haversine(b, f) * 1.35 : 0, min = b ? r5(km / 40 * 60) : 0;
     var fit = FIT[f.fit] || FIT.ok;
     var g = f.g, stars = g ? '<span class="stars" aria-label="Google 評價 ' + g.rating + '"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small>' : '<small class="nog">Google 評價待查</small>';
@@ -837,18 +838,9 @@
     box.innerHTML = '<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Maps" src="https://maps.google.com/maps?hl=zh-TW&q=' + encodeURIComponent(btn.dataset.q) + '&z=16&output=embed"></iframe><p class="fp-embedhint">Google 的照片、評論與目前營業狀態；點左上角店名可以在 Google Maps 開大圖。</p>';
     box.hidden = false; btn.textContent = "收起 ▴";
   });
-  var PICK_SLOT = { breakfast: "早餐", lunch: "午餐", snack: "下午", dinner: "晚餐", late: "大人宵夜" }, PICK_ORDER = ["breakfast", "lunch", "snack", "dinner", "late"];
-  var PICK_STATUS = { proposed: ["建議", "st-blue"], decided: ["已決定", "st-gold"], booked: ["已訂位", "st-ok"] };
-  function foodById(id) { return FOOD.filter(function (f) { return f.id === id; })[0]; }
   function picksBlock(d, linkBase) {
-    var picks = (window.FOOD_PICKS || []).filter(function (p) { return p.date === d.date; }).sort(function (a, b) { return PICK_ORDER.indexOf(a.slot) - PICK_ORDER.indexOf(b.slot); });
-    if (!picks.length) return "";
-    return '<div class="picks"><p class="picks-h">這天怎麼吃 <small>依 4 大 4 小帶幼兒的條件挑的（保姆在的日子多一位）；藍色是建議、金色是已決定。新的店進來會重新比對，換掉會寫原因。</small></p><ul class="picklist">' + picks.map(function (p) {
-      var f = foodById(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
-      var bk = (p.backup || []).map(function (id) { var g = foodById(id); return g ? '<a href="' + linkBase + '#' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</a>' : ""; }).filter(Boolean).join("、");
-      return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><a class="pick-name" href="' + linkBase + '#' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</a><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
-        '<p class="pick-why">' + em(fill(p.why, p.date, { slot: p.slot })) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date, { slot: p.slot })) + '</p>' : "") + '</li>';
-    }).join("") + '</ul></div>';
+    var body = Plan.picksHTML(d.date, function (id, t, cls) { return '<a' + (cls ? ' class="' + cls + '"' : "") + ' href="' + linkBase + '#' + id + '">' + t + '</a>'; });
+    return body ? '<div class="picks"><p class="picks-h">這天怎麼吃 <small>依 {party} 帶幼兒的條件挑的；藍色是建議、金色是已決定。備案是想吃好一點或現場排太久時換的。</small></p>'.replace("{party}", esc(Plan.fill("{party}", d.date))) + body + '</div>' : "";
   }
   /* 可收合的長清單：標題列永遠看得到，內容預設收起；打開狀態在重新渲染後保留 */
   function fold(id, head, sub, body) {
@@ -864,15 +856,18 @@
   addEventListener("hashchange", function () { openFoldFor(location.hash); });
   document.addEventListener("click", function (e) { var a = e.target.closest('a[href="#dayfood"],a[href="#dayspots"]'); if (a) openFoldFor(a.getAttribute("href")); });
   function foodBlock(d, b) {
-    var areas = FOOD_AREAS[d.base] || [], list = FOOD.filter(function (f) { return areas.indexOf(f.area) >= 0; });
+    var areas = FOOD_AREAS[d.base] || [], mine = Plan.mealIds(d.date), list = FOOD.filter(function (f) { return areas.indexOf(f.area) >= 0 || mine.indexOf(f.id) >= 0; });
+    areas = areas.concat(list.map(function (f) { return f.area; }).filter(function (a, i, arr) { return areas.indexOf(a) < 0 && arr.indexOf(a) === i; }));
+    var planned = Plan.plannedIds(d.date), isP = function (f) { return planned.indexOf(f.id) >= 0; };
     var byArea = {}; list.forEach(function (f) { (byArea[f.area] = byArea[f.area] || []).push(f); });
     var wd = new Date(d.date + "T00:00:00").getDay();
-    var nClosed = list.filter(function (f) { return f.closed && f.closed.indexOf(wd) >= 0; }).length, nPlanned = list.filter(function (f) { return f.key && d.meals.join("").indexOf(f.key) >= 0; }).length;
-    var html = '<div class="sec-head"><h2>今天可以吃什麼</h2><p class="sec-note">午餐 ' + esc(d.meals[0]) + '；晚餐預計 ' + esc(d.meals[1]) + '。</p></div>' + picksBlock(d, BASE + "food/?day=" + d.date);
+    var nClosed = list.filter(function (f) { return f.closed && f.closed.indexOf(wd) >= 0; }).length, nPlanned = list.filter(isP).length;
+    var ms = Plan.meals(d.date).filter(function (p) { return p.slot === "lunch" || p.slot === "dinner"; });
+    var html = '<div class="sec-head"><h2>今天可以吃什麼</h2><p class="sec-note">' + ms.map(function (p) { return Plan.SLOT_LONG[p.slot] + " " + esc(Plan.mealName(p)); }).join("；") + '。</p></div>' + picksBlock(d, BASE + "food/?day=" + d.date);
     var body = '<a class="btn btn-ghost fm-link" href="' + BASE + 'food/?day=' + d.date + '">在美食地圖上看這些店 →</a>';
     areas.forEach(function (ar) {
       if (!byArea[ar]) return;
-      var items = byArea[ar].slice().sort(function (x, y) { var px = !!(x.key && d.meals.join("").indexOf(x.key) >= 0), py = !!(y.key && d.meals.join("").indexOf(y.key) >= 0); if (px !== py) return px ? -1 : 1; var cx = x.closed && x.closed.indexOf(wd) >= 0, cy = y.closed && y.closed.indexOf(wd) >= 0; if (cx !== cy) return cx ? 1 : -1; if ((x.rec || 99) !== (y.rec || 99)) return (x.rec || 99) - (y.rec || 99); var o = { best: 0, ok: 1, unknown: 2, warn: 3 }; return (o[x.fit] || 1) - (o[y.fit] || 1); });
+      var items = byArea[ar].slice().sort(function (x, y) { var px = isP(x), py = isP(y); if (px !== py) return px ? -1 : 1; var cx = x.closed && x.closed.indexOf(wd) >= 0, cy = y.closed && y.closed.indexOf(wd) >= 0; if (cx !== cy) return cx ? 1 : -1; if ((x.rec || 99) !== (y.rec || 99)) return (x.rec || 99) - (y.rec || 99); var o = { best: 0, ok: 1, unknown: 2, warn: 3 }; return (o[x.fit] || 1) - (o[y.fit] || 1); });
       body += '<h3 class="h3">' + esc(ar) + (ar === "Kiroro" ? "（雪場內，午餐；2025-26 雪季資訊）" : "") + ' · ' + items.length + ' 家</h3><ul class="foodpick">' + items.map(function (f) { return foodItem(f, d, b); }).join("") + '</ul>';
     });
     html += fold("foldfood", '附近所有的店 <b>' + list.length + '</b> 家', '住在' + esc(b.short.split("・").pop()) + '這幾天附近的店，按地區分' + (nPlanned ? ' · 今天預計 ' + nPlanned : "") + (nClosed ? ' · 今天公休 ' + nClosed : "") + ' · 點開看', body);

@@ -45,7 +45,8 @@
     var d = state.day ? dayById[state.day] : null, b = d ? baseById[d.base] : null;
     return { d: d, b: b, wd: d ? wday(d.date) : -1 };
   }
-  function isPlanned(f, c) { return !!(c.d && f.key && c.d.meals.join("").indexOf(f.key) >= 0); }
+  function isPlanned(f, c) { return !!(c.d && window.Plan && Plan.plannedIds(c.d.date).indexOf(f.id) >= 0); }
+  function isMine(f, c) { return !!(c.d && window.Plan && Plan.mealIds(c.d.date).indexOf(f.id) >= 0); }
   function isClosed(f, c) { return !!(f.closed && c.wd >= 0 && f.closed.indexOf(c.wd) >= 0); }
   function driveMin(f, c) { if (!c.b) return 0; return r5(hav(c.b, f) * 1.35 / 40 * 60); }
   function nearby(c) { return c.d ? (FOOD_AREAS[c.d.base] || []) : []; }
@@ -53,7 +54,7 @@
   function visible() {
     var c = ctx();
     return FOOD.filter(function (f) {
-      if (state.area === "附近" && nearby(c).indexOf(f.area) < 0) return false;
+      if (state.area === "附近" && nearby(c).indexOf(f.area) < 0 && !isMine(f, c)) return false;   /* 今天選的店和備案一定在（例如機場） */
       if (state.area !== "全部" && state.area !== "附近" && f.area !== state.area) return false;
       if (state.kind !== "全部" && groupOf(f) !== state.kind) return false;
       if (state.kids && f.fit !== "best") return false;
@@ -195,19 +196,10 @@
   }
 
   /* ---------- 這天怎麼吃（建議／已決定） ---------- */
-  var PICK_SLOT = { breakfast: "早餐", lunch: "午餐", snack: "下午", dinner: "晚餐", late: "大人宵夜" }, PICK_ORDER = ["breakfast", "lunch", "snack", "dinner", "late"];
-  var PICK_STATUS = { proposed: ["建議", "st-blue"], decided: ["已決定", "st-gold"], booked: ["已訂位", "st-ok"] };
-  function byId(id) { return FOOD.filter(function (f) { return f.id === id; })[0]; }
   function picksHTML(c) {
-    if (!c.d) return "";
-    var picks = (window.FOOD_PICKS || []).filter(function (p) { return p.date === c.d.date; }).sort(function (a, b) { return PICK_ORDER.indexOf(a.slot) - PICK_ORDER.indexOf(b.slot); });
-    if (!picks.length) return "";
-    return '<li class="picks"><p class="picks-h">' + md(c.d.date) + ' 這天怎麼吃 <small>藍色是建議、金色是已決定；點店名跳到卡片。</small></p><ul class="picklist">' + picks.map(function (p) {
-      var f = byId(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
-      var bk = (p.backup || []).map(function (id) { var g = byId(id); return g ? '<button type="button" class="lnk" data-go="' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</button>' : ""; }).filter(Boolean).join("、");
-      return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><button type="button" class="pick-name lnk" data-go="' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</button><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
-        '<p class="pick-why">' + em(fill(p.why, p.date, { slot: p.slot })) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date, { slot: p.slot })) + '</p>' : "") + '</li>';
-    }).join("") + '</ul></li>';
+    if (!c.d || !window.Plan) return "";
+    var body = Plan.picksHTML(c.d.date, function (id, t, cls) { return '<button type="button" class="' + (cls ? cls + " " : "") + 'lnk" data-go="' + id + '">' + t + '</button>'; });
+    return body ? '<li class="picks"><p class="picks-h">' + md(c.d.date) + ' 這天怎麼吃 <small>藍色是建議、金色是已決定；點店名跳到卡片。</small></p>' + body + '</li>' : "";
   }
 
   /* ---------- 全部重畫 ---------- */
