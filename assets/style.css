@@ -415,8 +415,21 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .todo .when { font: 400 12px/1.6 var(--f-mono); color: var(--gold); }
 .todo input:checked ~ .what { color: var(--muted); text-decoration: line-through; }
 .kv { list-style: none; margin: 0; padding: 0; display: grid; }
-.kv li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; align-items: center; }
-.kv .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.kv li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, auto); gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; align-items: center; }
+.kv li > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.kv .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; max-width: 60%; justify-self: end; overflow-wrap: anywhere; }
+/* 手機：鍵和值都長的那幾列（例如租車公司＋營業時間）改成上下排，字才不會直著掉下來 */
+@media (max-width: 560px) { .kv li { grid-template-columns: minmax(0, 1fr); gap: 2px; } .kv .v { max-width: none; justify-self: start; text-align: left; color: var(--ink); } }
+.prepcard { display: grid; gap: 10px; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r); background: var(--paper); font-size: 14px; }
+.pc-lead { margin: 0; line-height: 1.7; }
+.pc-k { margin: 6px 0 -4px; font: 400 11px/1 var(--f-display); letter-spacing: .25em; color: var(--muted); text-transform: uppercase; }
+.pc-note { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+.kv-wrap li { grid-template-columns: minmax(0, 1fr) minmax(0, auto); }
+.ins { list-style: none; margin: 0; padding: 0; display: grid; }
+.ins li { display: grid; gap: 3px; padding: 10px 0; border-top: 1px solid var(--line); }
+.ins li b { font-weight: 500; }
+.ins li span { font-size: 13.5px; line-height: 1.7; color: var(--muted); }
+.ins li span b { color: var(--ink); }
 .kv .v a { color: var(--glacier); text-decoration: none; }
 .steps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 14px; }
 

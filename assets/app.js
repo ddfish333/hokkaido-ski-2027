@@ -975,6 +975,19 @@
     $("#emergency").innerHTML = T.emergency.map(function (e) {
       return '<li><span>' + esc(e[0]) + '</span><span class="v"><a href="tel:' + e[1].replace(/[^0-9+]/g, "") + '">' + esc(e[1]) + '</a></span></li>';
     }).join("");
+    var L = T.luggage;
+    if (has("luggage") && L) $("#luggage").innerHTML = '<p class="pc-lead">' + esc(L.car) + '・' + esc(L.seats) + '</p>' +
+      '<ul class="kv kv-wrap">' + L.dims.map(function (d) { return '<li><span>' + esc(d[0]) + '</span><span class="v">' + esc(d[1]) + '</span></li>'; }).join("") + '</ul>' +
+      '<p class="pc-k">座位怎麼分</p><ul class="bullets">' + L.split.map(function (x) { return '<li>' + em(x) + '</li>'; }).join("") + '</ul>' +
+      '<p class="pc-k">雪具放哪裡</p><ul class="bullets">' + L.fit.map(function (x) { return '<li>' + em(x) + '</li>'; }).join("") + '</ul>' +
+      '<p class="pc-note">' + em(L.airline) + '</p>';
+    var I = T.insurance;
+    if (has("insurance") && I) {
+      function rows(list) { return '<ul class="ins">' + list.map(function (x) { return '<li><b>' + esc(x[0]) + '</b><span>' + em(x[1]) + '</span></li>'; }).join("") + '</ul>'; }
+      $("#insurance").innerHTML = '<p class="pc-k">已經有的</p>' + rows(I.have) + '<p class="pc-k">這趟該保的（9 個人都要）</p>' + rows(I.need) +
+        '<p class="pc-k">最容易漏的</p><ul class="bullets">' + I.miss.map(function (x) { return '<li>' + em(x) + '</li>'; }).join("") + '</ul>' +
+        '<p class="pc-note">只是整理給大家對保單用，不是保險建議；條款以各公司保單為準。把保障明細頁（不用保單號碼）給我，我再逐條比對缺口。</p>';
+    }
   }
 
   /* ---------- 幣別切換與即時匯率 ---------- */
