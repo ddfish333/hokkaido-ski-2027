@@ -164,7 +164,7 @@
   var lastSig = null;
   function stopsSig() { return state.date + "|" + day().stops.map(function (s) { return s.id + ":" + (s.via || ""); }).join(","); }
   var VIA = { walk: "步行", shuttle: "接駁", taxi: "計程車／地鐵" };
-  function legHTML(l) { return (VIA[l.mode] || "開車") + ' ' + fmtMin(l.min) + ' · ' + l.km + ' km' + (l.est ? ' <em>直線估算，儲存時會查路網</em>' : ""); }
+  function legHTML(l) { return P.legHTML(l); }
   function timeHTML(s, last) { return s.time + (last || !s.stay ? "" : ' <small>– ' + s.timeDep + '</small>'); }
   function badgeHTML(s, last) { return (last || !s.stay ? "" : '<span class="stay">停 ' + fmtMin(s.stay) + '</span>') + (s.late ? '<span class="late">晚 ' + s.late + ' 分</span>' : s.wait ? '<span class="wait">早到，等 ' + s.wait + ' 分</span>' : ""); }
   function notePrev(note) { return /\{/.test(note || "") ? "網站上顯示：" + P.fill(note, state.date) : ""; }
@@ -186,7 +186,7 @@
     box.innerHTML = sch.stops.map(function (s, i) {
       var raw = stops[i], last = i === sch.stops.length - 1, html = "";
       if (i > 0) {
-        html += '<li class="leg" data-i="' + i + '"><span class="legline"></span><span class="legtxt">' + legHTML(sch.legs[i - 1]) + '</span>' +
+        html += '<li class="leg m-' + P.legMode(sch.legs[i - 1]) + '" data-i="' + i + '"><span class="legline"></span><span class="legtxt">' + legHTML(sch.legs[i - 1]) + '</span>' +
           '<button type="button" class="ins" data-ins="' + i + '" aria-label="在這裡加一站">＋ 加一站</button>' +
           '<select class="via" data-i="' + i + '" aria-label="到達方式"><option value="drive"' + (s.via === "drive" ? " selected" : "") + '>開車</option><option value="walk"' + (s.via === "walk" ? " selected" : "") + '>步行</option><option value="shuttle"' + (s.via === "shuttle" ? " selected" : "") + '>接駁</option><option value="taxi"' + (s.via === "taxi" ? " selected" : "") + '>計程車／地鐵</option></select></li>';
       }

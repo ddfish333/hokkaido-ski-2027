@@ -416,7 +416,7 @@
     if (withSound) { try { startMusic(); } catch (e) { } }
     chrome.hidden = false;
     raf = requestAnimationFrame(loop);
-    setTimeout(function () { show(0); }, 300);
+    setTimeout(function () { if (!paused) show(0); }, 300);   /* 一打開就已經捲到下面（例如重新整理後回到原位置）：等捲回來才開始 */
     setTimeout(function () { hint.style.opacity = 0; }, 6000);
   }
   /* 序幕放在頁面最上面，不擋頁面：結束就停在結尾卡，「看今天的行程」只是往下捲 */
@@ -431,7 +431,7 @@
   var paused = false, pausedAt = 0, pausedLeft = 0;
   function pauseFilm() {
     if (paused || !started || ended) return; paused = true;
-    pausedLeft = Math.max(800, (+secs[cur].dataset.dur) - (performance.now() - pausedAt)); clearTimeout(timer); clearInterval(cycleT);
+    pausedLeft = cur < 0 ? 0 : Math.max(800, (+secs[cur].dataset.dur) - (performance.now() - pausedAt)); clearTimeout(timer); clearInterval(cycleT);
     secs.forEach(function (sec) { var v = sec._vid; if (v && !v.paused) try { v.pause(); } catch (e) { } });
     cancelAnimationFrame(raf); cancelAnimationFrame(RM.raf); RM.raf = null; RM.pausedAt = performance.now();
     if (AC) try { AC.suspend(); } catch (e) { }
@@ -442,6 +442,7 @@
     var v = vidOf(cur); if (v) { try { var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } }
     raf = requestAnimationFrame(loop); if (RM.cv && !RM.raf) { RM.lastT = performance.now(); if (RM.pausedAt) RM.moveT0 += performance.now() - RM.pausedAt; RM.pausedAt = 0; RM.raf = requestAnimationFrame(rmTick); }
     if (AC && !muted) try { AC.resume(); } catch (e) { }
+    if (cur < 0) { show(0); return; }   /* 還沒開始播就被捲走：捲回來從第一幕開始 */
     pausedAt = performance.now() - ((+secs[cur].dataset.dur) - pausedLeft);
     if (cur < secs.length - 1) timer = setTimeout(function () { show(cur + 1); }, pausedLeft);
   }

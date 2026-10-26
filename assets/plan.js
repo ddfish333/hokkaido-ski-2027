@@ -103,6 +103,23 @@
   });
   P.fill = fill; P.clearCache = function () { schedCache = {}; };
 
+  /* 共用：路段那一行（交通方式＋分鐘＋公里）。單日頁時間表和編輯器都用這一份，顏色依交通方式：
+     開車＝藍、接駁車＝青、步行＝綠、計程車／地鐵＝紫（顏色在 style.css 的 .m-drive 等） */
+  P.LEGMODE = { drive: "開車", shuttle: "接駁車", walk: "步行", taxi: "計程車／地鐵" };
+  var LEGICON = {
+    drive: '<path d="M5 16h14M6.5 16l1.4-5.2A2 2 0 0 1 9.8 9.3h4.4a2 2 0 0 1 1.9 1.5L17.5 16M5 16v2.5M19 16v2.5"/><circle cx="8" cy="16" r=".6"/><circle cx="16" cy="16" r=".6"/>',
+    shuttle: '<rect x="5" y="4.5" width="14" height="12" rx="2.5"/><path d="M5 11h14M8 16.5V19M16 16.5V19"/><circle cx="8.5" cy="13.8" r=".6"/><circle cx="15.5" cy="13.8" r=".6"/>',
+    walk: '<circle cx="13" cy="4.8" r="1.6"/><path d="M10 21l2.2-6.2L10.5 12l1-4 3 2.4 2.5.6M12.2 14.8L15 21M11.5 8L8 10.5 7 14"/>',
+    taxi: '<rect x="6" y="3.5" width="12" height="13" rx="3"/><path d="M6 10h12M9 16.5L7.5 20M15 16.5l1.5 3.5"/><circle cx="9" cy="13.3" r=".6"/><circle cx="15" cy="13.3" r=".6"/>'
+  };
+  function legMin(m) { m = Math.round(m); if (m < 60) return m + " 分"; var h = Math.floor(m / 60), r = m % 60; return h + " 小時" + (r ? " " + r + " 分" : ""); }
+  P.legMode = function (l) { return P.LEGMODE[l && l.mode] ? l.mode : "drive"; };
+  P.legHTML = function (l) {
+    var m = P.legMode(l);
+    return '<span class="lg m-' + m + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + LEGICON[m] + '</svg>' +
+      '<b>' + P.LEGMODE[m] + ' ' + legMin(l.min) + '</b><small>' + l.km + ' km' + (l.est ? ' · 直線估算' : "") + '</small></span>';
+  };
+
   /* 共用：跳脫、**粗體**、標記 → HTML。所有頁面的說明文字都走這一個，才不會有的頁面漏掉粗體或時間標記 */
   P.esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   P.text = function (s, date, ctx) { return P.esc(date ? fill(s, date, ctx) : s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); };

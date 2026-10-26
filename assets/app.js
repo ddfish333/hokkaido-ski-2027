@@ -307,7 +307,7 @@
       '<div class="modeseg seg" role="tablist" aria-label="路況"></div>' +
       '<ol class="timeline">' + sch.stops.map(function (s, i) {
         var row = "";
-        if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg ' + l.mode + '"><time></time><span>' + (l.mode === "walk" ? "步行" : l.mode === "shuttle" ? "接駁車" : l.mode === "taxi" ? "計程車／地鐵" : "開車") + ' ' + fmtMin(l.min) + ' <small>· ' + l.km + ' km' + (l.est ? ' · 直線估算' : '') + '</small></span></li>'; }
+        if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg ' + Plan.legMode(l) + ' m-' + Plan.legMode(l) + '"><time></time>' + Plan.legHTML(l) + '</li>'; }
         var last = i === sch.stops.length - 1;
         row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + jaTag(s.ja, s.name) + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(fill(s.note, d.date, s)) + '</span>' : "") + stopFacts(s, d) + '</span></li>';
         return row;

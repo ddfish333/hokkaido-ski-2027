@@ -160,7 +160,8 @@ if "{{SUB}}" in open(os.path.join(ROOT, "tools/day.template.html"), encoding="ut
     E("tools/day.template.html：靜態頁面不能放 {{SUB}}（裡面有推算時間，編輯器一存就和頁面不一致）")
 for f, marks in {"assets/editor.js": [("/git/refs/heads/main", "一次儲存一個 commit、快轉更新（10/26）"), ("merge3(", "多人同時改以天為單位合併（10/26）"), ("readPlan(commitSha)", "存完讀回比對才顯示已儲存（10/26）"), ("stopsSig(", "改數字只更新字、不重畫正在輸入的欄位（10/26 時間轉輪會跳掉）"), ("function candidates(", "新增站點用選的，資料讀 trip／spots／food（10/26）")],
                  "assets/plan.js": [("fromGitHub(", "有金鑰的手機直接讀 GitHub 最新版（10/26）"), ("snow13-saved", "剛存的手機先用自己存的版本（10/26）")],
-                 "plan/index.html": [("id=\"toast\"", "儲存狀態固定在畫面底部（10/26）")]}.items():
+                 "plan/index.html": [("id=\"toast\"", "儲存狀態固定在畫面底部（10/26）")],
+                 "assets/app.js": [("Plan.legHTML(", "路段一行（交通方式顏色）單日頁和編輯器共用一份（10/26）")]}.items():
     src = open(os.path.join(ROOT, f), encoding="utf-8").read()
     for mark, what in marks:
         if what and mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被拿掉或被舊檔案蓋掉了")
