@@ -79,3 +79,34 @@
 .field { display: grid; gap: 4px; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
 .field input { background: var(--soft); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; font: 400 14px var(--f-mono); }
 .dlg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* 儲存狀態：按鍵本身＋固定在底部的提示（捲到哪都看得到） */
+.save-btn { min-width: 108px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s, border-color .2s, color .2s; }
+.save-btn.is-dirty { background: var(--gold, #E8C27A); border-color: var(--gold, #E8C27A); color: #0B0F17; font-weight: 500; }
+.save-btn.is-clean, .save-btn.is-saving { background: none; color: var(--muted); border-color: var(--line); cursor: default; }
+.save-btn.is-saved { background: var(--ok); border-color: var(--ok); color: #06140D; }
+.save-btn.is-error { background: var(--accent); border-color: var(--accent); color: #fff; }
+.spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; display: inline-block; flex: none; animation: edSpin .8s linear infinite; }
+@keyframes edSpin { to { transform: rotate(360deg); } }
+.toast { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 50; width: min(560px, calc(100% - 24px)); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 13px 14px 13px 16px; border-radius: 14px; background: #161D2A; border: 1px solid rgba(255,255,255,.14); color: var(--ink); font-size: 14px; line-height: 1.55; box-shadow: 0 12px 40px rgba(0,0,0,.45); }
+.toast[hidden] { display: none; }
+.toast .tt { flex: 1 1 200px; min-width: 0; }
+.toast.ok { border-color: rgba(69,192,138,.55); }
+.toast.bad { border-color: rgba(255,90,76,.6); background: #2A1517; }
+.toast .tk { width: 22px; height: 22px; border-radius: 50%; background: var(--ok); color: #06140D; display: grid; place-items: center; font-size: 13px; flex: none; }
+.toast .ta { flex: none; padding: 8px 12px; border-radius: 9px; border: 1px solid rgba(255,255,255,.25); background: none; color: var(--ink); font: 400 13px/1 var(--f-body); text-decoration: none; cursor: pointer; white-space: nowrap; }
+.toast.ok .ta { border-color: rgba(69,192,138,.6); }
+.toast .tx { flex: none; background: none; border: 0; color: var(--muted); font-size: 20px; line-height: 1; padding: 2px 4px; cursor: pointer; }
+.ed-stamp { margin: 0 0 12px; min-height: 1.4em; font-size: 12.5px; color: var(--muted); letter-spacing: .04em; }
+.ed-main { padding-bottom: 120px; }
+.whochips { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 6px; }
+.whochips .chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--soft); color: var(--ink); font: 400 14px/1 var(--f-body); cursor: pointer; }
+.whochips .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.sharebox { display: grid; gap: 6px; margin: 6px 0 12px; padding: 12px; border: 1px dashed var(--line); border-radius: 12px; font-size: 12px; color: var(--muted); }
+.sharerow { display: flex; gap: 8px; }
+.sharerow select { flex: 1; background: var(--soft); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px; font: 400 14px var(--f-body); }
+.sharebox small { line-height: 1.6; }
+.tokhow { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+.tokhow summary { cursor: pointer; margin-bottom: 8px; }
+@media (max-width: 560px) { .save-btn { min-width: 96px; } }
+

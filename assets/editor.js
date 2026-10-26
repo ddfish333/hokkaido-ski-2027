@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   var T = window.TRIP, P = window.Plan; if (!T || !P) return;
-  var REPO = "ddfish333/hokkaido-ski-2027", API = "https://api.github.com/repos/" + REPO + "/contents/";
+  var REPO = P.REPO, GH = P.API;
   var $ = function (s) { return document.querySelector(s); };
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function fmtMin(m) { m = Math.round(m); if (m < 60) return m + " 分"; var h = Math.floor(m / 60), r = m % 60; return h + "h" + (r < 10 ? "0" : "") + r; }
@@ -11,38 +11,114 @@
   function dow(s) { var p = s.split("-").map(Number); return DOW[new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay()]; }
   function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
-  function msg(t, bad) { var m = $("#msg"); m.textContent = t || ""; m.classList.toggle("bad", !!bad); }
+  /* ---------- 狀態提示：固定在畫面底部，捲到哪裡都看得到（以前寫在頁面最上面，捲下去改東西時按儲存就像沒反應） ---------- */
+  var toastT = null;
+  function toast(text, kind, actions) {
+    var t = $("#toast"); clearTimeout(toastT);
+    if (!text) { t.hidden = true; return; }
+    t.className = "toast " + (kind || "info"); t.hidden = false;
+    t.innerHTML = (kind === "busy" ? '<i class="spin" aria-hidden="true"></i>' : kind === "ok" ? '<b class="tk">✓</b>' : "") + '<span class="tt">' + esc(text) + '</span>' +
+      (actions || []).map(function (a, i) { return typeof a[1] === "string" ? '<a class="ta" href="' + esc(a[1]) + '">' + esc(a[0]) + '</a>' : '<button type="button" class="ta" data-a="' + i + '">' + esc(a[0]) + '</button>'; }).join("") +
+      (kind === "busy" ? "" : '<button type="button" class="tx" aria-label="關閉">×</button>');
+    t.onclick = function (e) { var b = e.target.closest("[data-a]"); if (b) { actions[+b.dataset.a][1](); return; } if (e.target.closest(".tx")) t.hidden = true; };
+    if (kind === "ok" || kind === "info") toastT = setTimeout(function () { t.hidden = true; }, kind === "ok" ? 9000 : 7000);
+  }
+  function msg(t, bad) { toast(t, bad ? "bad" : "info"); }
+  /* 儲存鍵本身也要看得出狀態：未儲存幾天／儲存中／已儲存 ✓／失敗再試 */
+  var btnState = "clean", btnT = null, legFails = 0;
+  function setBtn(st) {
+    var b = $("#save"), n = changedDays().length + (state.legsDirty && !changedDays().length ? 1 : 0);
+    if (st == null) { if (btnState === "saving" || btnState === "saved") return; st = isDirty() ? "dirty" : (btnState === "error" ? "error" : "clean"); }
+    btnState = st; clearTimeout(btnT);
+    b.className = "btn save-btn is-" + st; b.disabled = st === "saving" || st === "clean" || st === "saved";
+    b.innerHTML = st === "saving" ? '<i class="spin" aria-hidden="true"></i>儲存中…' : st === "saved" ? "已儲存 ✓" : st === "error" ? "再試一次" : st === "dirty" ? "儲存" + (n > 1 ? "（" + n + " 天）" : "") : "已儲存";
+    if (st === "saved") btnT = setTimeout(function () { btnState = "clean"; setBtn(); }, 3000);
+    var d = $("#dirty"); d.hidden = !isDirty(); d.textContent = "未儲存" + (n ? " · " + n + " 天" : "");
+  }
 
-  var state = { date: null, mode: P.mode(), base: null, baseLegs: null, sha: {}, legsDirty: false, map: null, mapReady: false, drag: null };
+  var state = { date: null, mode: P.mode(), base: null, baseLegs: null, planSha: null, legsDirty: false, map: null, mapReady: false, drag: null, seenSha: null };
   var dates = T.days.map(function (d) { return d.date; });
 
-  /* ---------- 載入 ---------- */
-  function fetchSha(path) {
-    return fetch(API + path + "?ref=main", { headers: authHeaders(), cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return j && j.sha; }).catch(function () { return null; });
+  /* ---------- 載入 ----------
+     內容和它的版本號（sha）一次從 GitHub 拿：以前內容讀網站上的檔案、版本號讀 GitHub，
+     別人剛存完的一分鐘內打開，會拿到「舊內容＋新版本號」，存下去就把別人的修改蓋掉。 */
+  function gh(method, path, body) {
+    var h = { Accept: "application/vnd.github+json" }, t = P.token(); if (t) h.Authorization = "Bearer " + t; if (body) h["Content-Type"] = "application/json";
+    return fetch(GH + path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined, cache: method === "GET" ? "no-cache" : "no-store" }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error(j.message || ("GitHub " + r.status)); e.status = r.status; throw e; } return j; });
+    });
+  }
+  function dec(b) { return decodeURIComponent(escape(atob(String(b).replace(/\s/g, "")))); }
+  function readPlan(ref) { return gh("GET", "/contents/data/plan.json?ref=" + (ref || "main")).then(function (j) { return { sha: j.sha, plan: JSON.parse(dec(j.content)) }; }); }
+  function adopt(rp) { P.plan = rp.plan; P.clearCache(); state.base = clone(rp.plan); state.planSha = rp.sha; state.seenSha = rp.sha; }
+  /* 新的站點可能用到這支手機還沒有的路段：補讀 legs.json */
+  function syncLegs(plan) {
+    var miss = false; Object.keys(plan.days).forEach(function (d) { var st = plan.days[d].stops; for (var i = 1; i < st.length; i++) if (!P.legs[P.legKey(st[i - 1].id, st[i].id, st[i].via)] && st[i - 1].id !== st[i].id) miss = true; });
+    if (!miss) return Promise.resolve();
+    return P.ghRaw("data/legs.json").then(function (l) { Object.keys(l).forEach(function (k) { if (!P.legs[k]) P.legs[k] = l[k]; }); state.baseLegs = clone(P.legs); P.clearCache(); }).catch(function () { });
   }
   function load() {
     return P.ready.then(function () {
-      state.base = clone(P.plan); state.baseLegs = P.legs;
-      return Promise.all([fetchSha("data/plan.json"), fetchSha("data/legs.json")]);
-    }).then(function (sh) {
-      state.sha = { plan: sh[0], legs: sh[1] };
+      return readPlan().then(function (rp) { var same = JSON.stringify(rp.plan) === JSON.stringify(P.plan); adopt(rp); return same ? null : syncLegs(rp.plan); }, function () {
+        state.base = clone(P.plan);   /* GitHub 讀不到（沒網路或沒金鑰被限流）：先用網站上的版本，儲存時會再對一次 */
+      });
+    }).then(function () {
+      state.baseLegs = clone(P.legs);
       var draft = store("snow13-draft");
-      if (draft && draft.plan && draft.sha === state.sha.plan && JSON.stringify(draft.plan) !== JSON.stringify(state.base)) {
-        P.plan = draft.plan; if (draft.legs) Object.keys(draft.legs).forEach(function (k) { P.legs[k] = draft.legs[k]; state.legsDirty = true; });
-        msg("已還原這個瀏覽器裡未儲存的草稿。");
-      } else if (draft && draft.sha !== state.sha.plan) { store("snow13-draft", null); if (draft.plan) msg("網站上的行程已經被別人更新，你之前的草稿已捨棄。"); }
+      if (draft && draft.plan) {
+        if (draft.sha === state.planSha) { P.plan = draft.plan; msg("已還原這支手機上還沒儲存的修改。"); }
+        else if (draft.base) {
+          /* 草稿之後別人存過：把你改的那幾天套到最新版上；同一天兩人都改了，留別人的版本並告訴你 */
+          var m = merge3(draft.base, draft.plan, P.plan); P.plan = m.plan;
+          msg(m.conflicts.length ? "你上次沒存的修改已套到最新版；但 " + m.conflicts.map(md).join("、") + " 別人也改了，這幾天先用別人的版本。" : "你上次沒存的修改已套到最新版，記得按儲存。", !!m.conflicts.length);
+        } else { store("snow13-draft", null); msg("網站上的行程已經被別人更新，你之前的草稿已捨棄。", true); }
+        if (draft.legs) Object.keys(draft.legs).forEach(function (k) { if (!P.legs[k]) { P.legs[k] = draft.legs[k]; state.legsDirty = true; } });
+        P.clearCache();
+      }
       state.date = location.hash.replace("#", "") || todayOrFirst();
       if (dates.indexOf(state.date) < 0) state.date = dates[0];
-      renderAll();
+      renderAll(); renderStamp();
+      if (P.tokenBad) toast("這支手機的金鑰失效了（過期或被刪掉），現在不能儲存。", "bad", [["設定", openSettings]]);
       /* 從景點地圖「加入行程」帶過來：?add=<景點 id>，加到目前這一天的最後 */
       var addId = new URLSearchParams(location.search).get("add"), sp = addId && (window.SPOTS || []).filter(function (x) { return x.id === addId; })[0];
       if (sp) {
         var pid = Object.keys(P.plan.places).filter(function (k) { return P.plan.places[k].name === sp.name || (sp.stop && k === sp.stop); })[0] || newPlace(sp.name, sp.lat, sp.lon);
         day().stops.push({ id: pid, stay: sp.time || 60, note: "從景點收藏加入" + (sp.caution ? "；" + sp.caution.slice(0, 40) : "") });
         history.replaceState(null, "", location.pathname + location.hash);
-        afterReorder(); renderAll(); msg("已把「" + sp.name + "」加到 " + state.date.slice(5).replace("-", "/") + " 最後一站（停留 " + (sp.time || 60) + " 分）。拖到想去的順序，確認時間後再按「儲存到網站」。");
+        afterReorder(); renderAll(); msg("已把「" + sp.name + "」加到 " + state.date.slice(5).replace("-", "/") + " 最後一站（停留 " + (sp.time || 60) + " 分）。拖到想去的順序，確認時間後按「儲存」。");
       }
+      setInterval(poll, 60000);
+      document.addEventListener("visibilitychange", function () { if (!document.hidden) poll(); });
     });
+  }
+  /* 三方合併（以「天」為單位）：base＝我開始改之前的版本，mine＝我的，theirs＝網站上最新的。
+     只有我改的天 → 用我的；只有別人改的天 → 用別人的；兩邊都改而且不一樣 → 列為衝突，由人決定。地點清單取聯集。 */
+  function J(o) { return JSON.stringify(o === undefined ? null : o); }
+  function merge3(base, mine, theirs) {
+    var out = clone(theirs), conflicts = [];
+    Object.keys(mine.places).forEach(function (id) { if (!theirs.places[id] || J(mine.places[id]) !== J(base.places[id])) out.places[id] = mine.places[id]; });
+    Object.keys(mine.days).forEach(function (d) {
+      var b = J(base.days[d]), m = J(mine.days[d]), t = J(theirs.days[d]);
+      if (m === b || m === t) return;
+      if (t === b) out.days[d] = clone(mine.days[d]); else conflicts.push(d);
+    });
+    return { plan: out, conflicts: conflicts };
+  }
+  /* 編輯中每分鐘（和切回這個分頁時）看一下別人有沒有存：沒在改就直接換成最新版；正在改就提醒，儲存時自動合併 */
+  function poll() {
+    if (!P.token() || document.hidden || btnState === "saving") return;
+    readPlan().then(function (rp) {
+      if (rp.sha === state.planSha || rp.sha === state.seenSha) return;
+      var by = rp.plan.savedBy || "家人", days = dates.filter(function (d) { return J(rp.plan.days[d]) !== J(state.base.days[d]); }).map(md).join("、") || "地點資料";
+      if (!isDirty()) { adopt(rp); syncLegs(rp.plan).then(function () { state.baseLegs = clone(P.legs); renderAll(); renderStamp(); }); toast(by + " 剛更新了 " + days + "，畫面已換成最新版。", "info"); }
+      else { state.seenSha = rp.sha; toast(by + " 剛存了 " + days + "。你照常改，按儲存時會自動合併；同一天兩人都改才會問你。", "info"); }
+    }).catch(function () { });
+  }
+  function renderStamp() {
+    var e = $("#stamp"); if (!e) return; var p = state.base || P.plan;
+    if (!p.savedAt) { e.textContent = ""; return; }
+    var t = new Date(p.savedAt), now = new Date(), same = t.toDateString() === now.toDateString();
+    e.textContent = "網站上的版本：" + (p.savedBy || "家人") + " " + (same ? "今天 " : (t.getMonth() + 1) + "/" + t.getDate() + " ") + ("0" + t.getHours()).slice(-2) + ":" + ("0" + t.getMinutes()).slice(-2) + " 儲存";
   }
   function todayOrFirst() { var t = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); return dates.indexOf(t) >= 0 ? t : dates[0]; }
 
@@ -50,15 +126,14 @@
   function isDirty() { return JSON.stringify(P.plan) !== JSON.stringify(state.base) || state.legsDirty; }
   function touched() {
     var newLegs = {}; Object.keys(P.legs).forEach(function (k) { if (!state.baseLegs[k]) newLegs[k] = P.legs[k]; });
-    store("snow13-draft", { sha: state.sha.plan, plan: P.plan, legs: newLegs });
-    $("#dirty").hidden = !isDirty();
+    store("snow13-draft", isDirty() ? { sha: state.planSha, base: state.base, plan: P.plan, legs: newLegs } : null);
     renderAll();
   }
   window.addEventListener("beforeunload", function (e) { if (isDirty()) { e.preventDefault(); e.returnValue = ""; } });
 
   /* ---------- 畫面 ---------- */
   function day() { return P.plan.days[state.date]; }
-  function renderAll() { renderTabs(); renderHead(); renderStops(); renderMap(); $("#dirty").hidden = !isDirty(); }
+  function renderAll() { renderTabs(); renderHead(); renderStops(); renderMap(); setBtn(); }
   function renderTabs() {
     var s = $("#daytabs");
     s.innerHTML = T.days.map(function (d) {
@@ -139,8 +214,8 @@
     var key = P.legKey(a, b, via); if (P.legs[key] || a === b) return Promise.resolve(false);
     var pa = P.plan.places[a], pb = P.plan.places[b];
     if (via === "shuttle") { P.legs[key] = { km: Math.round(P.hav(pa, pb) * 13) / 10, normal: 10, snow: 10, mode: "shuttle", geom: [[pa.lon, pa.lat], [pb.lon, pb.lat]] }; state.legsDirty = true; return Promise.resolve(true); }
-    var prof = via === "walk" ? "foot" : "driving";
-    return fetch("https://router.project-osrm.org/route/v1/" + prof + "/" + pa.lon + "," + pa.lat + ";" + pb.lon + "," + pb.lat + "?overview=full&geometries=geojson")
+    var prof = via === "walk" ? "foot" : "driving", ac = window.AbortController ? new AbortController() : null, to = ac && setTimeout(function () { ac.abort(); }, 6000);
+    return fetch("https://router.project-osrm.org/route/v1/" + prof + "/" + pa.lon + "," + pa.lat + ";" + pb.lon + "," + pb.lat + "?overview=full&geometries=geojson", ac ? { signal: ac.signal } : {})
       .then(function (r) { return r.json(); }).then(function (j) {
         if (j.code !== "Ok") throw new Error("route");
         var rt = j.routes[0], m = rt.duration / 60, coords = rt.geometry.coordinates.map(function (c) { return [Math.round(c[0] * 1e5) / 1e5, Math.round(c[1] * 1e5) / 1e5]; });
@@ -148,8 +223,8 @@
         var wm = rt.distance / 1000 / 4 * 60;
         P.legs[key] = via === "walk" ? { km: Math.round(rt.distance / 100) / 10, normal: P.r5(wm), snow: P.r5(wm * 1.2), mode: "walk", geom: coords }
           : { km: Math.round(rt.distance / 100) / 10, normal: P.r5(m * 1.15), snow: P.r5(m * 1.5), mode: "drive", geom: coords };
-        state.legsDirty = true; return true;
-      }).catch(function () { msg("路網服務暫時連不上，這段先用直線估算，之後再試。", true); return false; });
+        clearTimeout(to); state.legsDirty = true; return true;
+      }).catch(function () { clearTimeout(to); legFails++; if (btnState !== "saving") msg("路網服務暫時連不上，這段先用直線估算，之後再試。", true); return false; });
   }
 
   /* 拖拉排序（滑鼠與觸控都用 pointer events） */
@@ -223,49 +298,124 @@
     if (pts.length) { var b = new maplibregl.LngLatBounds(pts[0], pts[0]); pts.forEach(function (c) { b.extend(c); }); state.map.fitBounds(b, { padding: 60, maxZoom: 13, duration: 500 }); }
   }
 
-  /* ---------- 設定與儲存 ---------- */
-  function authHeaders() { var t = store("snow13-gh-token"); var h = { Accept: "application/vnd.github+json" }; if (t) h.Authorization = "Bearer " + t; return h; }
-  $("#settings").addEventListener("click", function () { $("#token").value = store("snow13-gh-token") || ""; $("#who").value = store("snow13-who") || ""; $("#tokmsg").textContent = ""; $("#dlg").showModal(); });
-  $("#toksave").addEventListener("click", function () { store("snow13-gh-token", $("#token").value.trim() || null); store("snow13-who", $("#who").value.trim() || null); });
+  /* ---------- 設定 ---------- */
+  var ADULTS = ["Sean", "Lo", "Ethan", "阿茹"];
+  function who() { return store("snow13-who") || "家人"; }
+  function openSettings() {
+    $("#token").value = store("snow13-gh-token") || ""; $("#who").value = store("snow13-who") || ""; $("#tokmsg").textContent = "";
+    $("#whochips").innerHTML = ADULTS.map(function (n) { return '<button type="button" class="chip" data-who="' + esc(n) + '" aria-pressed="' + (store("snow13-who") === n) + '">' + esc(n) + '</button>'; }).join("");
+    $("#sharewho").innerHTML = ADULTS.map(function (n) { return '<option>' + esc(n) + '</option>'; }).join("");
+    $("#dlg").showModal();
+  }
+  $("#settings").addEventListener("click", openSettings);
+  $("#whochips").addEventListener("click", function (e) { var b = e.target.closest("[data-who]"); if (!b) return; $("#who").value = b.dataset.who; document.querySelectorAll("#whochips .chip").forEach(function (c) { c.setAttribute("aria-pressed", c === b); }); });
+  $("#toksave").addEventListener("click", function () { store("snow13-gh-token", $("#token").value.trim() || null); store("snow13-who", $("#who").value.trim() || null); P.tokenBad = 0; toast("設定已存在這支手機。", "ok"); });
   $("#tokclear").addEventListener("click", function () { $("#token").value = ""; store("snow13-gh-token", null); $("#tokmsg").textContent = "已清除。"; });
+  function testToken(t) {
+    return fetch(GH, { headers: { Authorization: "Bearer " + t, Accept: "application/vnd.github+json" } }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (j) { return j.permissions && j.permissions.push ? "ok" : "readonly"; }, function (st) { return st === 401 ? "bad" : st === 404 ? "norepo" : "fail"; });
+  }
+  var TESTMSG = { ok: "可以：這把金鑰能存到網站。", readonly: "金鑰有效，但沒有寫入權限（Contents 要選 Read and write）。", bad: "金鑰無效或過期。", norepo: "金鑰看不到這個網站的資料（Repository access 要選 hokkaido-ski-2027）。", fail: "現在連不上 GitHub，稍後再試。" };
   $("#toktest").addEventListener("click", function () {
     var t = $("#token").value.trim(); if (!t) { $("#tokmsg").textContent = "先貼金鑰。"; return; }
-    $("#tokmsg").textContent = "測試中…";
-    fetch("https://api.github.com/repos/" + REPO, { headers: { Authorization: "Bearer " + t, Accept: "application/vnd.github+json" } }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-      .then(function (j) { $("#tokmsg").textContent = j.permissions && j.permissions.push ? "可以：這把金鑰能寫入 " + j.full_name + "。" : "金鑰有效，但沒有寫入權限（Contents 要選 Read and write）。"; })
-      .catch(function (st) { $("#tokmsg").textContent = st === 401 ? "金鑰無效或過期。" : st === 404 ? "金鑰看不到這個 repo（Repository access 要選 hokkaido-ski-2027）。" : "測試失敗（" + st + "）。"; });
+    $("#tokmsg").textContent = "測試中…"; testToken(t).then(function (r) { $("#tokmsg").textContent = TESTMSG[r]; });
   });
-  function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
-  function changedDays() { return dates.filter(function (d) { return JSON.stringify(P.plan.days[d]) !== JSON.stringify(state.base.days[d]); }); }
-  function putFile(path, content, sha, message) {
-    return fetch(API + path, { method: "PUT", headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()), body: JSON.stringify({ message: message, content: b64(content), sha: sha || undefined, branch: "main" }) })
-      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.message || r.status); return j.content.sha; }); });
+  /* 給家人的設定連結：金鑰放在 # 後面（不會送到網站伺服器），對方點開一次，那支手機就能儲存 */
+  $("#sharelink").addEventListener("click", function () {
+    var t = $("#token").value.trim() || store("snow13-gh-token"); if (!t) { $("#tokmsg").textContent = "這支手機要先設定好金鑰，才能產生給家人的連結。"; return; }
+    var n = $("#sharewho").value, url = location.origin + location.pathname + "#key=" + encodeURIComponent(t) + "&who=" + encodeURIComponent(n);
+    var text = n + "：點這個連結一次，你的手機就能直接改北海道行程、按儲存。（連結裡有鑰匙，不要轉傳）";
+    if (navigator.share) navigator.share({ title: "北海道行程編輯", text: text, url: url }).catch(function () { });
+    else if (navigator.clipboard) navigator.clipboard.writeText(text + "\n" + url).then(function () { $("#tokmsg").textContent = "已複製給 " + n + " 的連結，貼到 LINE 傳給他。"; });
+    else prompt("複製這個連結傳給 " + n, url);
+  });
+  function setupFromLink() {
+    var h = location.hash.replace(/^#/, ""); if (h.indexOf("key=") !== 0) return false;
+    var q = new URLSearchParams(h), t = q.get("key"), n = q.get("who");
+    history.replaceState(null, "", location.pathname + location.search);
+    if (!t) return false;
+    store("snow13-gh-token", t); if (n) store("snow13-who", n); P.tokenBad = 0;
+    testToken(t).then(function (r) { if (r === "ok") toast("設定好了" + (n ? "（" + n + "）" : "") + "：這支手機現在可以直接改行程、按儲存。", "ok"); else toast(TESTMSG[r] + " 請跟 Sean 要新的連結。", "bad"); });
+    return true;
   }
-  $("#save").addEventListener("click", function () {
-    if (!isDirty()) { msg("沒有變更。"); return; }
-    if (!store("snow13-gh-token")) { msg("還沒有設定金鑰，先按「設定」。", true); $("#dlg").showModal(); return; }
-    var btn = $("#save"); btn.disabled = true; msg("檢查中…");
-    var stopsAll = []; dates.forEach(function (d) { stopsAll.push(P.plan.days[d].stops); });
-    Promise.all(stopsAll.map(fillLegs)).then(function () { return fetchSha("data/plan.json"); }).then(function (remote) {
-      if (remote && state.sha.plan && remote !== state.sha.plan && !confirm("網站上的行程在你載入之後被別人改過。要用你的版本覆蓋嗎？\n（按取消可以先重新載入看看別人改了什麼）")) throw new Error("cancel");
-      var who = store("snow13-who") || "家人", days = changedDays().map(md).join("、");
-      var m = "行程更新（" + who + "）：" + (days || "路段資料");
-      P.plan.updated = new Date().toISOString().slice(0, 10);
-      msg("儲存中…");
-      return putFile("data/plan.json", JSON.stringify(P.plan, null, 1), remote || state.sha.plan, m).then(function (sha) {
-        state.sha.plan = sha;
-        if (!state.legsDirty) return;
-        return fetchSha("data/legs.json").then(function (ls) { return putFile("data/legs.json", JSON.stringify(P.legs), ls, m + "（路段）"); }).then(function (sha2) { state.sha.legs = sha2; state.legsDirty = false; });
+
+  /* ---------- 儲存 ----------
+     一次儲存＝GitHub 上一個 commit（plan.json 和新路段 legs.json 一起），用「快轉」更新 main：
+     存的瞬間如果有人先存了，GitHub 會拒絕，我們就拿最新版重新合併再存（最多 3 次），不會蓋掉別人的修改。
+     存完再從 GitHub 讀回來比對，對得上才顯示「已儲存 ✓」。 */
+  function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+  function changedDays() { return dates.filter(function (d) { return J(P.plan.days[d]) !== J(state.base.days[d]); }); }
+  function newLegsSinceBase() { var o = {}; Object.keys(P.legs).forEach(function (k) { if (!state.baseLegs[k]) o[k] = P.legs[k]; }); return o; }
+  function hhmm(d) { return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  function commitOnce(tries) {
+    var head, tree0, rp, finalPlan, legsOut = null, addLegs = newLegsSinceBase();
+    return gh("GET", "/git/ref/heads/main").then(function (r) { head = r.object.sha; return gh("GET", "/git/commits/" + head); })
+      .then(function (c) { tree0 = c.tree.sha; return readPlan(head); })
+      .then(function (r) {
+        rp = r;
+        if (rp.sha === state.planSha) return clone(P.plan);
+        var m = merge3(state.base, P.plan, rp.plan), by = rp.plan.savedBy || "家人";
+        m.conflicts.forEach(function (d) {
+          if (!confirm(md(d) + "：你和 " + by + " 都改了這一天，內容不一樣。\n\n按「確定」用你的版本\n按「取消」保留 " + by + " 的版本（你這天的修改不存）")) m.plan.days[d] = clone(rp.plan.days[d]);
+          else m.plan.days[d] = clone(P.plan.days[d]);
+        });
+        return m.plan;
+      })
+      .then(function (fp) {
+        finalPlan = fp; var now = new Date();
+        finalPlan.savedAt = now.toISOString(); finalPlan.savedBy = who(); finalPlan.updated = finalPlan.savedAt.slice(0, 10);
+        var days = dates.filter(function (d) { return J(finalPlan.days[d]) !== J(rp.plan.days[d]); }).map(md).join("、");
+        var files = [{ path: "data/plan.json", mode: "100644", type: "blob", content: JSON.stringify(finalPlan, null, 2) + "\n" }];
+        var msgTxt = "行程更新（" + who() + "）：" + (days || "路段資料");
+        var legsP = Object.keys(addLegs).length ? P.ghRaw("data/legs.json", head).then(function (l) { Object.keys(addLegs).forEach(function (k) { l[k] = addLegs[k]; }); legsOut = l; files.push({ path: "data/legs.json", mode: "100644", type: "blob", content: JSON.stringify(l) }); }) : Promise.resolve();
+        return legsP.then(function () { return gh("POST", "/git/trees", { base_tree: tree0, tree: files }); })
+          .then(function (t) { return gh("POST", "/git/commits", { message: msgTxt, tree: t.sha, parents: [head] }); })
+          .then(function (c) { return gh("PATCH", "/git/refs/heads/main", { sha: c.sha, force: false }).then(function () { return c.sha; }); });
+      })
+      .then(function (commitSha) {
+        /* 讀回來確認：GitHub 上這個版本的 plan.json 就是剛剛送出的內容 */
+        return readPlan(commitSha).then(function (back) {
+          if (J(back.plan) !== J(finalPlan)) throw new Error("存完讀回來內容不一致");
+          return { sha: back.sha, plan: finalPlan, legs: legsOut, added: addLegs };
+        });
+      })
+      .catch(function (e) {
+        /* 422＝存的瞬間有人先存了（不是快轉）：拿最新版重新合併再存 */
+        if (e.status === 422 && tries < 3) { toast("剛好有人也在存，重新合併中…", "busy"); return commitOnce(tries + 1); }
+        throw e;
       });
-    }).then(function () {
-      state.base = clone(P.plan); state.baseLegs = clone(P.legs); store("snow13-draft", null);
-      var mm = $("#msg"); mm.classList.remove("bad"); mm.innerHTML = '已儲存，網站大約一分鐘後更新。<a href="../day/' + state.date.slice(5).replace("-", "") + '/">看 ' + md(state.date) + ' 的頁面 →</a><a href="../">回首頁 →</a>'; renderAll();
-    }).catch(function (e) { if (e.message !== "cancel") msg("儲存失敗：" + e.message, true); else msg(""); }).then(function () { btn.disabled = false; });
-  });
+  }
+  function explain(e) {
+    if (e.status === 401) return ["這支手機的金鑰失效了（過期或被刪掉）。", [["重新設定", openSettings]]];
+    if (e.status === 403 || e.status === 404) return ["這把金鑰沒有寫入這個網站的權限。", [["設定", openSettings]]];
+    if (e.status === 409 || e.status === 422) return ["一直有人同時在存，請過幾秒再按一次。", [["再試一次", save]]];
+    if (!navigator.onLine || e instanceof TypeError) return ["沒有網路，沒存到。修改還留在這支手機上，有網路再按一次。", [["再試一次", save]]];
+    return ["沒存到：" + e.message + "。修改還留在這支手機上。", [["再試一次", save]]];
+  }
+  function save() {
+    if (btnState === "saving") return;
+    if (!isDirty()) { toast("沒有要儲存的修改，網站上已經是這個版本。", "info"); return; }
+    if (!P.token()) { toast("這支手機還不能儲存：要先設定（跟 Sean 要設定連結，點一下就好）。", "bad", [["設定", openSettings]]); return; }
+    setBtn("saving"); toast("儲存中…", "busy"); legFails = 0;
+    var all = dates.map(function (d) { return P.plan.days[d].stops; });
+    Promise.all(all.map(fillLegs)).then(function () { return commitOnce(0); }).then(function (r) {
+      P.plan = r.plan; P.clearCache(); state.base = clone(r.plan); state.planSha = r.sha; state.seenSha = r.sha;
+      if (r.legs) Object.keys(r.legs).forEach(function (k) { if (!P.legs[k]) P.legs[k] = r.legs[k]; });
+      state.baseLegs = clone(P.legs); state.legsDirty = false; store("snow13-draft", null);
+      P.lsSet("snow13-saved", { plan: r.plan, legs: r.added });   /* 這支手機的其他頁面馬上用新版 */
+      setBtn("saved"); renderAll(); renderStamp();
+      toast("已存到網站 " + hhmm(new Date()) + "。有設定的家人打開就是新版；沒設定的手機約 1 分鐘後更新。" + (legFails ? "（有 " + legFails + " 段路暫時查不到路網，先用直線估算，下次儲存會再查）" : ""), "ok", [["看 " + md(state.date) + " →", "../day/" + state.date.slice(5).replace("-", "") + "/"]]);
+    }).catch(function (e) {
+      setBtn("error"); var x = explain(e); toast(x[0], "bad", x[1]);
+    });
+  }
+  $("#save").addEventListener("click", save);
   $("#reload").addEventListener("click", function () {
     if (isDirty() && !confirm("會丟掉未儲存的變更，確定重新載入？")) return;
     store("snow13-draft", null); location.reload();
   });
+  setupFromLink();
+  addEventListener("hashchange", setupFromLink);   /* 已經開著編輯頁時再點設定連結 */
 
   load().catch(function (e) { msg("載入失敗：" + e.message, true); });
 })();

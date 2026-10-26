@@ -124,7 +124,37 @@
   };
 
   function fetchJSON(u) { return fetch(u, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }); }
-  P.ready = Promise.all([fetchJSON(BASE + "data/plan.json"), fetchJSON(BASE + "data/legs.json")]).then(function (r) { P.plan = r[0]; P.legs = r[1]; return P; });
+  /* ---------- 行程資料從哪裡讀 ----------
+     有金鑰的手機（會編輯的大人）：直接讀 GitHub 上最新的 plan.json／legs.json，存完馬上看得到，不用等網站重新部署（約 1 分鐘）。
+       GitHub 2.5 秒內沒回應、或金鑰失效，就退回讀網站上的檔案。
+     沒有金鑰的手機：讀網站上的檔案。
+     兩種都一樣：如果這支手機剛存過、讀到的還是舊版（savedAt 比較早），就用這支手機存下來的那一版。 */
+  var REPO = "ddfish333/hokkaido-ski-2027", API = "https://api.github.com/repos/" + REPO;
+  function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+  function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
+  P.REPO = REPO; P.API = API; P.lsGet = lsGet; P.lsSet = lsSet;
+  P.token = function () { return lsGet("snow13-gh-token"); };
+  P.ghRaw = function (path, ref) {
+    var h = { Accept: "application/vnd.github.raw+json" }, t = P.token(); if (t) h.Authorization = "Bearer " + t;
+    return fetch(API + "/contents/" + path + "?ref=" + (ref || "main"), { headers: h, cache: "no-cache" }).then(function (r) {
+      if (!r.ok) { var e = new Error("GitHub " + r.status); e.status = r.status; throw e; } return r.json(); });
+  };
+  function fromPages() { return Promise.all([fetchJSON(BASE + "data/plan.json"), fetchJSON(BASE + "data/legs.json")]); }
+  function fromGitHub() { return Promise.all([P.ghRaw("data/plan.json"), P.ghRaw("data/legs.json")]); }
+  P.newer = function (a, b) { return String((a && a.savedAt) || "") > String((b && b.savedAt) || ""); };
+  P.ready = new Promise(function (res, rej) {
+    var pages = fromPages(), done = false;
+    pages.catch(function () { });
+    function usePages() { pages.then(function (r) { if (!done) { done = true; P.source = "pages"; res(r); } }, function (e) { if (!done) { done = true; rej(e); } }); }
+    if (!P.token()) { usePages(); return; }
+    fromGitHub().then(function (r) { if (!done) { done = true; P.source = "github"; res(r); } }, function (e) { if (e.status === 401 || e.status === 403) P.tokenBad = e.status; usePages(); });
+    setTimeout(usePages, 2500);
+  }).then(function (r) {
+    var mine = lsGet("snow13-saved");
+    if (mine && mine.plan && P.newer(mine.plan, r[0])) { r[0] = mine.plan; Object.keys(mine.legs || {}).forEach(function (k) { if (!r[1][k]) r[1][k] = mine.legs[k]; }); P.source += "+這支手機剛存的版本"; }
+    else if (mine) lsSet("snow13-saved", null);
+    P.plan = r[0]; P.legs = r[1]; P.readyAt = Math.round(performance.now()); return P;
+  });
   P.schedule = schedule; P.dayPlan = dayPlan; P.hm = hm; P.mins = mins; P.legKey = legKey; P.leg = leg; P.estLeg = estLeg; P.r5 = r5; P.hav = hav;
   P.mode = function (m) { try { if (m) { localStorage.setItem("snow13-mode", m); return m; } return localStorage.getItem("snow13-mode") || "normal"; } catch (e) { return m || "normal"; } };
   window.Plan = P;

@@ -150,6 +150,21 @@ for f, marks in {"assets/film.js": [("keepAround(", "序幕只掛前後一幕的
     for mark, what in marks:
         if mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被拿掉或被舊檔案蓋掉了")
 
+# 0f. 編輯器儲存的底線（10/26：存了不知道有沒有存、要等一分鐘、多人同時改會互蓋）
+#   (a) 單日頁的靜態 HTML 不能含 plan.json 推算出來的東西，否則編輯器一存，GitHub 檢查就紅叉、頁面標題變舊
+#   (b) 儲存＝一個 commit、快轉更新 main、存完讀回比對；載入內容和版本號一次拿；以天為單位三方合併；有金鑰的手機直接讀 GitHub 最新版
+PLAN_TOKEN = re.compile(r"\{(t|dep|at|by|open|close|leg)[:}|]")
+for d in trip["days"]:
+    if PLAN_TOKEN.search(d.get("title", "")): E(f"{d['date']}：標題用了行程推算的標記（{d['title']}）——標題會寫進靜態頁面，編輯器改時間後會對不上；推算的時間放到 sub 或提醒")
+if "{{SUB}}" in open(os.path.join(ROOT, "tools/day.template.html"), encoding="utf-8").read():
+    E("tools/day.template.html：靜態頁面不能放 {{SUB}}（裡面有推算時間，編輯器一存就和頁面不一致）")
+for f, marks in {"assets/editor.js": [("/git/refs/heads/main", "一次儲存一個 commit、快轉更新（10/26）"), ("merge3(", "多人同時改以天為單位合併（10/26）"), ("readPlan(commitSha)", "存完讀回比對才顯示已儲存（10/26）")],
+                 "assets/plan.js": [("fromGitHub(", "有金鑰的手機直接讀 GitHub 最新版（10/26）"), ("snow13-saved", "剛存的手機先用自己存的版本（10/26）")],
+                 "plan/index.html": [("id=\"toast\"", "儲存狀態固定在畫面底部（10/26）")]}.items():
+    src = open(os.path.join(ROOT, f), encoding="utf-8").read()
+    for mark, what in marks:
+        if what and mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被拿掉或被舊檔案蓋掉了")
+
 # 1. 三份資料的日期要一致
 for d in days:
     if d not in dayplan: E(f"{d}：trip.js 有這天，plan.json 沒有站點")
