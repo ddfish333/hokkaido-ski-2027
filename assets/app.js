@@ -444,6 +444,16 @@
     renderLayers(); renderAreas(); renderStops(); applyMode();
     KEYS = keyPoints(); POIS = explorePois(); renderDrive();
     if (!window.maplibregl) { $("#mapfallback").hidden = false; return; }
+    whenNear($("#mapcanvas"), makeMap);
+  }
+  /* 單日頁上面有序幕在播：WebGL 地圖等捲到附近（前一個螢幕高）才建立，兩個重的東西不同時佔手機記憶體。
+     其他頁照舊馬上建。所有用到 map 的地方本來就有 if (!map || !mapReady) 保護。 */
+  function whenNear(el, fn) {
+    if (!document.getElementById("film") || !("IntersectionObserver" in window)) { fn(); return; }
+    var io = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { io.disconnect(); fn(); } }, { rootMargin: "100% 0px" });
+    io.observe(el);
+  }
+  function makeMap() {
     try {
       map = new maplibregl.Map({
         container: "mapcanvas", style: "https://tiles.openfreemap.org/styles/" + (isDark ? "dark" : "positron"),

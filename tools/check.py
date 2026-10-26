@@ -127,6 +127,29 @@ for f, marks in GUARDS.items():
     for mark, what in marks:
         if mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被舊檔案蓋掉了，先 git pull 再改")
 
+# 0e. 手機效能底線（10/26 iPhone 序幕閃黑塊、整頁重新載入的根本原因）——這幾種寫法一出現就擋
+#   (a) backdrop-filter（毛玻璃）只准用在 .topbar／.dayswitch 兩條固定列；疊在影片、動畫、地圖上會每格重算，iPhone 會閃、會爆記憶體
+#   (b) 序幕照片層不准 will-change（會讓每一幕的照片都常駐一張全螢幕點陣圖）
+#   (c) 序幕只掛前後一幕的影像（keepAround／detach）、路線圖畫在 canvas、手機不載 1080p、單日頁 WebGL 地圖捲到附近才建
+for f in sorted(os.listdir(os.path.join(ROOT, "assets"))):
+    if not f.endswith(".css"): continue
+    css = open(os.path.join(ROOT, "assets", f), encoding="utf-8").read()
+    for m in re.finditer(r"([^{}]+)\{([^{}]*)\}", re.sub(r"/\*.*?\*/", "", css, flags=re.S)):
+        sel, body = m.group(1).strip(), m.group(2)
+        if re.search(r"(?<![\w-])(-webkit-)?backdrop-filter\s*:", body) and not re.fullmatch(r"\.(topbar|dayswitch)", sel.split("\n")[-1].strip()):
+            E(f"assets/{f}：「{sel.splitlines()[-1].strip()}」用了 backdrop-filter——只有 .topbar／.dayswitch 可以用，其他改成不透明一點的底色")
+        if sel.endswith(".film .ph") and "will-change" in body:
+            E(f"assets/{f}：.film .ph 不能加 will-change（每一幕照片都會常駐一張全螢幕圖層）")
+_film = open(os.path.join(ROOT, "assets/film.js"), encoding="utf-8").read()
+if "createElementNS" in _film: E("assets/film.js：序幕路線圖又出現 SVG（createElementNS）——要畫在 canvas 上")
+if re.search(r"devicePixelRatio[^;\n]*>\s*1500", _film) and "Math.min(innerWidth, innerHeight) >= 700" not in _film:
+    E("assets/film.js：1080p 只能看 CSS 短邊（≥ 700）決定，不能只看裝置像素（iPhone 3 倍螢幕會被當成大螢幕）")
+for f, marks in {"assets/film.js": [("keepAround(", "序幕只掛前後一幕的照片影片（10/26）"), ("v.removeAttribute(\"src\")", "離開的影片釋放解碼器（10/26）"), ("drawMap(", "路線圖畫在 canvas（10/26）"), ("Math.min(innerWidth, innerHeight) >= 700", "手機不載 1080p（10/26）")],
+                 "assets/app.js": [("whenNear($(\"#mapcanvas\"), makeMap)", "單日頁 WebGL 地圖捲到附近才建（10/26）")]}.items():
+    src = open(os.path.join(ROOT, f), encoding="utf-8").read()
+    for mark, what in marks:
+        if mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被拿掉或被舊檔案蓋掉了")
+
 # 1. 三份資料的日期要一致
 for d in days:
     if d not in dayplan: E(f"{d}：trip.js 有這天，plan.json 沒有站點")

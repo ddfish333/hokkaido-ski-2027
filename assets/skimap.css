@@ -115,7 +115,7 @@
 .sk-media .ch-play { position: absolute; left: 14px; bottom: 14px; width: 32px; height: 32px; }
 .sk-media.playing .ch-play { opacity: 0; }
 .sk-media-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; align-items: flex-start; }
-.sk-media-top .pill { background: rgba(7,11,18,.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--ink); border-color: rgba(255,255,255,.14); white-space: normal; text-align: center; line-height: 1.3; max-width: 100%; }
+.sk-media-top .pill { background: rgba(7,11,18,.8); color: var(--ink); border-color: rgba(255,255,255,.14); white-space: normal; text-align: center; line-height: 1.3; max-width: 100%; }
 .sk-media-top .pill.open { color: var(--ok); } .sk-media-top .pill.soon { color: #A9C9FF; }
 .sk-media-top .pill.days { color: var(--gold); margin-left: auto; }
 .sk-card .r-name { font-size: 20px; }
@@ -132,7 +132,7 @@
 .sk-pin-d { width: 14px; height: 14px; border-radius: 50%; background: var(--ac); border: 2px solid rgba(7,11,18,.9); box-shadow: 0 0 0 2px rgba(255,255,255,.25), 0 4px 10px rgba(0,0,0,.45); transition: transform .2s; }
 .sk-pin:hover .sk-pin-d, .sk-pin.active .sk-pin-d { transform: scale(1.4); }
 .sk-pin.active .sk-pin-d { box-shadow: 0 0 0 3px rgba(255,255,255,.6), 0 0 0 9px rgba(232,179,106,.25), 0 4px 12px rgba(0,0,0,.5); }
-.sk-pin-l { display: grid; justify-items: center; gap: 1px; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; color: var(--ink); background: rgba(7,11,18,.74); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 4px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid rgba(255,255,255,.1); pointer-events: none; }
+.sk-pin-l { display: grid; justify-items: center; gap: 1px; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; color: var(--ink); background: rgba(7,11,18,.84); padding: 4px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid rgba(255,255,255,.1); pointer-events: none; }
 .sk-pin-l b { font-weight: 500; }
 .sk-pin.otaru .sk-pin-l { opacity: .8; }
 .sk-pin.active .sk-pin-l { border-color: var(--ac); }
