@@ -152,10 +152,11 @@
   }
   function refreshPosterWx() { document.querySelectorAll("[data-pw]").forEach(function (el) { var d = T.days.filter(function (x) { return x.date === el.dataset.pw; })[0]; if (d) el.innerHTML = posterWx(d); }); }
   var CHAPTER_IMG = { villa: "otaru", furano: "furano", sapporo: "sapporo" };
-  var CHAPTER_LINE = {
-    villa: "從一棟很美的房子開始。走出門五分鐘就是 Onze，面著海滑雪。",
-    furano: "主戰場。木頭香的小木屋，五分鐘到纜車；平日早上的壓雪坡留給 carving。",
-    sapporo: "最後三晚回到城市。新飯店、大浴場，街很美——用走的。"
+  /* 三章：海と雪、山と雪、街と雪——照片、日文標題、一段話（文案 2026-10-26 由 Sean 提供） */
+  var CHAPTER = {
+    villa: { en: "CHAPTER 01 — OTARU · 4 NIGHTS", jp: "海と雪", line: "第一站，住進小樽近郊的山鄉。白天往 Kiroro 滑雪，留一個下午給小樽運河與堺町通。雪山、海岸、溫泉與壽司，構成最初的四晚。" },
+    furano: { en: "CHAPTER 02 — FURANO · 5 NIGHTS", jp: "山と雪", line: "五晚住在北之峰，這裡是旅程的滑雪重心。從小木屋出發，探索富良野的兩個滑雪區；也安排旭山動物園、美瑛雪原與青池點燈。" },
+    sapporo: { en: "CHAPTER 03 — SAPPORO · 3 NIGHTS", jp: "街と雪", line: "最後三晚回到札幌。把車停好，走進城市裡的餐廳、商店與冬日街景。想滑雪還能再上山，其餘時間就留給美食與自由探索。" }
   };
   var LINK_ICON = {
     "官網": '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>',
@@ -164,17 +165,21 @@
     "導航": '<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20l7.5-4 7.5 4z"/></svg>'
   };
   function linkPill(label, url, sub) { return '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + (LINK_ICON[label] || "") + '<span>' + esc(label) + (sub ? ' <b>' + esc(sub) + '</b>' : "") + '</span></a>'; }
+  function arrowLink(label, url) { return '<a class="alink" href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(label) + '<svg viewBox="0 0 56 8" aria-hidden="true"><path d="M0 7h54M48 1l6 6"/></svg></a>'; }
   function renderChapters() {
     var box = $("#chapterlist"); if (!box) return;
     box.innerHTML = T.bases.map(function (b, i) {
-      var k = CHAPTER_IMG[b.id];
+      var k = CHAPTER_IMG[b.id], c = CHAPTER[b.id] || { en: "", jp: "", line: "" };
+      var site = (b.links || []).filter(function (l) { return l[0] === "官網"; })[0];
       return '<article class="chapter">' +
         '<div class="ch-img"><img src="' + BASE + 'assets/img/chapter/' + k + '.jpg" alt="" loading="lazy"></div>' +
-        '<div class="ch-body"><p class="ch-k">第 ' + ["一", "二", "三"][i] + ' 章 · ' + md(b.from) + ' – ' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
-        '<h3 class="ch-h">' + esc(b.short) + '</h3><p class="ch-line">' + esc(CHAPTER_LINE[b.id]) + '</p>' +
-        '<p class="ch-stay"><span>住 ' + esc(b.name) + (b.checkin ? ' · 入住 ' + b.checkin : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</span>' +
-        '<span class="ch-links">' + ((b.links || []).filter(function (l) { return l[0] === "官網"; }).map(function (l) { return linkPill(l[0], l[1]); }).join("")) + linkPill("導航", navUrl(b.lat, b.lon)) + '</span></p>' +
-        '<div class="ch-gal">' + [1, 2, 3, 4].map(function (n) { return '<img src="' + BASE + 'assets/img/stay/' + b.id + '-' + n + '.jpg" alt="" loading="lazy">'; }).join("") + '</div>' +
+        '<div class="ch-body">' +
+        '<p class="ch-k">' + esc(c.en) + '</p>' +
+        '<p class="ch-jp">' + esc(c.jp) + '</p>' +
+        '<p class="ch-area">' + esc(b.short) + '｜' + md(b.from) + '–' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
+        '<p class="ch-line">' + esc(c.line) + '</p>' +
+        '<p class="ch-stay">' + esc(b.name) + (b.checkin ? ' · 入住 ' + b.checkin : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
+        '<p class="ch-links">' + (site ? arrowLink("官網", site[1]) : "") + arrowLink("導航", navUrl(b.lat, b.lon)) + '</p>' +
         '</div></article>';
     }).join("");
   }
