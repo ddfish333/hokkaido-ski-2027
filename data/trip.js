@@ -10,19 +10,19 @@ window.TRIP = {
   fx: { jpyTwd: 0.2073, date: "2026-10-25", source: "open.er-api.com" },
 
   bases: [
-    { id: "villa", name: "山郷 春 Villa -SHUN-", short: "小樽・山鄉", area: "小樽", lat: 43.1467841, lon: 141.1354924,
+    { id: "villa", stop: "villa", name: "山郷 春 Villa -SHUN-", short: "小樽・山鄉", area: "小樽", lat: 43.1467841, lon: 141.1354924,
       from: "2027-01-07", to: "2027-01-11", nights: 4, checkin: "15:00 起（官網沒寫最晚時間；1/7 預計 {t:villa@01-07} 到，先跟房東說）", checkout: "11:00",
-      notes: ["**走路 5 分到 Onze 雪場**（夜滑到 {close:onze}），面海滑雪；開車 35 分上 Kiroro、25 分進札幌", "145 m² 一棟包：挑高大窗對著森林、檜木浴缸、森林景觀的廚房；洗烘衣機、洗碗機", "三五工務店蓋的「像住在北海道一樣」的房子，用的是北海道的木頭；停車每棟 2 格、免費"],
-      facts: ["走路 5 分到 Onze", "145 m² 一棟包", "檜木浴缸・洗烘衣機", "停車 2 格"],
+      notes: ["**走路 {leg:villa|onze|walk} 分到 Onze 雪場**（夜滑到 {close:onze}），面海滑雪；冬天開車 {T:drive.villa.kiroro.1} 分上 Kiroro（山路）", "145 m² 一棟包：挑高大窗對著森林、檜木浴缸、森林景觀的廚房；洗烘衣機、洗碗機", "三五工務店蓋的「像住在北海道一樣」的房子，用的是北海道的木頭；停車每棟 2 格、免費"],
+      facts: ["走路 {leg:villa|onze|walk} 分到 Onze", "145 m² 一棟包", "檜木浴缸・洗烘衣機", "停車 2 格"],
       video: "villa-hover.mp4", videoSm: "villa-hover-sm.mp4",
       links: [["官網", "https://mt-sango.com/stay/shun/"], ["訂房", "https://www.ikyu.com/00051685/"]], g: { rating: 5.0, n: 2, pid: "ChIJv-YvGwDfCl8Rybz1BtgpE2w" } },
-    { id: "furano", name: "BEST DAY EVER FURANO LODGES", short: "富良野・北之峰", area: "富良野", lat: 43.3325009, lon: 142.3631996,
+    { id: "furano", stop: "lodge", name: "BEST DAY EVER FURANO LODGES", short: "富良野・北之峰", area: "富良野", lat: 43.3325009, lon: 142.3631996,
       from: "2027-01-11", to: "2027-01-16", nights: 5, checkin: "15:00", checkout: "10:00",
-      notes: ["開車 5 分到北之峰纜車、10 分到富良野市區；主戰場的 5 晚", "126 m² 小木屋、4 間臥室；全套廚房＋微波爐、洗衣機、陽台", "Google 5.0（48 則）：一進門是木頭香、乾淨得像新的、老闆自己是滑雪人，屋裡到處是雪板的小細節；停車免費"],
-      facts: ["開車 5 分到北之峰纜車", "126 m²・4 間臥室", "全套廚房・洗衣機", "停車免費"],
+      notes: ["開車 {leg:lodge|kita} 分到北之峰纜車、{leg:lodge|fstn} 分到富良野站；主戰場的 5 晚", "126 m² 小木屋、4 間臥室；全套廚房＋微波爐、洗衣機、陽台", "Google 5.0（48 則）：一進門是木頭香、乾淨得像新的、老闆自己是滑雪人，屋裡到處是雪板的小細節；停車免費"],
+      facts: ["開車 {leg:lodge|kita} 分到北之峰纜車", "126 m²・4 間臥室", "全套廚房・洗衣機", "停車免費"],
       video: "furano-hover.mp4", videoSm: "furano-hover-sm.mp4",
       links: [["官網", "https://bestdayeverfurano.com/"], ["訂房", "https://tour.l-tike.com/hotels/domestic/hotel/75033723/"]], g: { rating: 5.0, n: 48, pid: "ChIJPY_8pplTc18Rq5OgungIGww" } },
-    { id: "sapporo", name: "FAV LUX 札幌薄野", short: "札幌・薄野", area: "札幌", lat: 43.0523778, lon: 141.3485722,
+    { id: "sapporo", stop: "favlux", name: "FAV LUX 札幌薄野", short: "札幌・薄野", area: "札幌", lat: 43.0523778, lon: 141.3485722,
       from: "2027-01-16", to: "2027-01-19", nights: 3, checkin: "15:00", checkout: "10:00",
       notes: ["2025 年 7 月新開幕、84 間：**上下舖的 4–6 人家庭房**、房內洗衣機、兩個洗手台、小客廳、冰箱微波爐，小孩有自己的小桌子；住客專用大浴場＋三溫暖（Google 4.3，306 則）", "**在札幌盡量走路**：街很美、什麼都在 10 分鐘內，札幌站–大通–薄野一路地下街不用踩雪；市電「東本願寺前」站就在幾分鐘路程內", "車子 1/16 停好就三晚不動——停哪裡、怎麼導航，看單日頁的「車停哪裡」", "退房 {T:bases.2.checkout}，1/19 同時要還車：**{t:favlux@01-19} 前離開**"],
       facts: ["上下舖家庭房", "房內洗衣機", "大浴場・三溫暖", "走路逛札幌，車停好三晚不動"],
@@ -37,10 +37,10 @@ window.TRIP = {
       tickets: [["1 日券", "¥5,600"], ["4 小時券", "¥4,500"], ["家庭套票（大人＋小孩 4h＋餐券 2）", "¥7,500"], ["國高中生・長者 1 日", "¥4,700"], ["小孩 1 日", "¥3,700"]],
       kids: "官網寫未就學兒童免費（出發前再確認一次）", lessons: "—",
       gear: "現場租借、不可預約：大人一組 ¥7,500、小孩 ¥5,200",
-      tips: ["山鄉步行 5 分，小樽 4 晚大人輪流夜滑", "規模小、雪不如 Kiroro 粉，滑 1–2 小時剛好"],
+      tips: ["山鄉步行 {leg:villa|onze|walk} 分，小樽 4 晚大人輪流夜滑", "規模小、雪不如 Kiroro 粉，滑 1–2 小時剛好"],
       links: [["官網", "https://onze.jp/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31616/"]],
       status: "https://weathernews.jp/ski/spot/31616/", stops: ["onze"], video: "onze-hover.mp4", videoSm: "onze-hover-sm.mp4", img: "onze.jpg",
-      entry: "停車場就在山腳（免費）；從山鄉走路 5 分，不用開車",
+      entry: "停車場就在山腳（免費）；從山鄉走路 {leg:villa|onze|walk} 分，不用開車",
       summit: null, base: 200 },
     { id: "kiroro", group: "main", name: "Kiroro", ja: "キロロ", tier: "粉雪大雪場", lat: 43.0679153, lon: 140.9893336,
       season: ["2026-11-28", "2027-05-05"], seasonNote: "旺季 12/12–4/11",
@@ -69,7 +69,7 @@ window.TRIP = {
       status: "https://www.princehotels.co.jp/ski/furano/informations/snowreport", cams: "https://www.princehotels.co.jp/ski/furano/livecamera/", cams360: "https://furano.panomax.com/?cu=ja-JP", trailmap: "https://www.princehotels.co.jp/ski/furano/winter/coursemap/", access: "https://www.princehotels.co.jp/ski/furano/winter/access/",
       stops: ["kita", "fzone"], video: "furano-hover.mp4", videoSm: "furano-hover-sm.mp4", img: "furano.jpg", top: [43.3280, 142.3150],
       gates: [
-        { name: "北之峰區（北の峰ゴンドラ）", sub: "小木屋開車 5 分；1/12、1/14 從這邊上", ja: "富良野スキー場 北の峰ゴンドラ", lat: 43.3438912, lon: 142.3602434, pid: "ChIJB2XB8aNSc18RbgxtFUZ8FPk", stop: "kita", note: "北之峰主街有租借店（Rhythm）、餐廳；導航直接到纜車站旁的北之峰區停車場（免費）。" },
+        { name: "北之峰區（北の峰ゴンドラ）", sub: "小木屋開車 {leg:lodge|kita} 分；1/12、1/14 從這邊上", ja: "富良野スキー場 北の峰ゴンドラ", lat: 43.3438912, lon: 142.3602434, pid: "ChIJB2XB8aNSc18RbgxtFUZ8FPk", stop: "kita", note: "北之峰主街有租借店（Rhythm）、餐廳；導航直接到纜車站旁的北之峰區停車場（免費）。" },
         { name: "富良野區（富良野ロープウェー）", sub: "1/13 從這邊上；山上兩區相通，但纜車站的停車場不相通", ja: "富良野ロープウェー", lat: 43.3254401, lon: 142.3536473, pid: "ChIJHaVVJfJSc18RNW9hDu1q5qM", stop: "fzone", note: "新富良野王子飯店旁；101 人大纜車 5 分上山。停哪邊就從哪邊下山，別滑錯區。" }
       ],
       summit: 900, base: 250 },
@@ -83,10 +83,10 @@ window.TRIP = {
       lessons: "Teine Olympia 滑雪學校有 Junior 班；本次不上課",
       gear: "Olympia 3 樓「HEAD Sports Station」（HEAD／BURTON）08:30–20:00，建議網路預約；IG 說租借偏貴",
       gates: [
-        { name: "Olympia Ski Center", sub: "家庭・魔毯・Snow Land・夜滑；帶小孩停這邊", ja: "オリンピアスキーセンター", lat: 43.0944, lon: 141.2112, pid: "ChIJ6zkmLHPYCl8RYqZuc-S35qw", note: "手稲本町 593-17。從這裡搭 Eight Gondola 上 Highland。" },
+        { name: "Olympia Ski Center", stop: "teine", sub: "家庭・魔毯・Snow Land・夜滑；帶小孩停這邊", ja: "オリンピアスキーセンター", lat: 43.0944, lon: 141.2112, pid: "ChIJ6zkmLHPYCl8RYqZuc-S35qw", note: "手稲本町 593-17。從這裡搭 Eight Gondola 上 Highland。" },
         { name: "Highland Ski Center", sub: "直接上高地；只滑 Highland 的人停這邊", ja: "ハイランドスキーセンター", lat: 43.0843, lon: 141.2053, pid: "ChIJLRLJ7xfYCl8R_MltyFlEiys", note: "手稲金山 172。另一條山路上去，約多 10 分；兩邊停車場不相通。" }
       ],
-      tips: ["11/21 開季（官網 10/17 公告）；正式雪季 12/19–3/7，3/29 起只開 Highland", "**錯過 Eight Gondola 最後一班（15:30）就回不到 Olympia**——車停 Olympia 的人 15:00 前要下山", "如果真的去滑（1/16–1/18 都不是正式行程）：1/18 前 Highland 吊椅只到 15:30，上午一位滑 Highland，下午那位用夜滑券（WEB ¥2,900）滑 Olympia 到 20:00，兩個人都滑得到", "官網：札幌市中心約 15 km、車約 40 分（FAV LUX 出發我們抓 25–35 分）；停車免費", "票、租借、點餐都掃 QR（IG）"],
+      tips: ["11/21 開季（官網 10/17 公告）；正式雪季 12/19–3/7，3/29 起只開 Highland", "**錯過 Eight Gondola 最後一班（15:30）就回不到 Olympia**——車停 Olympia 的人 15:00 前要下山", "如果真的去滑（1/16–1/18 都不是正式行程）：1/18 前 Highland 吊椅只到 15:30，上午一位滑 Highland，下午那位用夜滑券（WEB ¥2,900）滑 Olympia 到 20:00，兩個人都滑得到", "官網：札幌市中心約 15 km、車約 40 分（FAV LUX 出發 {T:drive.sapporo.teine.1} 分、下雪 {T:drive.sapporo.teine.2} 分）；停車免費", "票、租借、點餐都掃 QR（IG）"],
       links: [["官網", "https://sapporo-teine.com/snow/"], ["票價・吊椅時間", "https://sapporo-teine.com/snow/lift-time"], ["雪道", "https://sapporo-teine.com/snow/course"], ["開車", "https://sapporo-teine.com/snow/access/by-car"], ["Olympia Ski Center", "https://sapporo-teine.com/snow/facilities/olympia-ski-center"], ["Webshop", "https://teine.axess.shop/ja/Products/Tickets"]],
       status: "https://sapporo-teine.com/snow/gelande-report", cams: "https://sapporo-teine.com/snow/gelande-report", trailmap: "https://sapporo-teine.com/snow/course?id=Map", webshop: "https://teine.axess.shop/ja/Products/Tickets", access: "https://sapporo-teine.com/snow/access/by-car", kidsArea: "https://sapporo-teine.com/snow/park/snow-land",
       stops: ["teine"], video: "teine-hover.mp4", videoSm: "teine-hover-sm.mp4", img: "teine.jpg", top: [43.0800, 141.1994],
@@ -99,7 +99,7 @@ window.TRIP = {
       tickets: [["1 日券", "¥7,000", "WEB 預購 ¥6,700"], ["4 小時券", "¥6,500", "WEB 預購 ¥6,200"], ["小學生 1 日", "¥2,800", "WEB 預購 ¥2,500"], ["雪上手扶梯 1 日", "¥2,800"], ["雪上手扶梯 未就學＋家長合計", "¥2,800"]],
       kids: "未就學免費（IC 卡 ¥500）；山腳有雪上手扶梯初學區，未就學小孩＋家長合計 ¥2,800（12 月下旬起）",
       lessons: "—", gear: "山腳租借；IG 說比 Teine 便宜",
-      tips: ["往年 11 月下旬開季到 5 月初，2026-27 日期待官網公告", "FAV LUX 出發約 60 分、從山鄉走朝里→道道 1 號約 50 分：來回吃掉 2 小時，**不適合中午交換**", "海拔高、雪量多，粉雪和寬壓雪坡是札幌近郊最好的；纜車廂要排隊（IG 抱怨週末排很久）", "沒有夜滑；回程可順路定山溪泡湯"],
+      tips: ["往年 11 月下旬開季到 5 月初，2026-27 日期待官網公告", "FAV LUX 出發約 {T:drive.sapporo.kokusai.1} 分、從山鄉約 {T:drive.villa.kokusai.1} 分（都是冬天山路）：來回吃掉 2 小時以上，**不適合中午交換**", "海拔高、雪量多，粉雪和寬壓雪坡是札幌近郊最好的；纜車廂要排隊（IG 抱怨週末排很久）", "沒有夜滑；回程可順路定山溪泡湯"],
       links: [["官網", "https://www.sapporo-kokusai.jp/"], ["票價", "https://www.sapporo-kokusai.jp/price/"], ["雪道（中文）", "https://www.sapporo-kokusai.jp/tw/slopes/"]],
       status: "https://www.sapporo-kokusai.jp/slopes/", trailmap: "https://www.sapporo-kokusai.jp/tw/slopes/", webshop: "https://www.sapporo-kokusai.jp/webshop/", access: "https://www.sapporo-kokusai.jp/access/", kidsArea: "https://www.sapporo-kokusai.jp/slopes/snow-playground.php",
       video: "kokusai-hover.mp4", videoSm: "kokusai-hover-sm.mp4", img: "kokusai.jpg", top: [43.0640, 141.0700],
@@ -112,7 +112,7 @@ window.TRIP = {
       tickets: [["1 日券", "¥7,500"], ["4 小時券", "¥6,600"], ["夜滑券（16:00 起）", "¥2,500"], ["中學生以下 1 日", "¥6,000"], ["中學生以下 4 小時", "¥4,800"], ["わくわくスノーランド 1 日（3 歲起）", "¥1,000", "持吊椅票 ¥800"], ["スノーランド 親子（大人 1＋小孩 1）", "¥1,500"]],
       kids: "わくわくスノーランド：和雪道分開的小孩雪上樂園（雪橇、雪圈、雪地滑步車），3 歲起 ¥1,000、親子 ¥1,500，10:00–16:00；3 歲以下是否免費🔎",
       lessons: "—", gear: "現場租借",
-      tips: ["往年 12 月上旬開季，2026-27 日期待官網公告", "FAV LUX 出發約 20 分：大人輪流滑、或天氣差只想滑 2 小時時最實用", "Snow Land 票價是 Teine 的一半，4 歲小孩在這裡玩雪最划算", "Google 3.9（1,800 則）：雪道短、人多；不是專程來練 carving 的地方"],
+      tips: ["往年 12 月上旬開季，2026-27 日期待官網公告", "FAV LUX 出發約 {T:drive.sapporo.bankei.1} 分：大人輪流滑、或天氣差只想滑 2 小時時最實用", "Snow Land 票價是 Teine 的一半，4 歲小孩在這裡玩雪最划算", "Google 3.9（1,800 則）：雪道短、人多；不是專程來練 carving 的地方"],
       links: [["官網", "https://www.bankei.co.jp/ski/"], ["票價", "https://www.bankei.co.jp/liftprice/"], ["札幌觀光局介紹", "https://visit.sapporo.travel/discover/snow/sapporo-bankei-ski-area/"]],
       status: "https://www.bankei.co.jp/ski/", img: "bankei.jpg",
       summit: null, base: 200, est: true },
@@ -141,7 +141,7 @@ window.TRIP = {
       tickets: [["1 日券", "¥3,300", "WEB 預購 ¥3,200"], ["4 小時券", "¥2,400", "WEB 預購 ¥2,300"], ["夜滑券（16:00 起）", "¥1,700"]],
       kids: "學齡前免費（IC 卡 ¥500）",
       lessons: "—", gear: "現場租借",
-      tips: ["往年 12 月中開季，2026-27 待官網公告", "FAV LUX 出發約 40 分，票價只有 Teine 的三分之一；評論說初學區不用買吊椅票、Google 寫營業到 16:30＋夜滑", "部分雪道偏陡，便宜不等於每條都好練；我們已經有 Kiroro 和富良野，這裡只是候補"],
+      tips: ["往年 12 月中開季，2026-27 待官網公告", "FAV LUX 出發約 {T:drive.sapporo.fus.1} 分，票價只有 Teine 的三分之一；評論說初學區不用買吊椅票、Google 寫營業到 16:30＋夜滑", "部分雪道偏陡，便宜不等於每條都好練；我們已經有 Kiroro 和富良野，這裡只是候補"],
       links: [["官網", "https://www.fujino-yagai-sports.jp/winter"], ["票價（中文）", "https://www.fujino-yagai-sports.jp/zh-hant/winter/fee"]],
       status: "https://www.fujino-yagai-sports.jp/winter", cams: "https://www.fujino-yagai-sports.jp/winter/live", access: "https://www.fujino-yagai-sports.jp/winter/access",
       summit: null, base: 200, est: true },
@@ -150,67 +150,68 @@ window.TRIP = {
       tixSeason: "2025-26 參考價（2026-27 待公告，11 月再查）",
       tickets: [["1 日券", "¥5,500"], ["4 小時券", "¥4,900"], ["アフター14（14:00 起）", "¥3,500"], ["小孩 1 日", "¥3,300"], ["小孩 4 小時", "¥3,000"]],
       kids: "小孩票 ¥3,300；學齡前是否免費🔎", lessons: "—", gear: "現場租借",
-      tips: ["往年 12 月中開季到 4 月初，2026-27 日期待官網公告（11 月）", "山鄉開車 25 分、朝里 IC 下來 5 分；1/9 Kiroro 太擠或天氣差時的備案", "回程接湯の花 朝里殿泡湯"],
+      tips: ["往年 12 月中開季到 4 月初，2026-27 日期待官網公告（11 月）", "山鄉開車約 {T:drive.villa.asari.1} 分（最後一段是山路）；1/9 Kiroro 太擠或天氣差時的備案", "回程接湯の花 朝里殿泡湯"],
       links: [["官網", "https://asari-ski.com/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31502/"]],
       status: "https://weathernews.jp/ski/spot/31502/",
       summit: 660, base: 140, est: true }
   ],
 
   /* 住宿 → 雪場 車程 [km, 一般分鐘, 下雪分鐘] */
+  /* 住宿 → 雪場車程 [公里, 一般分鐘, 下雪分鐘]：tools/refresh_legs.py 產生（和 legs.json 同一套算法：冬季山路另計），不要手改 */
   drive: {
-    villa:   { onze: [1.3, 5, 5],   kiroro: [34.5, 35, 45],  teine: [17.1, 20, 25], asari: [22.8, 25, 35], furano_kita: [136.1, 130, 175], kokusai: [33, 50, 70], bankei: [28, 40, 55], moiwa: [33, 45, 60], fus: [42, 55, 75] },
-    furano:  { onze: [136.5, 135, 180], kiroro: [169.7, 170, 220], teine: [131.4, 135, 175], asari: [158.0, 160, 210], furano_kita: [1.8, 5, 10], kokusai: [145, 150, 200], bankei: [120, 125, 165], moiwa: [116, 120, 160], fus: [118, 125, 165] },
-    sapporo: { onze: [23.4, 30, 40], kiroro: [56.5, 60, 80], teine: [18.3, 25, 35], asari: [44.9, 50, 65], furano_kita: [113.9, 115, 150], kokusai: [38, 60, 80], bankei: [8.5, 20, 30], moiwa: [6.5, 20, 30], fus: [17, 40, 55] }
+    villa: { onze: [1.3, 5, 5], kiroro: [34.5, 50, 65], furano_kita: [135.7, 130, 170], teine: [17.0, 30, 35], kokusai: [27.0, 40, 50], bankei: [24.5, 30, 35], moiwa: [29.4, 35, 45], fus: [38.5, 40, 55], asari: [22.8, 40, 45] },
+    furano: { onze: [136.5, 135, 180], kiroro: [169.7, 170, 220], furano_kita: [1.9, 5, 5], teine: [131.3, 135, 175], kokusai: [158.4, 160, 210], bankei: [123.0, 130, 170], moiwa: [120.2, 125, 160], fus: [129.3, 130, 170], asari: [158.0, 160, 210] },
+    sapporo: { onze: [23.4, 30, 40], kiroro: [56.5, 85, 105], furano_kita: [113.4, 110, 145], teine: [18.3, 25, 35], kokusai: [44.6, 65, 80], bankei: [8.6, 15, 20], moiwa: [6.4, 10, 10], fus: [15.5, 15, 20], asari: [44.9, 70, 90] }
   },
 
   /* 地圖上的地點：type = stay | ski | sight | food | onsen | shop | grocery | hospital | transport */
   places: [
-    { type: "transport", name: "新千歲機場", ja: "新千歳空港", lat: 42.7868, lon: 141.683, note: "去程：國際線入境、領完行李後到一樓出口右手邊【98 許可車專用】站牌，打電話或 LINE 叫租車接駁（官網取車流程頁）；回程：租車店接駁車送到航廈" },
-    { type: "transport", name: "北海道租車 新千歲機場店", ja: "カーレンタル北海道 新千歳空港店（千歳市青葉8-9-8）", lat: 42.823071, lon: 141.6630606, note: "官網：09:00–18:00；機場免費接駁約 10 分" },
-    { type: "transport", name: "富良野站（保姆巴士）", ja: "富良野駅", lat: 43.3469, lon: 142.3917, note: "1/14 下午送保姆" },
-    { type: "sight", name: "小樽運河", lat: 43.197846, lon: 141.0032753, note: "天黑後煤氣燈亮起" },
+    { type: "transport", name: "新千歲機場", stop: "cts", ja: "新千歳空港", lat: 42.7868, lon: 141.683, note: "去程：國際線入境、領完行李後到一樓出口右手邊【98 許可車專用】站牌，打電話或 LINE 叫租車接駁（官網取車流程頁）；回程：租車店接駁車送到航廈" },
+    { type: "transport", name: "北海道租車 新千歲機場店", stop: "rental", ja: "カーレンタル北海道 新千歳空港店（千歳市青葉8-9-8）", lat: 42.823071, lon: 141.6630606, note: "官網：09:00–18:00；機場免費接駁約 10 分" },
+    { type: "transport", name: "富良野站（保姆巴士）", stop: "fstn", ja: "富良野駅", lat: 43.3468945, lon: 142.3912825, note: "1/14 下午送保姆" },
+    { type: "sight", name: "小樽運河", stop: "canal", lat: 43.197846, lon: 141.0032753, note: "天黑後煤氣燈亮起" },
     { type: "sight", name: "小樽水族館", ja: "おたる水族館", lat: 43.2370, lon: 141.0114, note: "冬季企鵝雪地散步（上一季 11:30／12:40／13:30／14:40）" },
-    { type: "sight", name: "旭山動物園", lat: 43.7686, lon: 142.4793, note: "冬季 10:30–15:30（最後入園 15:00）；企鵝散步往年 11:00、14:30，26–27 季未公告；國中以下免費" },
-    { type: "sight", name: "千代田牧場 Farm's Chiyoda", ja: "ファームズ千代田", lat: 43.5427, lon: 142.4918, note: "營業 10:00–15:00（待確認冬季）" },
-    { type: "sight", name: "白鬚瀑布", ja: "白ひげの滝", lat: 43.4746, lon: 142.6392, note: "日落–21:00 點燈，免費" },
-    { type: "sight", name: "青池", ja: "青い池", lat: 43.4935, lon: 142.6141, note: "1 月 17:00–21:00 點燈；停車 ¥1,000" },
-    { type: "sight", name: "森林精靈露台", ja: "ニングルテラス", lat: 43.3234, lon: 142.3563, note: "森林小木屋商店街，晚上點燈" },
-    { type: "sight", name: "瀧野鈴蘭丘陵公園（雪世界）", ja: "滝野すずらん丘陵公園 滝野スノーワールド", lat: 42.9125, lon: 141.3814, note: "200 m 雪地滑圈、兒童雪地遊戲" },
+    { type: "sight", name: "旭山動物園", stop: "zoo", lat: 43.7689713, lon: 142.4791319, note: "冬季 10:30–15:30（最後入園 15:00）；企鵝散步往年 11:00、14:30，26–27 季未公告；國中以下免費" },
+    { type: "sight", name: "千代田牧場 Farm's Chiyoda", stop: "chiyoda", ja: "ファームズ千代田", lat: 43.5427, lon: 142.4918, note: "營業 10:00–15:00（待確認冬季）" },
+    { type: "sight", name: "白鬚瀑布", stop: "shirahige", ja: "白ひげの滝", lat: 43.4746, lon: 142.6392, note: "日落–21:00 點燈，免費" },
+    { type: "sight", name: "青池", stop: "aoiike", ja: "青い池", lat: 43.4935, lon: 142.6141, note: "1 月 17:00–21:00 點燈；停車 ¥1,000" },
+    { type: "sight", name: "森林精靈露台", stop: "ningle", ja: "ニングルテラス", lat: 43.3233257, lon: 142.3558861, note: "森林小木屋商店街，晚上點燈" },
+    { type: "sight", name: "瀧野鈴蘭丘陵公園（雪世界）", stop: "takino", ja: "滝野すずらん丘陵公園 滝野スノーワールド", lat: 42.9125, lon: 141.3814, note: "200 m 雪地滑圈、兒童雪地遊戲" },
     { type: "sight", name: "圓山動物園", ja: "円山動物園", lat: 43.0488, lon: 141.3061, note: "冬季時間待確認" },
-    { type: "sight", name: "AOAO SAPPORO 水族館", lat: 43.0578, lon: 141.3536, note: "從 FAV LUX 走路可到" },
-    { type: "sight", name: "白色戀人公園", ja: "白い恋人パーク", lat: 43.0887, lon: 141.2717, note: "室內、甜點" },
-    { type: "food", name: "若鶏時代なると 本店", area: "小樽", lat: 43.1994, lon: 140.9956, approx: true, note: "炸半雞 ¥980；約 250 席、有座敷；11:00–21:00", tags: ["8 人 OK", "座敷"] },
-    { type: "food", name: "回轉壽司 和楽 小樽店", ja: "回転寿司 和楽 小樽店", area: "小樽", lat: 43.1962, lon: 141.0050, approx: true, note: "11:00–22:00；小孩自己挑", tags: ["回轉壽司"] },
+    { type: "sight", name: "AOAO SAPPORO 水族館", stop: "aoao", lat: 43.0578, lon: 141.3536, note: "從 FAV LUX 走路可到" },
+    { type: "sight", name: "白色戀人公園", stop: "shiroi", ja: "白い恋人パーク", lat: 43.0889, lon: 141.2717, note: "室內、甜點" },
+    { type: "food", name: "若鶏時代なると 本店", stop: "naruto", area: "小樽", lat: 43.2003732, lon: 140.9950942, note: "炸半雞 ¥980；約 250 席、有座敷；11:00–21:00", tags: ["8 人 OK", "座敷"] },
+    { type: "food", name: "回轉壽司 和楽 小樽店", stop: "waraku", ja: "回転寿司 和楽 小樽店", area: "小樽", lat: 43.196278, lon: 141.0047969, note: "11:00–22:00；小孩自己挑", tags: ["回轉壽司"] },
     { type: "food", name: "小樽寿司屋通り 日本橋", area: "小樽", lat: 43.1949, lon: 140.9984, approx: true, note: "掘りごたつ和室、50 人大廣間；週四休", tags: ["座敷", "週四休"] },
     { type: "food", name: "三角市場（海鮮丼）", ja: "三角市場", area: "小樽", lat: 43.1985, lon: 140.9939, note: "早上到下午；店小人擠", tags: ["早餐"] },
-    { type: "food", name: "LeTAO 本店", area: "小樽", lat: 43.1913, lon: 141.0074, note: "09:00–18:00；2F 咖啡 LO 17:30", tags: ["甜點"] },
+    { type: "food", name: "LeTAO 本店", stop: "letao", area: "小樽", lat: 43.191311, lon: 141.007433, note: "09:00–18:00；2F 咖啡 LO 17:30", tags: ["甜點"] },
     { type: "food", name: "Kiroro 山上餐廳群", ja: "キロロ マウンテンセンター", area: "Kiroro", lat: 43.0680, lon: 140.9895, approx: true, note: "Pizzeria、Lumière 自助餐、Cafe Le Lift；8 人包廂 The Lounge ¥18,000", tags: ["午餐"] },
     { type: "food", name: "餃子茶屋 あおぞら", area: "小樽", lat: 43.1384, lon: 141.1821, approx: true, note: "11:00–19:00；週一、二休；石狩灣海景", tags: ["週一二休"] },
-    { type: "food", name: "くまげら", area: "富良野", lat: 43.3452, lon: 142.3912, note: "山賊鍋、和牛壽喜燒；11:30–21:30；週三休；停車 50 台", tags: ["週三休"] },
-    { type: "food", name: "唯我独尊（蛋包咖哩）", ja: "唯我独尊", area: "富良野", lat: 43.3449, lon: 142.3895, note: "30 席、不能訂位、只收現金；週一休", tags: ["只收現金", "週一休"] },
-    { type: "food", name: "Fenix Restaurant & Bar", area: "富良野", lat: 43.3438793, lon: 142.3606818, approx: true, note: "北之峰纜車站對面；天婦羅、涮涮鍋", tags: ["滑完最近"] },
+    { type: "food", name: "くまげら", stop: "kumagera", area: "富良野", lat: 43.3450343, lon: 142.3911696, note: "山賊鍋、和牛壽喜燒；11:30–21:30；週三休；停車 50 台", tags: ["週三休"] },
+    { type: "food", name: "唯我独尊（蛋包咖哩）", stop: "yuiga", ja: "唯我独尊", area: "富良野", lat: 43.344792, lon: 142.3894602, note: "30 席、不能訂位、只收現金；週一休", tags: ["只收現金", "週一休"] },
+    { type: "food", name: "Fenix Restaurant & Bar", stop: "fenix", area: "富良野", lat: 43.3438793, lon: 142.3606818, note: "北之峰纜車站對面；天婦羅、涮涮鍋", tags: ["滑完最近"] },
     { type: "food", name: "富良野チーズ工房", area: "富良野", lat: 43.3207, lon: 142.3772, note: "起司、披薩、冰淇淋（冬季時間待確認）", tags: ["親子"] },
-    { type: "food", name: "じゅんぺい（炸蝦丼）", ja: "じゅんぺい", area: "美瑛", lat: 43.5886, lon: 142.4673, approx: true, note: "11:00–15:00；週一休；現金或 PayPay", tags: ["只收現金", "週一休"] },
+    { type: "food", name: "じゅんぺい（炸蝦丼）", stop: "junpei", ja: "じゅんぺい", area: "美瑛", lat: 43.5892501, lon: 142.4680775, note: "11:00–15:00；週一休；現金或 PayPay", tags: ["只收現金", "週一休"] },
     { type: "food", name: "旭川拉麵村", ja: "あさひかわラーメン村", area: "旭川", lat: 43.7817, lon: 142.4141, note: "8 家拉麵；11:00–20:00；免費停車", tags: ["動物園順路"] },
-    { type: "food", name: "サッポロビール園（成吉思汗）", ja: "サッポロビール園", area: "札幌", lat: 43.0709, lon: 141.3688, note: "兒童椅、兒童餐具；10–120 人包廂；訂位 0570-098-346", tags: ["8 人 OK", "要訂位"] },
-    { type: "food", name: "札幌かに本家 札幌駅前本店", area: "札幌", lat: 43.0653, lon: 141.3533, approx: true, note: "螃蟹；掘りごたつ包廂 2–16 人；午餐兒童會席", tags: ["包廂", "要訂位"] },
-    { type: "food", name: "湯咖哩 SOUL STORE", ja: "スープカレー SOUL STORE", area: "札幌", lat: 43.0557, lon: 141.3477, approx: true, note: "FAV LUX 步行 7 分；¥1,300–1,850", tags: ["步行可到"] },
+    { type: "food", name: "サッポロビール園（成吉思汗）", stop: "beer", ja: "サッポロビール園", area: "札幌", lat: 43.0709, lon: 141.3688, note: "兒童椅、兒童餐具；10–120 人包廂；訂位 0570-098-346", tags: ["8 人 OK", "要訂位"] },
+    { type: "food", name: "札幌かに本家 札幌駅前本店", stop: "kani", area: "札幌", lat: 43.0653, lon: 141.3533, approx: true, note: "螃蟹；掘りごたつ包廂 2–16 人；午餐兒童會席", tags: ["包廂", "要訂位"] },
+    { type: "food", name: "湯咖哩 SOUL STORE", stop: "soul", ja: "スープカレー SOUL STORE", area: "札幌", lat: 43.0557, lon: 141.3477, approx: true, note: "FAV LUX 走路可到；¥1,300–1,850", tags: ["步行可到"] },
     { type: "food", name: "湯咖哩 MATALE 円山店", ja: "スープカレー MATALE 円山店", area: "札幌", lat: 43.0557, lon: 141.3225, approx: true, note: "有兒童餐；可配圓山動物園", tags: ["兒童餐"] },
     { type: "food", name: "二条市場", area: "札幌", lat: 43.0582, lon: 141.3585, note: "海鮮丼早餐（ながもり 07:00 起）", tags: ["早餐"] },
-    { type: "onsen", name: "湯の花 朝里殿", lat: 43.1573, lon: 141.0442, note: "09:00–23:00；大人 ¥980、小學生 ¥400、1–5 歲 ¥200；Kiroro 回程順路（1/9）" },
-    { type: "onsen", name: "湯の花 手宮殿", lat: 43.2122, lon: 141.0086, note: "09:00–23:00；大人 ¥980、1–5 歲 ¥200；小樽市區、離壽司屋通り 4 分，有停車場（1/8 大人泡）" },
+    { type: "onsen", name: "湯の花 朝里殿", stop: "asari", lat: 43.1573, lon: 141.0442, note: "09:00–23:00；大人 ¥980、小學生 ¥400、1–5 歲 ¥200；Kiroro 回程順路（1/9）" },
+    { type: "onsen", name: "湯の花 手宮殿", lat: 43.2122, lon: 141.0086, note: "09:00–23:00；大人 ¥980、1–5 歲 ¥200；小樽市區、壽司屋通り附近，有停車場（1/8 大人泡）" },
     { type: "onsen", name: "小樽温泉 オスパ", lat: 43.1878, lon: 141.0163, note: "24 小時；小樽築港，回銭函順路的備案" },
     { type: "shop", name: "Mountain Shop Vainqueur（Kiroro）", lat: 43.0670, lon: 140.9910, approx: true, note: "雪板、雪靴、固定器；打蠟 ¥3,500" },
     { type: "shop", name: "ICI 石井スポーツ 札幌店", lat: 43.0711, lon: 141.3321, approx: true, note: "雪具專門店；10:00–20:00" },
     { type: "shop", name: "Alpen Outdoors 札幌月寒", lat: 43.0367, lon: 141.3925, approx: true, note: "旗艦店；10:00–21:00" },
-    { type: "shop", name: "狸小路商店街", lat: 43.0572, lon: 141.3527, note: "藥妝、唐吉訶德；有屋頂" },
+    { type: "shop", name: "狸小路商店街", stop: "tanuki", lat: 43.0572, lon: 141.3527, note: "藥妝、唐吉訶德；有屋頂" },
     { type: "shop", name: "三井アウトレット 札幌北広島", lat: 42.9714, lon: 141.4713, note: "10:00–20:00；免費停車約 2,600 台" },
     { type: "shop", name: "ポケモンセンターサッポロ", lat: 43.0675, lon: 141.3495, note: "大丸札幌店內" },
-    { type: "grocery", name: "イオンモール札幌発寒", lat: 43.0962, lon: 141.2768, note: "1/7 從機場過來順路採買＋美食街；專門店 10:00–21:00（超市更早開、更晚關），大型免費停車場" },
+    { type: "grocery", name: "イオンモール札幌発寒", stop: "aeon", lat: 43.0960621, lon: 141.2775757, note: "1/7 從機場過來順路採買＋美食街；專門店 10:00–21:00（超市更早開、更晚關），大型免費停車場" },
     { type: "grocery", name: "ラルズマート 銭函", lat: 43.1432, lon: 141.1460, note: "離山鄉最近的超市" },
-    { type: "grocery", name: "コープさっぽろ 富良野", lat: 43.3383, lon: 142.3928, note: "富良野市區超市" },
-    { type: "hospital", name: "手稻溪仁會醫院（急診）", ja: "手稲渓仁会病院", lat: 43.1221, lon: 141.2431, note: "山鄉開車 15 分" },
-    { type: "hospital", name: "富良野協會醫院", ja: "富良野協会病院", lat: 43.3481, lon: 142.3923, note: "小木屋開車 10 分" }
+    { type: "grocery", name: "コープさっぽろ 富良野", stop: "coop_furano", lat: 43.3382395, lon: 142.3928396, note: "富良野市區超市" },
+    { type: "hospital", name: "手稻溪仁會醫院（急診）", ja: "手稲渓仁会病院", lat: 43.1221, lon: 141.2431, note: "離山鄉最近的大醫院急診" },
+    { type: "hospital", name: "富良野協會醫院", ja: "富良野協会病院", lat: 43.3481, lon: 142.3923, note: "離小木屋最近的醫院" }
   ],
 
   days: [
@@ -239,7 +240,7 @@ window.TRIP = {
     biei: { label: "美瑛", tmax: -4.1, tmin: -15.1, snow: 5.2 }
   },
 
-  nanny: { start: "08:00", end: "18:00", overtime: "NT$550／時", lastDay: "2027-01-14", bus: "14:00" },
+  nanny: { start: "08:00", end: "18:00", overtime: "NT$550／時", lastDay: "2027-01-14", bus: "14:00", busStop: "fstn" },
   /* 團體人數：保姆在的日子 9 人，1/14 送走保姆後 8 人；文字裡用 {party} 標記，會自己照日期換 */
   party: { adults: 4, kids: 4, withNanny: "9 人（4 大 4 小＋保姆）", noNanny: "8 人（4 大 4 小）" },
   /* 航班：唯一來源。首頁開場、1/7・1/19 時間表機場站、出發前準備的航班卡都從這裡產生 */
@@ -252,10 +253,12 @@ window.TRIP = {
 
   rental: {
     company: "カーレンタル北海道 新千歳空港店（北海道租車）",
-    hours: "09:00–18:00（官網營業所頁；最後接送是關門前 30 分）", open: "09:00", returnBy: "10:00",
-    pickup: ["入境、領完行李後，出境大廳出來右手邊（經過便利商店）到一樓", "出口右手邊【98 許可車專用】站牌", "人到站牌後再打電話或 LINE 聯絡，接駁車約 15 分鐘到（只能停 10 分鐘）", "到店出示：台灣駕照正本＋日文譯本＋護照（每位駕駛）"],
+    hours: "09:00–18:00（官網營業所頁）", open: "09:00", returnBy: "10:00",
+    /* 電話、最後送迎只寫這裡：1/7 機場站備註、租車卡、緊急電話都從這裡帶（{T:rental.phone}、{T:rental.lastPickup}） */
+    phone: "0123-22-4040", lastPickup: "17:30",
+    pickup: ["入境、領完行李後，出境大廳出來右手邊（經過便利商店）到一樓", "出口右手邊【98 許可車專用】站牌", "人到站牌後再打電話或 LINE 聯絡，接駁車約 15 分鐘到（只能停 10 分鐘）；最後送迎 {T:rental.lastPickup}，航班延誤先打電話", "到店出示：台灣駕照正本＋日文譯本＋護照（每位駕駛）"],
     ret: ["契約時間內歸還；暴風雪延誤要先通知", "加滿油並附加油收據（未加滿收 ¥5,000–12,000）", "冬季沒有安心險：事故要報警，NOC 自付 ¥3–10 萬"],
-    contact: [["電話", "0123-22-4040"], ["LINE ID", "@jhs4331b"], ["WhatsApp", "+81 80-8299-4040（日文官網）／+81 90-1521-4040（中文、英文官網）——兩個頁面寫的不一樣，打電話或 LINE 最穩"]]
+    contact: [["LINE ID", "@jhs4331b"], ["WhatsApp", "+81 80-8299-4040（日文官網）／+81 90-1521-4040（中文、英文官網）——兩個頁面寫的不一樣，打電話或 LINE 最穩"]]
   },
 
   emergency: [
@@ -263,7 +266,7 @@ window.TRIP = {
     ["日本觀光局訪客熱線（24 小時，有中文）", "050-3816-2787"],
     ["台北駐日經濟文化代表處 札幌分處", "011-222-2930"],
     ["札幌分處 急難救助（重大緊急）", "080-1460-2568"],
-    ["租車公司（事故・延誤）", "0123-22-4040"]
+    ["租車公司（事故・延誤）", "{T:rental.phone}"]
   ],
 
   links: [

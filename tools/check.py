@@ -27,7 +27,8 @@ for d, v in PLAN["days"].items():
             W(f"{d}：{v['stops'][i-1]['id']}→{s['id']} 沒有路段快取，網站先用直線估算（在編輯器儲存一次會自動補）")
     for mode in ("normal", "snow"):
         for x in schedule(d, mode):
-            if x["late"]: W(f"{d}：{'下雪' if mode=='snow' else '一般'}路況下「{PLAN['places'].get(x['id'],{}).get('name',x['id'])}」會晚 {x['late']} 分（{hm(x['arr'])} 到）")
+            # 一般路況就會遲到＝時間表本身排錯，擋下來（10/26 第六輪：動物園 10:30 開、算出來 10:35 到，只是警告所以沒人修）；下雪才遲到是提醒
+            if x["late"]: (E if mode == "normal" else W)(f"{d}：{'下雪' if mode=='snow' else '一般'}路況下「{PLAN['places'].get(x['id'],{}).get('name',x['id'])}」會晚 {x['late']} 分（{hm(x['arr'])} 到）")
 
 
 # 0b. 事實只能有一個來源 ——
@@ -105,8 +106,9 @@ for d, v in PLAN["days"].items():
             pl = PLAN["places"].get(s["id"], {}); nm = pl.get("name", s["id"]); lab = "下雪" if mode == "snow" else "一般"
             if pl.get("open") and not s.get("at") and not is_resort_or_base(s["id"]) and x["arr"] + 5 < mins(pl["open"]):
                 W(f"{d}：{lab}路況 {hm(x['arr'])} 到「{nm}」，但 {pl['open']} 才開，要等 {mins(pl['open']) - x['arr']} 分（給這站加 at 或調前面的停留）")
-            if pl.get("close") and x["stay"] and x["dep"] > mins(pl["close"]):
-                W(f"{d}：{lab}路況在「{nm}」待到 {hm(x['dep'])}，但 {pl['close']} 關門")
+            # 雪場的 close＝吊椅收；收板、換鞋、還雪具要時間，離開雪場晚 30 分內是正常的
+            if pl.get("close") and x["stay"] and x["dep"] > mins(pl["close"]) + (30 if "滑雪場" in nm else 0):
+                (E if mode == "normal" else W)(f"{d}：{lab}路況在「{nm}」待到 {hm(x['dep'])}，但 {pl['close']} 關門")
     for i, s in enumerate(v["stops"], 1):
         if int(s.get("stay") or 0) >= 180 and not (s.get("at") or s.get("by")) and not is_resort_or_base(s["id"]) and not PLAN["places"].get(s["id"], {}).get("open"):
             W(f"{d}：第 {i} 站「{PLAN['places'].get(s['id'], {}).get('name', s['id'])}」停 {s['stay']} 分又沒有固定時間——是不是把別的事塞在同一站？拆成兩站比較清楚")
@@ -348,34 +350,103 @@ for k, p in PLAN["places"].items():
     for n in (p.get("name"), p.get("ja")):
         if _nm(n): _by_name.setdefault(_nm(n), (k, p))
 def _cross(src, x, xid=None):
+    """xid＝這筆資料明確參照的 plan.json 站點（food／spots 同 id、trip.js 的 stop）。
+    有參照：座標由 build_days.py 從 plan.json 同步，差超過 5 m 代表有人手改或忘了跑 build。
+    沒參照、但名稱或 Google 地點 id 和某個站點一樣：同一個地方存了兩份座標，要加參照。"""
     if not x or x.get("lat") is None: return
-    hits = []
-    if xid and xid in PLAN["places"]: hits.append((xid, PLAN["places"][xid]))
+    if xid and xid in PLAN["places"]:
+        d = _hav(PLAN["places"][xid], x)
+        if d > 0.005: E(f"{src}「{x.get('name')}」參照 plan.json 站點 {xid}，座標卻差 {d*1000:.0f} m——座標只改 plan.json，再跑 python3 tools/build_days.py 同步")
+        return
     pid = x.get("pid") or (x.get("g") or {}).get("pid")
-    if pid and pid in _pid_of: hits.append(_pid_of[pid])
-    for n in (x.get("name"), x.get("ja")):
-        if _nm(n) in _by_name: hits.append(_by_name[_nm(n)])
-    seen = set()
-    for k, p in hits:
-        if k in seen: continue
-        seen.add(k); d = _hav(p, x)
-        if d > 0.15: E(f"{src}「{x.get('name')}」和 plan.json「{p.get('name')}」（{k}）是同一個地方，座標卻差 {d*1000:.0f} m——以 plan.json 為準改過來（導航會導錯）")
-for x in trip.get("places", []): _cross("trip.js places", x)
+    hits = ([_pid_of[pid]] if pid and pid in _pid_of else []) + [_by_name[_nm(n)] for n in (x.get("name"), x.get("ja")) if _nm(n) in _by_name]
+    for k, p in {k: p for k, p in hits}.items():
+        if k.endswith(".park"): continue
+        E(f"{src}「{x.get('name')}」和 plan.json 站點 {k}「{p.get('name')}」是同一個地方，但自己存了一份座標（差 {_hav(p, x)*1000:.0f} m）——加 stop: \"{k}\"（food／spots 改用同一個 id），座標由 plan.json 同步")
+for x in trip.get("places", []): _cross("trip.js places", x, x.get("stop"))
 for r in trip.get("resorts", []):
-    for sid in r.get("stops") or []:
-        if sid in PLAN["places"] and _hav(PLAN["places"][sid], r) > 0.15 and sid == (r.get("stops") or [None])[0]:
-            E(f"trip.js 雪場 {r['name']} 的座標和 plan.json 站點 {sid} 差 {_hav(PLAN['places'][sid], r)*1000:.0f} m（雪場頁導航會導錯）")
+    first = (r.get("stops") or [None])[0]
+    if first in PLAN["places"] and _hav(PLAN["places"][first], r) > 0.005:
+        E(f"trip.js 雪場 {r['name']} 的座標和 plan.json 站點 {first} 差 {_hav(PLAN['places'][first], r)*1000:.0f} m——跑 python3 tools/build_days.py 同步")
     for g in r.get("gates") or []:
         _cross(f"trip.js 雪場 {r['name']} 入口", g, g.get("stop"))
         if g.get("approx") and any(st["id"] in (r.get("stops") or []) for v in PLAN["days"].values() for st in v["stops"]):
             W(f"trip.js 雪場 {r['name']} 入口「{g['name']}」位置概略，但行程有排這座雪場——去前核對")
-for x in food: _cross("food.js", x, x["id"])
-for x in spots: _cross("spots.js", x, x["id"])  # stop 只表示排在哪一站，不一定是同一個點（堺町通 → 運河那天）
+for x in food: _cross("food.js", x, x.get("place") or (x["id"] if x["id"] in PLAN["places"] else None))
+for x in spots: _cross("spots.js", x, x.get("place") or (x["id"] if x["id"] in PLAN["places"] else None))  # stop 只表示排在哪一站，不一定是同一個點（堺町通 → 運河那天）
 _unchecked = sorted({st["id"] for v in PLAN["days"].values() for i, st in enumerate(v["stops"]) if i and st.get("via", "drive") == "drive"
                      and not (PLAN["places"][st["id"]].get("pid") or (PLAN["places"][st["id"]].get("park") or {}).get("pid"))})
 if _unchecked: W(f"開車到的站點還沒核對 Google 地點（plan.json places 加 pid 或 park.pid）：{_unchecked}")
 _stale = [k for k, L in LEGS.items() if leg_stale(k, L)]
 if _stale: E(f"這些路段的起訖和現在的導航點對不上（地點或停車場改過）：{_stale}——跑 python3 tools/refresh_legs.py")
+
+# 0g2. trip.js 的住宿、雪場、地點說明也不能手寫車程／走路時間：用 {leg:a|b}（行程路段）或 {T:drive.住宿.雪場.1}（雪場車程表，tools/refresh_legs.py 產生）
+#      10/26 第六輪：冬季山路改算之後，「開車 35 分上 Kiroro」「FAV LUX 出發約 60 分」這些手寫數字全部跟表不一致
+_TRIP_MIN = re.compile(r"(?:開車|走路|步行|出發|車程|過去|下來)[^。；，、（）]{0,8}?\d+\s?(?:–\d+\s?)?(?:分鐘|分)(?!券)")
+def _walk_trip(o, path):
+    if isinstance(o, str):
+        m = _TRIP_MIN.search(TOKEN.sub("", o))
+        if m: E(f"trip.js {path}：手寫的車程「{m.group(0)}」——改用 {{leg:起點|終點}} 或 {{T:drive.住宿.雪場.1}}")
+    elif isinstance(o, dict):
+        for k, v in o.items():
+            if path == "" and k in ("days", "todo", "nanny", "flight", "party", "insurance", "luggage", "rental", "drive", "emergency"): continue
+            _walk_trip(v, f"{path}.{k}" if path else k)
+    elif isinstance(o, list):
+        for i, v in enumerate(o): _walk_trip(v, f"{path}[{i}]")
+_walk_trip(trip, "")
+for _p in ("bases", "resorts", "places"):
+    for _i, _x in enumerate(trip.get(_p, [])):
+        for _k in ("notes", "facts", "tips", "entry", "note", "sub", "gates"):
+            for _t in (_x.get(_k) if isinstance(_x.get(_k), list) else [_x.get(_k)]):
+                for _s in ([_t.get("sub"), _t.get("note")] if isinstance(_t, dict) else [_t]):
+                    if isinstance(_s, str):
+                        try: fill(_s, trip["start"], None, strict=True)
+                        except TokenError as ex: E(f"trip.js {_p}[{_i}].{_k}：{ex}")
+
+# 0j. 保姆最後一天：保姆和小孩在住宿，送她去搭車之前一定要先回住宿接人（10/26 第六輪：雪場直接開去車站，漏了接人）
+_N = trip.get("nanny") or {}
+if _N.get("lastDay") in PLAN["days"] and _N.get("busStop"):
+    _st = [s["id"] for s in PLAN["days"][_N["lastDay"]]["stops"]]
+    _base = next((b.get("stop") for b in trip["bases"] if b["from"] <= _N["lastDay"] < b["to"]), None)
+    if _N["busStop"] not in _st: E(f"{_N['lastDay']}：保姆最後一天的行程裡沒有搭車的站 {_N['busStop']}")
+    elif _st.index(_N["busStop"]) == 0 or _st[_st.index(_N["busStop"]) - 1] != _base:
+        E(f"{_N['lastDay']}：送保姆到 {_N['busStop']} 之前要先回住宿（{_base}）接保姆和小孩，現在前一站是 {_st[_st.index(_N['busStop']) - 1] if _st.index(_N['busStop']) else '（沒有）'}")
+    else:
+        _bx = [x for x in schedule(_N["lastDay"], "normal") if x["id"] == _N["busStop"]][0]
+        if _bx["arr"] > mins(_N["bus"]) - 10: E(f"{_N['lastDay']}：{_bx['time']} 才到車站，保姆 {_N['bus']} 的車要至少提早 10 分到")
+
+# 0k. 營業時間只能有一個說法：plan.json 的 open／close 要出現在 food.js／spots.js 同一個地方的 hours 文字裡；
+#     「週X休」只要寫在跟那家店有關的文字裡（店卡、餐點建議、trip.js 地點），就要和 closed 一致（10/26：唯我独尊三處三種說法）
+_DOW = "日一二三四五六"
+def _closed_in(t):
+    out = set()
+    for g in re.findall(r"週([一二三四五六日、]+)(?:公)?休", t or ""):
+        out |= {_DOW.index(ch) for ch in g if ch in _DOW}
+    return out
+_items = {}
+for lst in (food, spots):
+    for x in lst:
+        ref = x.get("place") or (x["id"] if x["id"] in PLAN["places"] else None)
+        _items[x["id"]] = (x, ref)
+        if ref and ref in PLAN["places"]:
+            pl = PLAN["places"][ref]
+            for k in ("open", "close"):
+                hv = pl.get(k)
+                if hv and x.get("hours") and not ({hv, hv.lstrip("0")} & set(re.findall(r"\d{1,2}:\d\d", x["hours"]))):
+                    E(f"plan.json {ref} 的 {k} {hv} 不在 {x['name']} 的營業時間「{x['hours']}」裡——兩邊說法要一致")
+def _chk_closed(where, text, item):
+    said = _closed_in(text)
+    if said and item.get("closed") is not None and said != set(item.get("closed") or []):
+        E(f"{where} 寫「週{'、'.join(_DOW[i] for i in sorted(said))}休」，但 {item['name']} 的 closed 是 {sorted(item.get('closed') or [])}——只改 closed，文字跟著改")
+for x, ref in _items.values():
+    for k in ("what", "hours", "caution", "why"): _chk_closed(f"{x['name']} {k}", x.get(k), x)
+for p in picks:
+    it = _items.get(p.get("pick"))
+    if it:
+        for k in ("why", "what", "book"): _chk_closed(f"food.js 餐點 {p['date']} {p['slot']} {k}", p.get(k), it[0])
+for x in trip.get("places", []):
+    it = next((v for v in _items.values() if v[1] and v[1] == x.get("stop")), None)
+    if it: _chk_closed(f"trip.js 地點 {x['name']}", (x.get("note") or "") + " " + " ".join(x.get("tags") or []), it[0])
 
 # 0h. plan.json 的站點 id 和 spots.js／food.js 的 id 相同時，必須是同一個地方（300 m 內）——
 #     撞名會讓單日頁抓到別張卡（10/26：temiya 溫泉抓到舊手宮線「全天・免費」）

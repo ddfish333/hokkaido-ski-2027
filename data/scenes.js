@@ -48,7 +48,7 @@ window.SCENES = {
     scenes: [
       { type: "title", eyebrow: "DAY 04 · OTARU", h: "半天 Kiroro・小樽", s: "滑半天，下午把小樽走一遍。", imgs: ["scene/otaru-1.jpg", "scene/otaru-5.jpg", "scene/otaru-6.jpg"], amb: "snow", dur: 5500 },
       { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "滑半天就好。", s: "這是在山鄉的最後一次 Kiroro。", amb: "quiet", dur: 6000 },
-      { stop: "canal", imgs: ["scene/otaru-1.jpg", "scene/otaru-2.jpg", "scene/otaru-3.jpg", "scene/otaru-4.jpg"], h: "下午，堺町通和運河。", s: "かま栄、北一硝子、LeTAO、音樂盒堂，一路走到底再走回來。四個大人的下午，小孩在山鄉。", amb: "snow", dur: 9000 },
+      { stop: "canal", imgs: ["scene/otaru-1.jpg", "scene/otaru-2.jpg", "scene/otaru-3.jpg", "scene/otaru-4.jpg"], h: "下午，堺町通和運河。", s: "かま栄、北一硝子、LeTAO、六花亭、音樂盒堂，一路走到底再走回來。四個大人的下午，小孩在山鄉。", amb: "snow", dur: 9000 },
       { stop: "canal#2", label: "運河的煤氣燈", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg", "scene/otaru-7.jpg"], h: "天黑了，煤氣燈亮起來。", s: "然後去吃若鶏時代なると。", amb: "snow", dur: 8000 },
       { type: "end", t: "今晚", img: "scene/villa-5.jpg", h: "山鄉的最後一晚。<br>明天搬家，往東。", amb: "fire", warm: true, dur: 7000 }
     ]
@@ -149,6 +149,6 @@ window.PLACE_OF_STOP = {
   canal: "otaru-canal", naruto: null, zoo: "asahiyama-zoo", lodge: "hotels/furano-lodge", kumagera: null, kita: "furano-ski", fzone: "furano-ski",
   ningle: "ningle-terrace", fstn: "furano-station", marche: "furano-marche", yuiga: null, junpei: null, chiyoda: "chiyoda-farm", shirahige: "shirahige-falls", aoiike: "blue-pond",
   favlux: "hotels/fav-lux", beer: "sapporo-beer-garden", takino: "takino", aoao: "aoao", soul: null, teine: "teine", kani: null,
-  shikisai: null, senka: null, kitakaro: null, ichigen: null, tanuki: "susukino", odori: null, tvtower: "sapporo", hitsujigaoka: null, toriton: null, shiroi: null, kujira: null, kamaei: null, kitaichi: null, letao: null, orgel: null, sunagawa_sa: null, coop_furano: null, fenix: null, furanoya: null,
+  shikisai: null, senka: null, kitakaro: null, ichigen: null, tanuki: "susukino", odori: null, tvtower: "sapporo", hitsujigaoka: null, toriton: null, shiroi: null, kujira: null, rokkatei_otaru: null, kamaei: null, kitaichi: null, letao: null, orgel: null, sunagawa_sa: null, coop_furano: null, fenix: null, furanoya: null,
   akarenga: null, clocktower: null, t38: null, ippin: null, rokkatei: null, hyosetsu: null
 };

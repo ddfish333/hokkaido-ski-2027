@@ -51,7 +51,8 @@
       return state.cur === "twd" ? "約 " + t : m + "（約 " + t + "）";
     });
   }
-  function em(s) { return esc(money(s)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+  /* 說明文字一律先換標記（已經換過的不受影響）；日期用正在看的那天 */
+  function em(s) { return esc(money(fill(s, window.DAY || T.start))).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
   /* 文字裡的 {t:站點}／{sun:set}／{T:欄位} 標記 → 推算的時間（見 assets/plan.js） */
   /* 日文名：到了當地看招牌、問路、Google Maps 都靠它 */
   function jaTag(ja, name) { return ja && ja !== name ? '<span class="ja">' + esc(ja) + '</span>' : ""; }
@@ -987,11 +988,15 @@
     };
     $("#flights").innerHTML = [T.flight.out, T.flight.back].map(function (f) { var fl = Plan.flightOn(f.date); return '<li><span>' + md(f.date) + '（' + DOW[new Date(f.date + "T00:00:00").getDay()] + '）' + esc(fl.dir) + '</span><span class="v">' + em(fl.line) + '</span></li>'; }).join("") +
       '<li><span>航空公司</span><span class="v">' + esc(T.flight.airline) + '</span></li>';
-    $("#pickup").innerHTML = T.rental.pickup.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join("");
+    var F = function (x) { return Plan.fill(x, T.start); };
+    $("#pickup").innerHTML = T.rental.pickup.map(function (s) { return '<li>' + esc(F(s)) + '</li>'; }).join("");
     $("#return").innerHTML = T.rental.ret.map(function (s) { return '<li>' + em(s) + '</li>'; }).join("");
     $("#rentalcontact").innerHTML = '<li><span>' + esc(T.rental.company) + '</span><span class="v">' + esc(T.rental.hours) + '</span></li>' +
+      '<li><span>電話</span><span class="v"><a href="tel:+81' + T.rental.phone.replace(/^0|[^0-9]/g, "") + '">' + esc(T.rental.phone) + '</a></span></li>' +
+      '<li><span>最後送迎</span><span class="v">' + esc(T.rental.lastPickup) + '（關門前 30 分；航班延誤先打電話）</span></li>' +
       T.rental.contact.map(function (c) { return '<li><span>' + esc(c[0]) + '</span><span class="v">' + esc(c[1]) + '</span></li>'; }).join("");
     $("#emergency").innerHTML = T.emergency.map(function (e) {
+      e = [e[0], F(e[1])];
       return '<li><span>' + esc(e[0]) + '</span><span class="v"><a href="tel:' + e[1].replace(/[^0-9+]/g, "") + '">' + esc(e[1]) + '</a></span></li>';
     }).join("");
     var L = T.luggage;

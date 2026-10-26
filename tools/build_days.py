@@ -55,6 +55,39 @@ def sync_topbar():
         edit_href = root + "plan/" + ("#{{DATE}}" if "day.template" in f else "")
         new = re.sub(r'<header class="topbar">.*?</header>', lambda m: topbar_html(root, brand, links, curbtn, edit_href), html, count=1, flags=re.S)
         if new != html: open(path, "w", encoding="utf-8").write(new); print("topbar:", f)
+# ---------- 座標只有一個來源：plan.json places ----------
+# 其他檔案裡「同一個地方」的座標由這裡改寫，手改了也會被蓋回來（check.py 檢查 5 m 內）：
+#   food.js／spots.js：id 和 plan.json 站點相同的那一筆
+#   trip.js：places 和雪場入口（gates）裡有 stop: "站點" 的那一行；雪場本身用 stops 的第一站
+def sync_coords():
+    import json as _j
+    P = _j.load(open(os.path.join(ROOT, "data/plan.json"), encoding="utf-8"))["places"]
+    LL = re.compile(r"lat: -?[\d.]+, lon: -?[\d.]+")
+    def fix(line, pid):
+        p = P.get(pid)
+        if not p or "lat" not in p or not LL.search(line): return line
+        return LL.sub(f"lat: {p['lat']}, lon: {p['lon']}", line, count=1)
+    # food／spots：place: "站點" 明確說「就是這個地方」；沒寫就看 id 是不是站點
+    REF = r'\bplace: "([\w-]+)"|^\s*\{ id: "([\w-]+)"'
+    for f, pat in (("data/food.js", REF), ("data/spots.js", REF), ("data/trip.js", r'\bstop: "([\w-]+)"')):
+        path = os.path.join(ROOT, f); src = open(path, encoding="utf-8").read(); out = []
+        for line in src.split("\n"):
+            m = re.search(r'\bplace: "([\w-]+)"', line) if f != "data/trip.js" else None  # place 優先於 id
+            m = m or re.search(pat, line)
+            out.append(fix(line, next(g for g in m.groups() if g)) if m else line)
+        new = "\n".join(out)
+        # 雪場：用 node 讀出每座雪場自己的 stops，第一站有在 plan.json 就改那座雪場 { id: "x", group: 那一行的座標
+        if f == "data/trip.js":
+            code = "global.window={};require(process.argv[1]);console.log(JSON.stringify(window.TRIP.resorts.map(function(r){return [r.id,(r.stops||[])[0]||null]})))"
+            open(path, "w", encoding="utf-8").write(new)
+            for rid, first in _j.loads(subprocess.run(["node", "-e", code, path], capture_output=True, text=True, check=True).stdout):
+                if first not in P: continue
+                new = re.sub(r'(\{ id: "' + re.escape(rid) + r'", group:[^\n]*?)lat: -?[\d.]+, lon: -?[\d.]+', lambda m: m.group(1) + f"lat: {P[first]['lat']}, lon: {P[first]['lon']}", new, count=1)
+        # 座標已經從 plan.json（核對過的 Google 地點）來，就不再是「位置約略」
+        new = "\n".join(re.sub(r",\s*approx: true", "", l) if (re.search(pat, l) and (lambda m: m and P.get(next(g for g in m.groups() if g), {}).get("pid"))(re.search(pat, l))) else l for l in new.split("\n"))
+        if new != src: open(path, "w", encoding="utf-8").write(new); print("座標同步:", f)
+
+sync_coords()
 sync_topbar()
 sync_tabbar()
 subprocess.run(["python3", os.path.join(ROOT, "tools/stamp.py")], check=True)

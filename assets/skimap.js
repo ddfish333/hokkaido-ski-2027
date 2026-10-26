@@ -16,7 +16,8 @@
   function money(s) {
     return esc(s).replace(/¥\s?([\d,]+)/g, function (m, a) { var v = parseFloat(a.replace(/,/g, "")); return isNaN(v) ? m : m + '<small class="twd">NT$' + nf(twd(v)) + '</small>'; });
   }
-  function em(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+  /* 說明文字一律先換標記（{T:drive.…}、{leg:…}），車程這類數字才不會寫死在文字裡 */
+  function em(s) { return esc(fill(s, (typeof state !== "undefined" && state.day) || T.start)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
   function fill(t, date, ctx) { return window.Plan && Plan.fill ? Plan.fill(t, date, ctx) : t; }
   var DOW = ["日", "一", "二", "三", "四", "五", "六"];
   function parts(s) { return s.split("-").map(Number); }

@@ -237,14 +237,16 @@
     var ends = P.legEnds(a, b, via), pa = ends[0], pb = ends[1]; /* 開車段的起訖是停車場（places[].park），和網站導航同一套 */
     if (via === "shuttle") { P.legs[key] = { km: Math.round(P.hav(pa, pb) * 13) / 10, normal: 10, snow: 10, mode: "shuttle", geom: [[pa.lon, pa.lat], [pb.lon, pb.lat]] }; state.legsDirty = true; return Promise.resolve(true); }
     var prof = via === "walk" ? "foot" : "driving", ac = window.AbortController ? new AbortController() : null, to = ac && setTimeout(function () { ac.abort(); }, 6000);
-    return fetch("https://router.project-osrm.org/route/v1/" + prof + "/" + pa.lon + "," + pa.lat + ";" + pb.lon + "," + pb.lat + "?overview=full&geometries=geojson", ac ? { signal: ac.signal } : {})
+    /* 走路用行人路網（router.project-osrm.org 只有汽車路網，走路會被單行道繞遠）；和 tools/refresh_legs.py 同一套 */
+    var base = via === "walk" ? "https://routing.openstreetmap.de/routed-foot/route/v1/driving/" : "https://router.project-osrm.org/route/v1/driving/";
+    return fetch(base + pa.lon + "," + pa.lat + ";" + pb.lon + "," + pb.lat + "?overview=full&geometries=geojson", ac ? { signal: ac.signal } : {})
       .then(function (r) { return r.json(); }).then(function (j) {
         if (j.code !== "Ok") throw new Error("route");
         var rt = j.routes[0], m = rt.duration / 60, coords = rt.geometry.coordinates.map(function (c) { return [Math.round(c[0] * 1e5) / 1e5, Math.round(c[1] * 1e5) / 1e5]; });
-        /* 公開的 OSRM 只有汽車路網：步行段的距離照路網、時間用 4 km/h 自己算 */
+        /* 步行段的距離照行人路網、時間用 4 km/h 自己算 */
         var wm = rt.distance / 1000 / 4 * 60;
         var ends = [[pa.lon, pa.lat], [pb.lon, pb.lat]]; /* 記下起訖：地點／停車場之後改了，tools/check.py 會知道這段要重算 */
-        P.legs[key] = via === "walk" ? { km: Math.round(rt.distance / 100) / 10, normal: P.r5(wm), snow: P.r5(wm * 1.2), mode: "walk", geom: coords, ends: ends }
+        P.legs[key] = via === "walk" ? { km: Math.round(rt.distance / 100) / 10, normal: P.r5(wm), snow: P.r5(wm * 1.2), mode: "walk", geom: coords, ends: ends, router: "osm-foot" }
           : { km: Math.round(rt.distance / 100) / 10, normal: P.r5(m * 1.15), snow: P.r5(m * 1.5), mode: "drive", geom: coords, ends: ends };
         clearTimeout(to); state.legsDirty = true; return true;
       }).catch(function () { clearTimeout(to); legFails++; if (btnState !== "saving") msg("路網服務暫時連不上，這段先用直線估算，之後再試。", true); return false; });

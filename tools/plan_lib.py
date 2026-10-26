@@ -31,6 +31,7 @@ def leg_stale(key, L):
     """路段算的時候用的起訖（ends）和現在的導航點差超過 30 m＝地點或停車場改過，路段要重算。
     舊路段沒有 ends：用路線頭尾判斷（OSRM 會吸附到最近的路，容許 150 m）。"""
     parts = key.split("|"); a, b = parts[0], parts[1]; via = parts[2] if len(parts) > 2 else "drive"
+    if b.startswith("@"): return False  # 雪場頁用的「住宿→雪場」路段，不是行程站點
     ea, eb = leg_ends(a, b, via)
     if not ea or not eb: return False
     if L.get("ends"):
