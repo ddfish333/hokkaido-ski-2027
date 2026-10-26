@@ -721,7 +721,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .m-edit { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); color: var(--hero-ink); text-decoration: none; font: 400 12.5px/1 var(--f-body); letter-spacing: .1em; }
   .m-edit svg { width: 15px; height: 15px; }
   .m-edit + .curbtn { margin-left: 8px; }
-  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 6px max(6px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-right)); background: rgba(9,13,21,.97); border-top: 1px solid rgba(255,255,255,.08); }
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); padding: 6px max(6px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-right)); background: rgba(9,13,21,.97); border-top: 1px solid rgba(255,255,255,.08); }
   .tabbar a { position: relative; display: grid; justify-items: center; gap: 3px; padding: 5px 0 3px; color: var(--hero-muted); text-decoration: none; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
   .tabbar a svg { width: 24px; height: 24px; }
   .tabbar a[aria-current="page"] { color: var(--hero-ink); }

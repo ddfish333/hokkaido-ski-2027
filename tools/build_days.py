@@ -32,7 +32,7 @@ TAB_ICON = {
     "wx": '<path d="M7 17.5a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7"/><path d="M9 20l1-2M12 21l1-2M15 20l1-2"/>',
     "prep": '<path d="M9 5h6l1 2h3v13H5V7h3z"/><path d="M9 12l2 2 4-4"/>',
 }
-TABS = [("home", "首頁", ""), ("day", "行程", "day/0107/"), ("ski", "滑雪", "ski/"), ("food", "美食", "food/"), ("spots", "景點", "spots/"), ("wx", "天氣", "#weather"), ("prep", "準備", "#prep")]
+TABS = [("home", "首頁", ""), ("day", "行程", "day/0107/"), ("ski", "滑雪", "ski/"), ("food", "美食", "food/"), ("spots", "景點", "spots/")]  # 天氣、準備在首頁往下捲就有，底部列只放常用的 5 個（10/26 Sean：太擠）
 TABBAR = {"index.html": ("", "home"), "ski/index.html": ("../", "ski"), "food/index.html": ("../", "food"), "spots/index.html": ("../", "spots"), "tools/day.template.html": ("../../", "day")}
 def tabbar_html(root, active, is_day):
     out = []
