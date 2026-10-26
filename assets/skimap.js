@@ -16,6 +16,7 @@
     return esc(s).replace(/¥\s?([\d,]+)/g, function (m, a) { var v = parseFloat(a.replace(/,/g, "")); return isNaN(v) ? m : m + '<small class="twd">NT$' + nf(twd(v)) + '</small>'; });
   }
   function em(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+  function fill(t, date, ctx) { return window.Plan && Plan.fill ? Plan.fill(t, date, ctx) : t; }
   var DOW = ["日", "一", "二", "三", "四", "五", "六"];
   function parts(s) { return s.split("-").map(Number); }
   function dow(s) { var p = parts(s); return DOW[new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay()]; }
@@ -223,7 +224,7 @@
       '<h2>' + (isPlan ? '今天滑 ' : '') + esc(r.name) + ' <small>' + esc(r.ja) + '</small></h2>' +
       '<div class="sk-hero-meta">' + seasonPill(r) + (r.rec ? '<span class="r-rec">' + esc(r.rec) + '</span>' : "") + '</div>' +
       (isPlan ? planLine(k) : '<p class="sk-note">這天行程裡沒有這座雪場；下面是從' + esc(b.short.split("・").pop()) + '出發的車程與天氣。</p>') +
-      (k && k.stop.note && isPlan ? '<p class="sk-note">' + em(k.stop.note) + '</p>' : "") +
+      (k && k.stop.note && isPlan ? '<p class="sk-note">' + em(fill(k.stop.note, state.day, k.stop)) + '</p>' : "") +
       '<p class="sk-drive">' + driveTxt + (g ? '<br><span class="muted">停：' + esc(g.name) + (g.sub ? '｜' + esc(g.sub) : "") + '</span>' : "") + '</p>' +
       '<div class="sk-actions"><a class="btn" href="' + nav + '" target="_blank" rel="noopener">導航' + (g ? '：' + esc(g.name.replace(/（.*?）/g, "")) : "") + ' ↗</a>' + links + '</div>' +
       '<div class="sk-wxhead"><p class="sk-k">天氣 ' + md(state.day) + (sun ? ' <span class="sun">' + sun + '</span>' : "") + '</p>' + (inRange ? wxTabs(r) : "") + '</div>' + wx +
