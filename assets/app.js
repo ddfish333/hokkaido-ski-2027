@@ -562,9 +562,25 @@
       return '<button type="button" role="radio" aria-checked="' + (state.origin === o[0]) + '" data-o="' + o[0] + '">' + esc(o[1]) + '</button>';
     }).join("");
   }
+  /* 換出發地時，地圖跟著回到那一區（住宿 → 該區範圍；我的位置 → 目前位置） */
+  var ORIGIN_AREA = { villa: "otaru", furano: "furano", sapporo: "sapporo" }, gpsSeq = 0;
+  function showOrigin() {
+    if (!map || !mapReady) return;
+    if (state.origin === "gps") {
+      if (!state.gps) return;
+      map.flyTo({ center: [state.gps.lon, state.gps.lat], zoom: Math.max(map.getZoom(), 9), duration: 900 });
+      document.querySelectorAll("#areas [aria-selected]").forEach(function (b) { b.setAttribute("aria-selected", "false"); });
+      return;
+    }
+    var a = ORIGIN_AREA[state.origin];
+    if (!a || !AREAS.some(function (x) { return x[0] === a; })) return;
+    state.area = a; renderAreas(); applyMode(); fitArea(true);
+  }
+  function inHokkaido(p) { return p.lat > 41.3 && p.lat < 45.7 && p.lon > 139.3 && p.lon < 146; }
   if (has("origin")) $("#origin").addEventListener("click", function (e) {
     var b = e.target.closest("[data-o]"); if (!b) return;
-    state.origin = b.dataset.o; state.originManual = true; renderOrigin(); renderDrive();
+    if (b.dataset.o !== "gps") { gpsSeq++; if (has("gpsmsg")) $("#gpsmsg").textContent = ""; }
+    state.origin = b.dataset.o; state.originManual = true; renderOrigin(); renderDrive(); showOrigin();
   });
   function originPoint() {
     if (state.origin === "gps") return state.gps;
@@ -595,8 +611,17 @@
     var msg = $("#gpsmsg");
     if (!navigator.geolocation) { msg.textContent = "這個瀏覽器不支援定位，請改選住宿。"; return; }
     msg.textContent = "定位中…";
+    var seq = ++gpsSeq;
     navigator.geolocation.getCurrentPosition(function (pos) {
-      state.gps = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      if (seq !== gpsSeq) return;   // 定位途中已經改選住宿，就不再搶走出發地
+      var here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      /* 人不在北海道（例如出發前在台灣試按）：地圖不飛走，車程照樣從住宿算 */
+      if (!inHokkaido(here)) {
+        var near = T.bases.map(function (b) { return [b, haversine(here, b)]; }).sort(function (x, y) { return x[1] - y[1]; })[0];
+        msg.textContent = "你現在不在北海道（離" + near[0].short + "約 " + nf(Math.round(near[1] / 10) * 10) + " km），車程先從住宿算；到了北海道再按一次。";
+        return;
+      }
+      state.gps = here;
       state.origin = "gps"; state.originManual = true; state.gpsDrive = null;
       msg.textContent = "已定位（誤差約 " + Math.round(pos.coords.accuracy) + " m），正在計算路線…";
       renderOrigin(); renderDrive();
@@ -605,7 +630,7 @@
           var el = document.createElement("div"); el.className = "marker"; el.style.setProperty("--mc", "var(--ink)"); el.textContent = "我";
           gpsMarker = new maplibregl.Marker({ element: el }).setLngLat([state.gps.lon, state.gps.lat]).addTo(map);
         } else gpsMarker.setLngLat([state.gps.lon, state.gps.lat]);
-        map.flyTo({ center: [state.gps.lon, state.gps.lat], zoom: 9 });
+        showOrigin();
       }
       var coords = [state.gps.lon + "," + state.gps.lat].concat(T.resorts.map(function (r) { return r.lon + "," + r.lat; })).join(";");
       fetch("https://router.project-osrm.org/table/v1/driving/" + coords + "?sources=0&annotations=duration,distance")
@@ -617,10 +642,11 @@
             var sec = j.durations[0][k + 1], m = j.distances[0][k + 1];
             if (sec != null) state.gpsDrive[r.id] = [Math.round(m / 100) / 10, r5(sec / 60 * 1.15), r5(sec / 60 * 1.5)];
           });
+          if (state.origin !== "gps") return;
           msg.textContent = "已用目前位置計算路線車程。";
           renderDrive();
         })
-        .catch(function () { msg.textContent = "路線服務暫時連不上，先用直線距離估算。"; });
+        .catch(function () { if (state.origin === "gps") msg.textContent = "路線服務暫時連不上，先用直線距離估算。"; });
     }, function (err) {
       msg.textContent = err.code === 1 ? "沒有定位權限。請在瀏覽器設定允許，或直接選住宿。" : "暫時定位不到，請稍後再試或直接選住宿。";
     }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
