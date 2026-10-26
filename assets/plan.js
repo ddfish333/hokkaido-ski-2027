@@ -9,9 +9,29 @@
   function r5(x) { return Math.max(5, Math.round(x / 5) * 5); }
   function hav(a, b) { var R = 6371, k = Math.PI / 180, dLa = (b.lat - a.lat) * k, dLo = (b.lon - a.lon) * k; var h = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a.lat * k) * Math.cos(b.lat * k) * Math.sin(dLo / 2) * Math.sin(dLo / 2); return 2 * R * Math.asin(Math.sqrt(h)); }
   function legKey(a, b, via) { return a + "|" + b + (via === "walk" ? "|walk" : via === "shuttle" ? "|shuttle" : ""); }
+  /* ---------- 導航點（唯一來源：plan.json places） ----------
+     每個地點有兩個座標：地點本身（lat/lon，地圖上的點、走路的目的地），和「車要開到哪」（park：停車場／入口）。
+     開車、計程車的路段和導航按鈕都開到 park（沒有 park 就開到地點）；走路、接駁車到地點本身。
+     pid＝Google 地點 id：有的話導航用 place id，Google 會帶到那個地點的正門／停車場，不會因為座標差幾十公尺導錯。 */
+  function placeOf(id) { return (P.plan && P.plan.places[id]) || null; }
+  function drivePt(id) { var p = placeOf(id); return p ? (p.park || p) : null; }
+  function legEnds(a, b, via) {
+    var walk = via === "walk" || via === "shuttle";
+    return [walk ? placeOf(a) : drivePt(a), walk ? placeOf(b) : drivePt(b)];
+  }
+  /* 導航網址：target 可以是 plan.json 的站點 id，或任何有 lat/lon（pid、name、ja 可有可無）的物件。
+     不帶起點：手機會用現在的位置，按下去直接開始導航（帶了起點 Google 只會顯示路線預覽）。 */
+  P.navUrl = function (target, mode) {
+    var t = typeof target === "string" ? (mode === "walk" ? placeOf(target) : drivePt(target)) : target;
+    if (!t || t.lat == null) return "";
+    var tm = mode === "walk" ? "walking" : mode === "transit" || mode === "taxi" ? "transit" : "driving";
+    var pid = t.pid || (t.g && t.g.pid);
+    return "https://www.google.com/maps/dir/?api=1&travelmode=" + tm + "&destination=" + t.lat + "," + t.lon + (pid ? "&destination_place_id=" + pid : "");
+  };
+  P.drivePt = drivePt; P.legEnds = legEnds;
   /* 沒有快取的路段：先用直線估算（編輯器會打 OSRM 補上真的） */
   function estLeg(a, b, via) {
-    var pa = P.plan.places[a], pb = P.plan.places[b]; if (!pa || !pb) return null;
+    var e = legEnds(a, b, via), pa = e[0], pb = e[1]; if (!pa || !pb) return null;
     var km = hav(pa, pb) * (via === "walk" ? 1.3 : 1.35);
     var min = via === "walk" ? km / 4 * 60 : via === "shuttle" ? 10 : km / 45 * 60;
     return { km: Math.round(km * 10) / 10, normal: r5(min), snow: r5(via === "walk" ? min * 1.2 : via === "shuttle" ? min : min * 1.3), mode: via || "drive", geom: [[pa.lon, pa.lat], [pb.lon, pb.lat]], est: true };
@@ -24,10 +44,14 @@
     return L;
   }
   /* 座標 → plan.json 的站點 id（150 m 內），住宿／餐廳／景點和站點對得起來就能用 legs.json 的真實路段 */
-  function placeNear(pt) {
-    if (!P.plan || !pt) return null; if (pt.id && P.plan.places[pt.id]) return pt.id;
-    var best = null, bd = 0.15; for (var k in P.plan.places) { var d = hav(P.plan.places[k], pt); if (d < bd) { bd = d; best = k; } } return best;
+  function placeNear(pt, tol) {
+    if (!P.plan || !pt || pt.lat == null) return null;
+    if (pt.id && P.plan.places[pt.id] && hav(P.plan.places[pt.id], pt) < 0.3) return pt.id;
+    var best = null, bd = tol || 0.15; for (var k in P.plan.places) { var d = hav(P.plan.places[k], pt); if (d < bd) { bd = d; best = k; } } return best;
   }
+  /* 任何頁面的「導航」都先問：這個點是不是行程裡的站點？是的話一律用站點的導航點（停車場＋Google 地點），各頁才會導到同一個地方 */
+  P.placeNear = placeNear;
+  P.navTo = function (t, mode) { var id = placeNear(t, 0.05); return P.navUrl(id || t, mode); };
   /* ---------- 共用：從住宿到某個地點要多久。美食頁、景點頁、首頁車程表、單日頁都用這一份，各頁數字才會一樣 ----------
      順序：1) 住宿→雪場用 trip.js 的 drive 表（雪場頁同一張表） 2) 兩端都對得到站點就用 legs.json 的真實路段 3) 直線估算（和 estLeg 同一個算法）
      札幌（車停三晚不動）：2.5 km 內走路，再遠就計程車／地鐵。回傳 { km, min, mode, label } */

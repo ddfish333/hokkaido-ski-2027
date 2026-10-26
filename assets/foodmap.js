@@ -82,7 +82,7 @@
       '<p class="fp-what">' + em(f.what) + '</p>' +
       '<p class="fp-meta"><span class="area">' + esc(f.area) + '</span> · ' + em(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + travelText(f, c) + ' · <span class="fit">' + fit[0] + '</span>' + (f.approx ? ' · 位置約略' : "") + '</p>' +
       '<div class="fp-act">' + (g ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") + '<a href="' + mapsUrl + '" target="_blank" rel="noopener">在 Google Maps 開啟 →</a>' +
-      '<a href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + f.lat + ',' + f.lon + (c.b ? '&origin=' + c.b.lat + ',' + c.b.lon : "") + '" target="_blank" rel="noopener">導航 →</a></div>' +
+      '<a href="' + Plan.navTo(f) + '" target="_blank" rel="noopener">導航 →</a></div>' +
       '<div class="fp-embed" hidden></div></li>';
   }
   document.addEventListener("click", function (e) {
@@ -190,7 +190,7 @@
     popup.setLngLat([f.lon, f.lat]).setHTML('<b>' + esc(f.name) + '</b><span>' + esc(f.kind) + ' · ' + esc(f.area) + (g ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
       (isPlanned(f, c) ? '<em class="gold">' + md(c.d.date) + ' 預計</em>' : "") + (isClosed(f, c) ? '<em class="red">' + md(c.d.date) + ' 公休</em>' : "") +
       '<small>' + em(f.hours) + travelText(f, c) + '</small>' +
-      '<a href="#' + f.id + '" data-go="' + f.id + '">看詳情 ↓</a> <a href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + f.lat + ',' + f.lon + (c.b ? '&origin=' + c.b.lat + ',' + c.b.lon : "") + '" target="_blank" rel="noopener">導航 ↗</a>').addTo(map);
+      '<a href="#' + f.id + '" data-go="' + f.id + '">看詳情 ↓</a> <a href="' + Plan.navTo(f) + '" target="_blank" rel="noopener">導航 ↗</a>').addTo(map);
   }
   function scrollToCard(id) {
     var li = document.getElementById(id); if (!li) return;

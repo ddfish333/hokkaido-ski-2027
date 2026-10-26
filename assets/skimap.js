@@ -29,8 +29,9 @@
   }
   function fmtMin(m) { m = Math.round(m); if (m < 60) return m + " 分"; var h = Math.floor(m / 60), r = m % 60; return h + "h" + (r < 10 ? "0" : "") + r; }
   function hm(x) { x = Math.round(x); return (x < 600 ? "0" : "") + Math.floor(x / 60) + ":" + (x % 60 < 10 ? "0" : "") + (x % 60); }
-  function navUrl(lat, lon) { return "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + lat + "," + lon; }
-  function gateUrl(g) { return g.pid ? "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(g.ja || g.name) + "&destination_place_id=" + g.pid : g.ja ? "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(g.ja) : navUrl(g.lat, g.lon); }
+  /* 導航都走 Plan.navTo：行程站點用 plan.json 的停車場＋Google 地點，入口（gates）有 pid 就用 place id */
+  function navUrl(lat, lon) { return Plan.navTo({ lat: lat, lon: lon }); }
+  function gateUrl(g) { return g.stop ? Plan.navUrl(g.stop) : Plan.navTo(g); } /* 入口是行程站點（stop）就用站點的停車場 */
   function hav(a, b) {
     var R = 6371, k = Math.PI / 180, dLa = (b.lat - a.lat) * k, dLo = (b.lon - a.lon) * k;
     var h = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a.lat * k) * Math.cos(b.lat * k) * Math.sin(dLo / 2) * Math.sin(dLo / 2);

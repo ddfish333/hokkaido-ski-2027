@@ -42,7 +42,7 @@ window.TRIP = {
       status: "https://weathernews.jp/ski/spot/31616/", stops: ["onze"], video: "onze-hover.mp4", videoSm: "onze-hover-sm.mp4", img: "onze.jpg",
       entry: "停車場就在山腳（免費）；從山鄉走路 5 分，不用開車",
       summit: null, base: 200 },
-    { id: "kiroro", group: "main", name: "Kiroro", ja: "キロロ", tier: "粉雪大雪場", lat: 43.0674, lon: 140.9904,
+    { id: "kiroro", group: "main", name: "Kiroro", ja: "キロロ", tier: "粉雪大雪場", lat: 43.0679153, lon: 140.9893336,
       season: ["2026-11-28", "2027-05-05"], seasonNote: "旺季 12/12–4/11",
       hours: "吊椅大多 09:00–15:30（2/14 起到 16:00）；山腳的 Gateway Express 纜車 08:30–16:00、Family 吊椅到 16:30、Center Express 到 19:00；結束時間依日落調整——25-26 官網時刻表，26-27 待公告", scale: "23 條雪道、9 條纜車（含 2 條纜車廂）；山頂 1,180 m",
       tickets: [["1 日券", "¥9,200"], ["4 小時券", "¥7,800"], ["2 日券（可不連續）", "¥18,400"], ["3 日券（可不連續）", "¥27,600"], ["夜滑", "¥3,000"], ["6–12 歲 1 日", "¥5,500"]],
@@ -54,10 +54,10 @@ window.TRIP = {
       status: "https://www.kiroro.co.jp/dashboard/", cams: "https://www.kiroro.co.jp/livecamera", trailmap: "https://www.kiroro.co.jp/guide_map/", webshop: "https://webstore.kiroro.co.jp/en/", access: "https://www.kiroro.co.jp/access-winter/",
       stops: ["kiroro"], video: "kiroro-hover.mp4", videoSm: "kiroro-hover-sm.mp4", img: "kiroro.jpg", top: [43.0790, 140.9670],
       gates: [
-        { name: "Mountain Center", sub: "日歸的人都停這裡：售票、租借、Kids Academy、餐廳都在館內", ja: "キロロリゾート マウンテンセンター", lat: 43.0674, lon: 140.9904, note: "免費停車約 2,000 台；旺季 08:00–20:00。從山鄉走朝里 → 道道 1 號上山，最後一段是山路，下雪慢慢開。" }
+        { name: "Mountain Center", sub: "日歸的人都停這裡：售票、租借、Kids Academy、餐廳都在館內", ja: "キロロリゾート マウンテンセンター", lat: 43.0679153, lon: 140.9893336, pid: "ChIJ0ZtUZSvbCl8Rp8sA7XPQCoE", stop: "kiroro", note: "免費停車約 2,000 台；旺季 08:00–20:00。從山鄉走朝里 → 道道 1 號上山，最後一段是山路，下雪慢慢開。" }
       ],
       summit: 1180, base: 570 },
-    { id: "furano_kita", group: "main", name: "富良野滑雪場", ja: "富良野スキー場", tier: "大雪場・兩區", lat: 43.3404, lon: 142.3433,
+    { id: "furano_kita", group: "main", name: "富良野滑雪場", ja: "富良野スキー場", tier: "大雪場・兩區", lat: 43.3438912, lon: 142.3602434,
       season: ["2026-11-28", "2027-05-05"], seasonNote: "一般期 12/5–3/22",
       hours: "08:30–日落；夜滑平日 16:00–18:00、週末假日至 19:30", scale: "北之峰區＋富良野區（新富良野王子）",
       tickets: [["1 日券", "¥9,000"], ["1 日券（SEIBU PRINCE CLUB 會員）", "¥7,500"], ["4 小時券", "¥8,200"], ["夜滑 平日", "¥3,100"], ["夜滑 週末假日", "¥3,900"], ["60 歲以上 1 日", "¥8,500"]],
@@ -69,8 +69,8 @@ window.TRIP = {
       status: "https://www.princehotels.co.jp/ski/furano/informations/snowreport", cams: "https://www.princehotels.co.jp/ski/furano/livecamera/", cams360: "https://furano.panomax.com/?cu=ja-JP", trailmap: "https://www.princehotels.co.jp/ski/furano/winter/coursemap/", access: "https://www.princehotels.co.jp/ski/furano/winter/access/",
       stops: ["kita", "fzone"], video: "furano-hover.mp4", videoSm: "furano-hover-sm.mp4", img: "furano.jpg", top: [43.3280, 142.3150],
       gates: [
-        { name: "北之峰區（北の峰ゴンドラ）", sub: "小木屋開車 5 分；1/12、1/14 從這邊上", ja: "富良野スキー場 北の峰ゴンドラ", lat: 43.3404, lon: 142.3433, stop: "kita", note: "北之峰主街有租借店（Rhythm）、餐廳；停車免費。" },
-        { name: "富良野區（富良野ロープウェー）", sub: "1/13 從這邊上；山上兩區相通，但纜車站的停車場不相通", ja: "富良野ロープウェー", lat: 43.3266, lon: 142.3394, stop: "fzone", note: "新富良野王子飯店旁；101 人大纜車 5 分上山。停哪邊就從哪邊下山，別滑錯區。" }
+        { name: "北之峰區（北の峰ゴンドラ）", sub: "小木屋開車 5 分；1/12、1/14 從這邊上", ja: "富良野スキー場 北の峰ゴンドラ", lat: 43.3438912, lon: 142.3602434, pid: "ChIJB2XB8aNSc18RbgxtFUZ8FPk", stop: "kita", note: "北之峰主街有租借店（Rhythm）、餐廳；導航直接到纜車站旁的北之峰區停車場（免費）。" },
+        { name: "富良野區（富良野ロープウェー）", sub: "1/13 從這邊上；山上兩區相通，但纜車站的停車場不相通", ja: "富良野ロープウェー", lat: 43.3254401, lon: 142.3536473, pid: "ChIJHaVVJfJSc18RNW9hDu1q5qM", stop: "fzone", note: "新富良野王子飯店旁；101 人大纜車 5 分上山。停哪邊就從哪邊下山，別滑錯區。" }
       ],
       summit: 900, base: 250 },
     { id: "teine", group: "sapporo", rec: "帶幼兒的家庭：首選", name: "札幌 Teine（手稻）", ja: "サッポロテイネ", tier: "札幌近郊・1972 奧運場地", lat: 43.0944, lon: 141.2112, pid: "ChIJ6zkmLHPYCl8RYqZuc-S35qw",
@@ -165,10 +165,10 @@ window.TRIP = {
 
   /* 地圖上的地點：type = stay | ski | sight | food | onsen | shop | grocery | hospital | transport */
   places: [
-    { type: "transport", name: "新千歲機場", ja: "新千歳空港", lat: 42.7868, lon: 141.6830, note: "租車店有接駁車往返機場（去程在國際線入境後搭，回程送到航廈）" },
-    { type: "transport", name: "北海道租車 新千歲機場店", ja: "北海道レンタカー（オールレンタカー）新千歳空港店", lat: 42.8195, lon: 141.6575, note: "冬季 09:00–18:00；離機場約 10 分", approx: true },
+    { type: "transport", name: "新千歲機場", ja: "新千歳空港", lat: 42.7868, lon: 141.683, note: "去程：國際線入境、領完行李後到一樓出口右手邊【98 許可車專用】站牌，打電話或 LINE 叫租車接駁（官網取車流程頁）；回程：租車店接駁車送到航廈" },
+    { type: "transport", name: "北海道租車 新千歲機場店", ja: "カーレンタル北海道 新千歳空港店（千歳市青葉8-9-8）", lat: 42.823071, lon: 141.6630606, note: "官網：09:00–18:00；機場免費接駁約 10 分" },
     { type: "transport", name: "富良野站（保姆巴士）", ja: "富良野駅", lat: 43.3469, lon: 142.3917, note: "1/14 下午送保姆" },
-    { type: "sight", name: "小樽運河", lat: 43.2020, lon: 141.0006, note: "天黑後煤氣燈亮起" },
+    { type: "sight", name: "小樽運河", lat: 43.197846, lon: 141.0032753, note: "天黑後煤氣燈亮起" },
     { type: "sight", name: "小樽水族館", ja: "おたる水族館", lat: 43.2370, lon: 141.0114, note: "冬季企鵝雪地散步（上一季 11:30／12:40／13:30／14:40）" },
     { type: "sight", name: "旭山動物園", lat: 43.7686, lon: 142.4793, note: "冬季 10:30–15:30（最後入園 15:00）；企鵝散步往年 11:00、14:30，26–27 季未公告；國中以下免費" },
     { type: "sight", name: "千代田牧場 Farm's Chiyoda", ja: "ファームズ千代田", lat: 43.5427, lon: 142.4918, note: "營業 10:00–15:00（待確認冬季）" },
@@ -188,7 +188,7 @@ window.TRIP = {
     { type: "food", name: "餃子茶屋 あおぞら", area: "小樽", lat: 43.1384, lon: 141.1821, approx: true, note: "11:00–19:00；週一、二休；石狩灣海景", tags: ["週一二休"] },
     { type: "food", name: "くまげら", area: "富良野", lat: 43.3452, lon: 142.3912, note: "山賊鍋、和牛壽喜燒；11:30–21:30；週三休；停車 50 台", tags: ["週三休"] },
     { type: "food", name: "唯我独尊（蛋包咖哩）", ja: "唯我独尊", area: "富良野", lat: 43.3449, lon: 142.3895, note: "30 席、不能訂位、只收現金；週一休", tags: ["只收現金", "週一休"] },
-    { type: "food", name: "Fenix Restaurant & Bar", area: "富良野", lat: 43.3404, lon: 142.3440, approx: true, note: "北之峰纜車站對面；天婦羅、涮涮鍋", tags: ["滑完最近"] },
+    { type: "food", name: "Fenix Restaurant & Bar", area: "富良野", lat: 43.3438793, lon: 142.3606818, approx: true, note: "北之峰纜車站對面；天婦羅、涮涮鍋", tags: ["滑完最近"] },
     { type: "food", name: "富良野チーズ工房", area: "富良野", lat: 43.3207, lon: 142.3772, note: "起司、披薩、冰淇淋（冬季時間待確認）", tags: ["親子"] },
     { type: "food", name: "じゅんぺい（炸蝦丼）", ja: "じゅんぺい", area: "美瑛", lat: 43.5886, lon: 142.4673, approx: true, note: "11:00–15:00；週一休；現金或 PayPay", tags: ["只收現金", "週一休"] },
     { type: "food", name: "旭川拉麵村", ja: "あさひかわラーメン村", area: "旭川", lat: 43.7817, lon: 142.4141, note: "8 家拉麵；11:00–20:00；免費停車", tags: ["動物園順路"] },
@@ -203,7 +203,7 @@ window.TRIP = {
     { type: "shop", name: "Mountain Shop Vainqueur（Kiroro）", lat: 43.0670, lon: 140.9910, approx: true, note: "雪板、雪靴、固定器；打蠟 ¥3,500" },
     { type: "shop", name: "ICI 石井スポーツ 札幌店", lat: 43.0711, lon: 141.3321, approx: true, note: "雪具專門店；10:00–20:00" },
     { type: "shop", name: "Alpen Outdoors 札幌月寒", lat: 43.0367, lon: 141.3925, approx: true, note: "旗艦店；10:00–21:00" },
-    { type: "shop", name: "狸小路商店街", lat: 43.0570, lon: 141.3506, note: "藥妝、唐吉訶德；有屋頂" },
+    { type: "shop", name: "狸小路商店街", lat: 43.0572, lon: 141.3527, note: "藥妝、唐吉訶德；有屋頂" },
     { type: "shop", name: "三井アウトレット 札幌北広島", lat: 42.9714, lon: 141.4713, note: "10:00–20:00；免費停車約 2,600 台" },
     { type: "shop", name: "ポケモンセンターサッポロ", lat: 43.0675, lon: 141.3495, note: "大丸札幌店內" },
     { type: "grocery", name: "イオンモール札幌発寒", lat: 43.0962, lon: 141.2768, note: "1/7 從機場過來順路採買＋美食街；專門店 10:00–21:00（超市更早開、更晚關），大型免費停車場" },
@@ -252,10 +252,10 @@ window.TRIP = {
 
   rental: {
     company: "カーレンタル北海道 新千歳空港店（北海道租車）",
-    hours: "冬季 09:00–18:00（1 月可能 17:30 就關，出發前打電話確認）", open: "09:00", returnBy: "10:00",
+    hours: "09:00–18:00（官網營業所頁；最後接送是關門前 30 分）", open: "09:00", returnBy: "10:00",
     pickup: ["入境、領完行李後，出境大廳出來右手邊（經過便利商店）到一樓", "出口右手邊【98 許可車專用】站牌", "人到站牌後再打電話或 LINE 聯絡，接駁車約 15 分鐘到（只能停 10 分鐘）", "到店出示：台灣駕照正本＋日文譯本＋護照（每位駕駛）"],
     ret: ["契約時間內歸還；暴風雪延誤要先通知", "加滿油並附加油收據（未加滿收 ¥5,000–12,000）", "冬季沒有安心險：事故要報警，NOC 自付 ¥3–10 萬"],
-    contact: [["電話", "0123-22-4040"], ["LINE ID", "@jhs4331b"], ["WhatsApp", "+81 80-8299-4040（官網營業所頁 2026-10-26 核對）"]]
+    contact: [["電話", "0123-22-4040"], ["LINE ID", "@jhs4331b"], ["WhatsApp", "+81 80-8299-4040（日文官網）／+81 90-1521-4040（中文、英文官網）——兩個頁面寫的不一樣，打電話或 LINE 最穩"]]
   },
 
   emergency: [
@@ -316,7 +316,7 @@ window.TRIP = {
   todo: [
     ["現在", "4 位駕駛（Sean、Lo、Ethan、阿茹）到監理所辦駕照日文譯本"],
     ["現在", "問租車公司：13 天 HEP 怎麼算、雪胎與 4WD、Delica 油種、幾人座（7 或 8）、有沒有車頂雪具箱／雪板架可租（見下方「行李與雪具」）"],
-    ["現在", "問山鄉：1/7 預計 {t:villa@01-07} 到（入住 15:00–20:00）、兩台 Delica 車位（一休寫每棟 2 格）、雪具放哪裡乾"],
+    ["現在", "問山鄉：入住要先到哪裡報到、Villa 正確地址（訂房網站寫 2-3／2-6／2-13 不一樣，導航現在指到春 Villa 本身）；1/7 預計 {t:villa@01-07} 到（入住 15:00–20:00）、兩台 Delica 車位（一休寫每棟 2 格）、雪具放哪裡乾"],
     ["現在", "問富良野小木屋：兩台車位、雪具乾燥空間"],
     ["11 月", "每個小孩戴一顆 AirTag（4 顆，先綁好 Find My，放雪衣內袋）"],
     ["出發前", "札幌停車想保險就用 akippa／特P 預約 1/16–1/19 兩個平面車位；不然 1/16 13:00 前到パラカ（見單日頁）"],

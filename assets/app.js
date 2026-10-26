@@ -19,11 +19,8 @@
   }
   function fmtMin(m) { m = Math.round(m); if (m < 60) return m + " 分"; var h = Math.floor(m / 60), r = m % 60; return h + "h" + (r < 10 ? "0" : "") + r; }
   function r5(x) { return Math.max(5, Math.round(x / 5) * 5); }
-  function navUrl(lat, lon, o) {
-    var u = "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + lat + "," + lon;
-    if (o) u += "&origin=" + o.lat + "," + o.lon;
-    return u;
-  }
+  /* 導航一律走 Plan.navTo（plan.js）：行程站點用 plan.json 的停車場＋Google 地點，其他用座標／place id */
+  function navTo(t, mode) { return Plan.navTo(t, mode); }
   function haversine(a, b) {
     var R = 6371, toR = Math.PI / 180, dLa = (b.lat - a.lat) * toR, dLo = (b.lon - a.lon) * toR;
     var h = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a.lat * toR) * Math.cos(b.lat * toR) * Math.sin(dLo / 2) * Math.sin(dLo / 2);
@@ -190,7 +187,7 @@
         '<p class="ch-area">' + esc(b.short.split("・").pop()) + '｜' + md(b.from) + '–' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
         '<p class="ch-line">' + em(c.line) + '</p>' +
         '<p class="ch-stay">' + esc(b.name) + (b.checkin ? ' · 入住 ' + esc(fill(b.checkin, b.from)) : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
-        '<p class="ch-links">' + (site ? arrowLink("官網", site[1]) : "") + arrowLink("導航", navUrl(b.lat, b.lon)) + '</p>' +
+        '<p class="ch-links">' + (site ? arrowLink("官網", site[1]) : "") + arrowLink("導航", navTo(b)) + '</p>' +
         '</div></article>';
     }).join("");
     initChapterVideos();
@@ -278,7 +275,10 @@
       }).join("") + '</div>';
   }
   function stopFacts(s, d) {
-    if (s.id === d.base || baseById[s.id] || ["villa", "lodge", "favlux"].indexOf(s.id) >= 0) return "";
+    if (s.id === d.base || baseById[s.id] || ["villa", "lodge", "favlux"].indexOf(s.id) >= 0) {
+      var hp = s.i > 0 && s.via !== "walk" && s.via !== "taxi" && Plan.plan.places[s.id] && Plan.plan.places[s.id].park; /* 住宿：開車回來的那一趟要停哪裡 */
+      return hp ? '<br><span class="tl-facts">' + em("🅿 導航到 " + hp.name + (hp.note ? "：" + hp.note : "")) + '</span>' : "";
+    }
     /* 景點／餐廳卡片要「id 相同而且就在同一個地方（300 m 內）」才算同一個，免得 plan.json 和 spots.js 剛好撞名（例如 temiya 溫泉 vs 舊手宮線） */
     function same(x) { return x.id === s.id && haversine(x, s) < 0.3; }
     var sp = (window.SPOTS || []).filter(same)[0], fd = (window.FOOD || []).filter(same)[0];
@@ -289,11 +289,11 @@
       var tk = Plan.ticketFor(rs, s.stay); parts.push(rs.hours); if (tk) parts.push(tk[0] + " " + tk[1]); parts.push(rs.kids);
       href = BASE + "ski/?day=" + d.date + "#" + rs.id;
     } else if (sp) {
-      if (sp.hours) parts.push(sp.hours); if (sp.fee) parts.push(sp.fee); if (sp.parking) parts.push("停車：" + sp.parking);
+      if (sp.hours) parts.push(sp.hours); if (sp.fee) parts.push(sp.fee); if (sp.parking && !(s.i > 0 && Plan.plan.places[s.id] && Plan.plan.places[s.id].park)) parts.push("停車：" + sp.parking);
       if (sp.closed && sp.closed.indexOf(wd) >= 0) parts.push("**今天公休**");
       href = BASE + "spots/?day=" + d.date + "#" + sp.id;
     } else if (fd) {
-      if (fd.hours) parts.push(fd.hours); if (fd.price) parts.push(fd.price); if (fd.parking) parts.push("停車：" + fd.parking);
+      if (fd.hours) parts.push(fd.hours); if (fd.price) parts.push(fd.price); if (fd.parking && !(s.i > 0 && Plan.plan.places[s.id] && Plan.plan.places[s.id].park)) parts.push("停車：" + fd.parking);
       if (fd.closed && fd.closed.indexOf(wd) >= 0) parts.push("**今天公休**");
       if (fd.g && fd.g.rating) parts.push("Google " + fd.g.rating.toFixed(1));
       href = BASE + "food/?day=" + d.date + "#" + fd.id;
@@ -301,6 +301,9 @@
       var pl = T.places.filter(function (p) { return Math.abs(p.lat - s.lat) < 0.0015 && Math.abs(p.lon - s.lon) < 0.002; })[0];
       if (pl && pl.note) parts.push(pl.note);
     }
+    /* 開車到、而且導航設的是停車場：先寫停哪裡（導航按鈕就是開到這裡） */
+    var pk = s.i > 0 && s.via !== "walk" && s.via !== "shuttle" && s.via !== "taxi" && Plan.plan.places[s.id] && Plan.plan.places[s.id].park;
+    if (pk) parts.unshift("🅿 導航到 " + pk.name + (pk.note ? "：" + pk.note : ""));
     if (!parts.length) return "";
     return '<br><span class="tl-facts">' + parts.map(function (x) { return em(x); }).join(" · ") + (href ? ' <a href="' + href + '">' + (rs ? '滑雪地圖 →' : fl && s.id === "cts" ? '航班與準備 →' : '卡片 →') + '</a>' : "") + '</span>';
   }
@@ -342,7 +345,7 @@
     if (d.base === "sapporo" && d.date < b.to && (window.SPOTS || []).some(function (x) { return x.kind === "停車"; })) {
       var plots = (window.SPOTS || []).filter(function (x) { return x.kind === "停車"; });
       html += '<div class="card parkcard"><p class="panel-label">車停哪裡（飯店沒有停車場）</p><ul class="parklist">' + plots.map(function (x) {
-        var url = x.g && x.g.pid ? 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(x.ja || x.name) + '&destination_place_id=' + x.g.pid : navUrl(x.lat, x.lon);
+        var url = navTo(x);
         return '<li class="' + (x.status === "check" ? "no" : "") + '"><a href="' + url + '" target="_blank" rel="noopener"><b>' + esc(x.name) + '</b><span>' + em(x.fee || "") + (x.caution ? ' · ' + em(x.caution) : "") + '</span></a></li>';
       }).join("") + '</ul><p class="park-note">點店名直接開 Google Maps 導航到停車場入口。1/16 13:00 前先停パラカ，三晚不動。</p></div>';
     }
@@ -415,7 +418,7 @@
   }
 
   function popupHTML(p) {
-    var a = '<a href="' + navUrl(p.lat, p.lon) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
+    var a = '<a href="' + navTo(p) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
     if (p.link) a = '<a href="' + esc(p.link) + '"' + (/^https?:/.test(p.link) ? ' target="_blank" rel="noopener"' : "") + '>' + esc(p.linkText || "看詳細 →") + '</a>' + a;
     if (p.baseId) a += '<button type="button" data-origin="' + p.baseId + '">從這裡算車程</button>';
     return '<p class="pop-t">' + esc(p.name) + jaTag(p.ja, p.name) + '</p>' + (p.sub ? '<p class="pop-s">' + em(p.sub) + '</p>' : '') + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
@@ -627,10 +630,12 @@
       var role = i === 0 ? " start" : (i === plan.stops.length - 1 ? " end" : "");
       if (i > 0) {
         var l = plan.legs[i - 1], prev = plan.stops[i - 1];
-        var nav = l.mode === "walk"
-          ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + prev.lat + ',' + prev.lon + '&destination=' + s.lat + ',' + s.lon + '" target="_blank" rel="noopener">步行導航</a>'
-          : l.mode === "taxi" ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=transit&origin=' + prev.lat + ',' + prev.lon + '&destination=' + s.lat + ',' + s.lon + '" target="_blank" rel="noopener">地鐵導航</a>'
-          : '<a href="' + navUrl(s.lat, s.lon, prev) + '" target="_blank" rel="noopener">導航</a>';
+        /* 開車段導到這站的停車場（plan.json park），走路段導到地點本身；都不帶起點＝從現在位置直接開始導航 */
+        var pk = l.mode === "drive" && Plan.plan.places[s.id] && Plan.plan.places[s.id].park;
+        var nav = l.mode === "walk" ? '<a href="' + Plan.navUrl(s.id, "walk") + '" target="_blank" rel="noopener">步行導航</a>'
+          : l.mode === "taxi" ? '<a href="' + Plan.navUrl(s.id, "walk").replace("travelmode=walking", "travelmode=transit") + '" target="_blank" rel="noopener">地鐵導航</a>'
+          : l.mode === "shuttle" ? ""
+          : '<a href="' + Plan.navUrl(s.id) + '" target="_blank" rel="noopener"' + (pk ? ' title="導到停車場：' + esc(pk.name) + '"' : "") + '>導航' + (pk ? '<small>到 ' + esc(pk.short || pk.name) + '</small>' : "") + '</a>';
         html += '<li class="hop"><span>' + (l.mode === "walk" ? "步行 " : l.mode === "shuttle" ? "接駁 " : l.mode === "taxi" ? "計程車 " : "") + l.km + ' km · ' + fmtMin(l.min) + (l.mode === "drive" ? '<em>' + (state.mode === "snow" ? "一般 " + fmtMin(l.normal) : "雪 " + fmtMin(l.snow)) + '</em>' : "") + '</span>' + nav + '</li>';
       }
       html += '<li class="stop' + role + (s.late ? " late" : "") + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + jaTag(s.ja, s.name) + '</div><div class="sn">' + (s.stay && i < plan.stops.length - 1 ? '<span class="stay" style="margin:0 8px 4px 0">停 ' + fmtMin(s.stay) + ' → ' + s.timeDep + '</span>' : "") + lateTag(s) + em(fill(s.note, d.date, s)) + '</div></div></li>';
@@ -727,7 +732,7 @@
       var p = x.p;
       return '<li><div><div class="nm"><i class="dot" style="--mc:var(--' + (p.type === "stay" ? "accent" : "c-" + p.type) + ')"></i>' + esc(p.name) + jaTag(p.ja, p.name) + '</div><div class="km">' + esc(CAT_NAME[p.type]) + (p.sub ? ' · ' + em(p.sub) : '') + ' · ' + x.km + ' km' + (x.est ? '（直線估算）' : '') + '</div></div>' +
         '<div class="t">' + fmtMin(x.n) + '<small>下雪 ' + fmtMin(x.s) + '</small></div>' +
-        '<span class="lk">' + (p.link ? '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' : '') + '<a href="' + navUrl(p.lat, p.lon, o) + '" target="_blank" rel="noopener">開 Google Maps 導航 →</a></span></li>';
+        '<span class="lk">' + (p.link ? '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' : '') + '<a href="' + navTo(p) + '" target="_blank" rel="noopener">開 Google Maps 導航 →</a></span></li>';
     }).join("") + (rows.length > shown.length ? '<li class="more"><button type="button" id="drivemore">還有 ' + (rows.length - shown.length) + ' 個，全部顯示</button></li>' : "");
     var mb = $("#drivemore"); if (mb) mb.onclick = function () { driveShowAll = true; renderDrive(); };
   }

@@ -234,7 +234,7 @@
   /* 沒有快取的路段：打 OSRM 查真的路網 */
   function ensureLeg(a, b, via) {
     var key = P.legKey(a, b, via); if (P.legs[key] || a === b) return Promise.resolve(false);
-    var pa = P.plan.places[a], pb = P.plan.places[b];
+    var ends = P.legEnds(a, b, via), pa = ends[0], pb = ends[1]; /* 開車段的起訖是停車場（places[].park），和網站導航同一套 */
     if (via === "shuttle") { P.legs[key] = { km: Math.round(P.hav(pa, pb) * 13) / 10, normal: 10, snow: 10, mode: "shuttle", geom: [[pa.lon, pa.lat], [pb.lon, pb.lat]] }; state.legsDirty = true; return Promise.resolve(true); }
     var prof = via === "walk" ? "foot" : "driving", ac = window.AbortController ? new AbortController() : null, to = ac && setTimeout(function () { ac.abort(); }, 6000);
     return fetch("https://router.project-osrm.org/route/v1/" + prof + "/" + pa.lon + "," + pa.lat + ";" + pb.lon + "," + pb.lat + "?overview=full&geometries=geojson", ac ? { signal: ac.signal } : {})
@@ -243,8 +243,9 @@
         var rt = j.routes[0], m = rt.duration / 60, coords = rt.geometry.coordinates.map(function (c) { return [Math.round(c[0] * 1e5) / 1e5, Math.round(c[1] * 1e5) / 1e5]; });
         /* 公開的 OSRM 只有汽車路網：步行段的距離照路網、時間用 4 km/h 自己算 */
         var wm = rt.distance / 1000 / 4 * 60;
-        P.legs[key] = via === "walk" ? { km: Math.round(rt.distance / 100) / 10, normal: P.r5(wm), snow: P.r5(wm * 1.2), mode: "walk", geom: coords }
-          : { km: Math.round(rt.distance / 100) / 10, normal: P.r5(m * 1.15), snow: P.r5(m * 1.5), mode: "drive", geom: coords };
+        var ends = [[pa.lon, pa.lat], [pb.lon, pb.lat]]; /* 記下起訖：地點／停車場之後改了，tools/check.py 會知道這段要重算 */
+        P.legs[key] = via === "walk" ? { km: Math.round(rt.distance / 100) / 10, normal: P.r5(wm), snow: P.r5(wm * 1.2), mode: "walk", geom: coords, ends: ends }
+          : { km: Math.round(rt.distance / 100) / 10, normal: P.r5(m * 1.15), snow: P.r5(m * 1.5), mode: "drive", geom: coords, ends: ends };
         clearTimeout(to); state.legsDirty = true; return true;
       }).catch(function () { clearTimeout(to); legFails++; if (btnState !== "saving") msg("路網服務暫時連不上，這段先用直線估算，之後再試。", true); return false; });
   }

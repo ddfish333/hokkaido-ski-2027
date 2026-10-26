@@ -11,29 +11,34 @@
     },
     "rental": {
       "name": "北海道租車 新千歲機場店",
-      "lat": 42.8195,
-      "lon": 141.6575,
-      "ja": "北海道レンタカー 新千歳空港店"
+      "lat": 42.823071,
+      "lon": 141.6630606,
+      "ja": "カーレンタル北海道 新千歳空港店",
+      "pid": "ChIJreRaR78gdV8Rl-12awMztsI",
+      "addr": "千歳市青葉8丁目9番8"
     },
     "aeon": {
       "name": "AEON 札幌発寒",
-      "lat": 43.0962,
-      "lon": 141.2768,
-      "ja": "イオンモール札幌発寒"
+      "lat": 43.0960621,
+      "lon": 141.2775757,
+      "ja": "イオンモール札幌発寒",
+      "pid": "ChIJN85n33AoC18RhEt9DPc6lDs"
     },
     "villa": {
       "name": "山鄉 春 Villa",
       "lat": 43.1467841,
       "lon": 141.1354924,
-      "ja": "山郷 春 Villa -SHUN-"
+      "ja": "山郷 春 Villa -SHUN-",
+      "pid": "ChIJv-YvGwDfCl8Rybz1BtgpE2w"
     },
     "kiroro": {
-      "name": "Kiroro 滑雪場",
-      "lat": 43.0674,
-      "lon": 140.9904,
+      "name": "Kiroro 滑雪場（Mountain Center）",
+      "lat": 43.0679153,
+      "lon": 140.9893336,
       "open": "09:00",
       "close": "15:30",
-      "ja": "キロロリゾート"
+      "ja": "キロロリゾート",
+      "pid": "ChIJ0ZtUZSvbCl8Rp8sA7XPQCoE"
     },
     "onze": {
       "name": "Onze 雪場",
@@ -48,78 +53,135 @@
       "lon": 141.0442,
       "open": "09:00",
       "close": "23:00",
-      "ja": "湯の花 朝里殿"
+      "ja": "湯の花 朝里殿",
+      "pid": "ChIJQe673zTeCl8RBRAbXDCVrU8"
     },
     "canal": {
-      "name": "小樽運河",
-      "lat": 43.1988,
-      "lon": 141.0018,
-      "ja": "小樽運河"
+      "name": "小樽運河（浅草橋）",
+      "lat": 43.197846,
+      "lon": 141.0032753,
+      "ja": "小樽運河 浅草橋",
+      "pid": "ChIJrSLZL3HhCl8Ryp7mgLx-Maw",
+      "park": {
+        "name": "小樽市觀光駐車場（港町）",
+        "short": "小樽市觀光駐車場",
+        "ja": "小樽市観光駐車場",
+        "lat": 43.2007105,
+        "lon": 141.0035285,
+        "pid": "ChIJZeqr-UzgCl8RdlvYgPi-zxE",
+        "note": "評論：1 小時 ¥300、當天上限 ¥1,000；滿了改停堺町通り商店街駐車場（19:00 關）"
+      }
     },
     "naruto": {
       "name": "若鶏時代なると",
-      "lat": 43.1994,
-      "lon": 140.9956,
-      "ja": "若鶏時代なると 本店"
+      "lat": 43.2003732,
+      "lon": 140.9950942,
+      "ja": "若鶏時代なると 本店",
+      "pid": "ChIJq6padq3hCl8RdAJymA13dXs"
     },
     "zoo": {
       "name": "旭山動物園",
-      "lat": 43.7686,
-      "lon": 142.4793,
+      "lat": 43.7689713,
+      "lon": 142.4791319,
       "open": "10:30",
       "close": "15:30",
       "lastEntry": "15:00",
-      "ja": "旭山動物園"
+      "ja": "旭山動物園",
+      "pid": "ChIJyyPgtczgDF8R01OoHb3cJcg",
+      "park": {
+        "name": "旭山動物園 正門第一免費停車場",
+        "short": "正門免費停車場",
+        "ja": "旭山動物園 正門 第一無料駐車場",
+        "lat": 43.7686737,
+        "lon": 142.4753542,
+        "pid": "ChIJv8O7RDLnDF8RZqOm_URH-bs",
+        "note": "滿了改東門免費停車場；路邊招手的西門停車場是付費的"
+      }
     },
     "lodge": {
       "name": "富良野小木屋",
       "lat": 43.3325009,
       "lon": 142.3631996,
-      "ja": "BEST DAY EVER FURANO LODGES"
+      "ja": "BEST DAY EVER FURANO LODGES",
+      "pid": "ChIJPY_8pplTc18Rq5OgungIGww"
     },
     "kumagera": {
       "name": "くまげら",
-      "lat": 43.3452,
-      "lon": 142.3912,
-      "ja": "くまげら"
+      "lat": 43.3450343,
+      "lon": 142.3911696,
+      "ja": "くまげら",
+      "pid": "ChIJm5pbP29Nc18RKbnsRk975FQ"
     },
     "kita": {
-      "name": "富良野滑雪場 北之峰",
-      "lat": 43.3404,
-      "lon": 142.3433,
-      "ja": "富良野スキー場 北の峰ゾーン"
+      "name": "富良野滑雪場 北之峰（纜車站）",
+      "lat": 43.3438912,
+      "lon": 142.3602434,
+      "ja": "北の峰ゴンドラ",
+      "pid": "ChIJB2XB8aNSc18RbgxtFUZ8FPk",
+      "park": {
+        "name": "北之峰區停車場",
+        "short": "北之峰停車場",
+        "ja": "北の峰ゾーン駐車場",
+        "lat": 43.3424613,
+        "lon": 142.3600065,
+        "pid": "ChIJgXzXcdpTc18Ra_3ol52hbv8",
+        "note": "免費；平日下午也會滿，滿了往下的第二停車場離雪道遠"
+      }
     },
     "ningle": {
       "name": "森林精靈露台",
-      "lat": 43.3234,
-      "lon": 142.3563,
-      "ja": "ニングルテラス"
+      "lat": 43.3233257,
+      "lon": 142.3558861,
+      "ja": "ニングルテラス",
+      "pid": "ChIJPbaM-V5Sc18RLOjzIysMtac",
+      "park": {
+        "name": "新富良野王子飯店停車場",
+        "short": "王子飯店停車場",
+        "ja": "新富良野プリンスホテル 駐車場",
+        "lat": 43.3228308,
+        "lon": 142.3554533,
+        "pid": "ChIJA8p4CKNTc18RrBaNbpB-1V0",
+        "note": "森林精靈露台就在停車場旁"
+      }
     },
     "fzone": {
-      "name": "富良野滑雪場 富良野區",
-      "lat": 43.3266,
-      "lon": 142.3394,
-      "ja": "富良野スキー場 富良野ゾーン"
+      "name": "富良野滑雪場 富良野區（纜車站）",
+      "lat": 43.3254401,
+      "lon": 142.3536473,
+      "ja": "富良野ロープウェー",
+      "pid": "ChIJHaVVJfJSc18RNW9hDu1q5qM",
+      "park": {
+        "name": "富良野區停車場",
+        "short": "富良野區停車場",
+        "ja": "富良野ゾーン駐車場",
+        "lat": 43.3265179,
+        "lon": 142.3540585,
+        "pid": "ChIJqarud_JSc18RPDDHajPDurA",
+        "note": "免費；評論說除非比賽幾乎不會滿"
+      }
     },
     "fstn": {
       "name": "富良野站（保姆巴士）",
-      "lat": 43.3469,
-      "lon": 142.3917,
-      "ja": "富良野駅"
+      "lat": 43.3468945,
+      "lon": 142.3912825,
+      "ja": "富良野駅",
+      "pid": "ChIJaanaJWlNc18RH0pAMQ_1E5o"
     },
     "yuiga": {
       "name": "唯我独尊",
-      "lat": 43.3449,
-      "lon": 142.3895,
+      "lat": 43.344792,
+      "lon": 142.3894602,
       "ja": "唯我独尊",
-      "open": "17:00"
+      "open": "17:00",
+      "pid": "ChIJHQMlUW9Nc18RsMfqn_MK3WY"
     },
     "junpei": {
       "name": "じゅんぺい",
-      "lat": 43.5886,
-      "lon": 142.4673,
+      "lat": 43.5892501,
+      "lon": 142.4680775,
       "open": "11:00",
-      "ja": "じゅんぺい"
+      "ja": "じゅんぺい",
+      "pid": "ChIJrQEV1cTFDF8RsCT_OzBZN-g"
     },
     "chiyoda": {
       "name": "千代田牧場",
@@ -131,20 +193,48 @@
       "name": "白鬚瀑布",
       "lat": 43.4746,
       "lon": 142.6392,
-      "ja": "白ひげの滝"
+      "ja": "白ひげの滝",
+      "park": {
+        "name": "白鬚瀑布停車場（白金溫泉公共停車場）",
+        "short": "白鬚瀑布停車場",
+        "ja": "白ひげの滝 駐車場",
+        "lat": 43.4734909,
+        "lon": 142.6383712,
+        "pid": "ChIJw_prFQDNDF8RNV6jZF2yjPA",
+        "note": "免費、車位不多"
+      }
     },
     "aoiike": {
       "name": "青池",
       "lat": 43.4935,
       "lon": 142.6141,
       "open": "17:00",
-      "ja": "青い池"
+      "ja": "青い池",
+      "park": {
+        "name": "青池停車場",
+        "short": "青池停車場",
+        "ja": "白金 青い池 駐車場",
+        "lat": 43.4924298,
+        "lon": 142.6124712,
+        "pid": "ChIJPZMz_DXNDF8R9xVq6MBQjXQ",
+        "note": "07:00–19:00、收費；從旭川方向來不能右轉進場（我們從白鬚瀑布過來是左轉）"
+      }
     },
     "favlux": {
       "name": "FAV LUX 札幌薄野",
       "lat": 43.0523778,
       "lon": 141.3485722,
-      "ja": "FAV LUX 札幌すすきの"
+      "ja": "FAV LUX 札幌すすきの",
+      "pid": "ChIJDeSbhZMpC18RgWu851Dm37E",
+      "park": {
+        "name": "パラカ 南6西7第1（FAV LUX 合作停車場）",
+        "short": "パラカ停車場",
+        "ja": "パラカ 札幌市南６西７第１",
+        "lat": 43.0526681,
+        "lon": 141.3485398,
+        "pid": "ChIJJeyLN7YpC18RDT8MP8e3G5I",
+        "note": "櫃台拿 QR 折價券；滿了看「車停哪裡」"
+      }
     },
     "beer": {
       "name": "サッポロビール園",
@@ -190,15 +280,17 @@
     },
     "waraku": {
       "name": "回轉壽司 和楽 小樽店",
-      "lat": 43.1962,
-      "lon": 141.005,
-      "ja": "回転寿司 和楽 小樽店"
+      "lat": 43.196278,
+      "lon": 141.0047969,
+      "ja": "回転寿司 和楽 小樽店",
+      "pid": "ChIJ6coiCU7gCl8Rmd5EA3uEuiI"
     },
     "kitakaro": {
       "name": "北菓楼 砂川本店",
-      "lat": 43.5175,
-      "lon": 141.9142,
-      "ja": "北菓楼 砂川本店"
+      "lat": 43.51751,
+      "lon": 141.914217,
+      "ja": "北菓楼 砂川本店",
+      "pid": "ChIJG9qJH-GhDF8Rz7Go3cP1xAg"
     },
     "ichigen": {
       "name": "えびそば一幻 総本店",
@@ -230,25 +322,38 @@
       "lon": 141.3945,
       "open": "10:00",
       "close": "15:00",
-      "ja": "さっぽろ羊ヶ丘展望台"
+      "ja": "さっぽろ羊ヶ丘展望台",
+      "pid": "ChIJx2WCDKMqC18RnEw-r64NwtY"
     },
     "toriton": {
       "name": "回転寿し トリトン 円山店",
       "lat": 43.0624,
       "lon": 141.3204,
-      "ja": "回転寿し トリトン 円山店"
+      "ja": "回転寿し トリトン 円山店",
+      "pid": "ChIJ3XF_17gpC18R_A0j8aysL2I"
     },
     "shiroi": {
       "name": "白色戀人公園",
       "lat": 43.0889,
       "lon": 141.2717,
-      "ja": "白い恋人パーク"
+      "ja": "白い恋人パーク",
+      "pid": "ChIJU8vHZBIoC18RkQEK1Lg8HsI",
+      "park": {
+        "name": "白色戀人公園停車場（Times）",
+        "short": "白色戀人公園停車場",
+        "ja": "タイムズ白い恋人パーク",
+        "lat": 43.0881733,
+        "lon": 141.2703952,
+        "pid": "ChIJq7fHzscpC18Roj34EwIGKlw",
+        "note": "高的露營車進不去"
+      }
     },
     "kujira": {
       "name": "Trattoria KUJIRA",
-      "lat": 43.055,
-      "lon": 141.3395,
-      "ja": "Trattoria KUJIRA"
+      "lat": 43.0550423,
+      "lon": 141.3394845,
+      "ja": "Trattoria KUJIRA",
+      "pid": "ChIJ-bh746wpC18RFxalXcXazSI"
     },
     "akarenga": {
       "name": "北海道廳舊本廳舍（紅磚廳舍）",
@@ -289,15 +394,25 @@
     },
     "shikisai": {
       "name": "四季彩之丘 雪上樂園",
-      "lat": 43.5292,
-      "lon": 142.4651,
-      "ja": "四季彩の丘"
+      "lat": 43.5291728,
+      "lon": 142.4650824,
+      "ja": "四季彩の丘",
+      "pid": "ChIJDeIPuVXIDF8RPhiBRw83_ag",
+      "park": {
+        "name": "四季彩之丘停車場",
+        "short": "四季彩停車場",
+        "ja": "四季彩の丘 駐車場",
+        "lat": 43.5295555,
+        "lon": 142.4646641,
+        "pid": "ChIJV8k1CinJDF8Rsx_t_L6ZaSM"
+      }
     },
     "senka": {
       "name": "美瑛選果",
       "lat": 43.5906,
       "lon": 142.4545,
-      "ja": "美瑛選果"
+      "ja": "美瑛選果",
+      "pid": "ChIJ__97IdnFDF8RpJA43yFM_ms"
     },
     "temiya": {
       "name": "小樽天然温泉 湯の花 手宮殿",
@@ -305,34 +420,50 @@
       "lon": 141.0086111,
       "open": "09:00",
       "close": "23:00",
-      "ja": "小樽天然温泉 湯の花 手宮殿"
+      "ja": "小樽天然温泉 湯の花 手宮殿",
+      "pid": "ChIJUcCiPs_hCl8RUmPyM0Wz4y8"
     },
     "masazushi": {
       "name": "おたる政寿司 本店",
       "lat": 43.19427,
       "lon": 141.00011,
-      "ja": "おたる政寿司 本店"
+      "ja": "おたる政寿司 本店",
+      "pid": "ChIJuUOVZVHgCl8RCUm0xBUU6Cs"
     },
     "marche": {
       "name": "Furano Marché",
-      "lat": 43.3416,
-      "lon": 142.3836,
-      "ja": "フラノマルシェ"
+      "lat": 43.3422273,
+      "lon": 142.3871391,
+      "ja": "フラノマルシェ",
+      "pid": "ChIJy47IT2RNc18Rj9fZvT1syUM",
+      "addr": "富良野市幸町13-1"
     },
     "fenix": {
       "name": "Fenix Restaurant & Bar",
-      "lat": 43.3404,
-      "lon": 142.3433,
+      "lat": 43.3438793,
+      "lon": 142.3606818,
       "ja": "Fenix Restaurant & Bar",
       "open": "18:00",
-      "close": "21:30"
+      "close": "21:30",
+      "pid": "ChIJo77VbedTc18RX4EZmg2HoSI",
+      "addr": "富良野市北の峰町19-10",
+      "park": {
+        "name": "北之峰區停車場",
+        "short": "北之峰停車場",
+        "ja": "北の峰ゾーン駐車場",
+        "lat": 43.3424613,
+        "lon": 142.3600065,
+        "pid": "ChIJgXzXcdpTc18Ra_3ol52hbv8",
+        "note": "免費；平日下午也會滿，滿了往下的第二停車場離雪道遠"
+      }
     },
     "furanoya": {
       "name": "ふらのや（湯咖哩）",
-      "lat": 43.343,
-      "lon": 142.3826,
+      "lat": 43.3429869,
+      "lon": 142.3825976,
       "ja": "ふらのや",
-      "close": "20:00"
+      "close": "20:00",
+      "pid": "ChIJDdcLq2ZNc18RP_Z6EK3pRFI"
     },
     "asari_ski": {
       "name": "朝里川溫泉滑雪場",
@@ -344,17 +475,19 @@
       "ja": "朝里川温泉スキー場"
     },
     "sunagawa_sa": {
-      "name": "砂川 SA（休息站）",
-      "lat": 43.4894,
-      "lon": 141.9035,
-      "ja": "砂川サービスエリア"
+      "name": "砂川 SA（往旭川方向）",
+      "lat": 43.5284721,
+      "lon": 141.9283441,
+      "ja": "砂川サービスエリア（下り）",
+      "pid": "ChIJPQtoFlWfDF8RC1ka3fM2k2M"
     },
     "coop_furano": {
       "name": "コープさっぽろ 富良野店",
-      "lat": 43.3383,
-      "lon": 142.3928,
+      "lat": 43.3382395,
+      "lon": 142.3928396,
       "ja": "コープさっぽろ ふらの店",
-      "close": "21:00"
+      "close": "20:00",
+      "pid": "ChIJ1Y_apHtNc18R-VTdvUOKBNM"
     },
     "kamaei": {
       "name": "かま栄 工場直売店",
@@ -401,7 +534,7 @@
           "id": "cts",
           "at": "14:05",
           "stay": 110,
-          "note": "下機、入境、領行李與雪具、到國際線 98 號站牌等接駁（10–30 分一班）"
+          "note": "下機、入境、領行李與雪具；到國際線一樓出口右手邊【98 許可車專用】站牌，打電話或 LINE 叫租車接駁（官網：約 15 分到）"
         },
         {
           "id": "rental",
@@ -512,7 +645,7 @@
         {
           "id": "canal",
           "stay": 5,
-          "note": "停小樽運河駐車場（滿了就停堺町通南端音樂盒堂旁），接下來三小時都走路；小孩在山鄉，四個大人慢慢逛"
+          "note": "停車（導航直接帶到停車場），接下來三小時都走路；小孩在山鄉，四個大人慢慢逛"
         },
         {
           "id": "kamaei",

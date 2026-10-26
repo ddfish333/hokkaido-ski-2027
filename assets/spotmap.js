@@ -81,7 +81,7 @@
       '<p class="fp-meta">' + meta.join(" · ") + '</p>' +
       '<div class="fp-act">' + (g && g.q ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") +
       '<a href="' + mapsUrl + '" target="_blank" rel="noopener">Google Maps →</a>' +
-      '<a href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + s.lat + ',' + s.lon + (c.b ? '&origin=' + c.b.lat + ',' + c.b.lon : "") + '" target="_blank" rel="noopener">導航 →</a>' +
+      '<a href="' + Plan.navTo(s) + '" target="_blank" rel="noopener">導航 →</a>' +
       (s.photoAt ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + s.photoAt[0] + ',' + s.photoAt[1] + '" target="_blank" rel="noopener">📷 走到拍攝點 →</a>' : "") +
       (s.status !== "plan" ? '<a class="fp-add" href="' + addUrl(s, c) + '">加入行程 ＋</a>' : (s.day ? '<a href="' + (window.BASE || "../") + 'day/' + s.day.slice(5).replace("-", "") + '/">看 ' + md(s.day) + ' 行程 →</a>' : "")) +
       (s.src ? s.src.map(function (x) { return '<a class="src" href="' + esc(x[1]) + '" target="_blank" rel="noopener">' + esc(x[0]) + ' ↗</a>'; }).join("") : "") + '</div>' +

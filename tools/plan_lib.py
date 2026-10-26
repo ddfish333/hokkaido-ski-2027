@@ -17,6 +17,28 @@ DAY_BY_DATE = {d["date"]: d for d in TRIP["days"]}
 def mins(t): h, m = t.split(":"); return int(h) * 60 + int(m)
 def hm(x): return f"{x // 60:02d}:{x % 60:02d}"
 def r5(x): return max(5, int(round(x / 5)) * 5)
+import math
+def hav_km(a, b):
+    k = math.pi / 180; dla = (b["lat"] - a["lat"]) * k; dlo = (b["lon"] - a["lon"]) * k
+    h = math.sin(dla / 2) ** 2 + math.cos(a["lat"] * k) * math.cos(b["lat"] * k) * math.sin(dlo / 2) ** 2
+    return 2 * 6371 * math.asin(math.sqrt(h))
+# 和 plan.js 的 drivePt／legEnds 同一套：開車、計程車開到 park（停車場），走路、接駁到地點本身
+def drive_pt(pid): p = PLAN["places"].get(pid); return (p.get("park") or p) if p else None
+def leg_ends(a, b, via):
+    walk = via in ("walk", "shuttle")
+    return (PLAN["places"].get(a) if walk else drive_pt(a)), (PLAN["places"].get(b) if walk else drive_pt(b))
+def leg_stale(key, L):
+    """路段算的時候用的起訖（ends）和現在的導航點差超過 30 m＝地點或停車場改過，路段要重算。
+    舊路段沒有 ends：用路線頭尾判斷（OSRM 會吸附到最近的路，容許 150 m）。"""
+    parts = key.split("|"); a, b = parts[0], parts[1]; via = parts[2] if len(parts) > 2 else "drive"
+    ea, eb = leg_ends(a, b, via)
+    if not ea or not eb: return False
+    if L.get("ends"):
+        (alo, ala), (blo, bla) = L["ends"]
+        return hav_km(ea, {"lat": ala, "lon": alo}) > 0.03 or hav_km(eb, {"lat": bla, "lon": blo}) > 0.03
+    if not L.get("geom") or len(L["geom"]) < 2: return False
+    g0, g1 = L["geom"][0], L["geom"][-1]
+    return hav_km(ea, {"lat": g0[1], "lon": g0[0]}) > 0.15 or hav_km(eb, {"lat": g1[1], "lon": g1[0]}) > 0.15
 def taxi_min(m): return max(15, r5(m * 1.5))  # 和 plan.js taxiMin 同：叫車／等車，×1.5、最少 15 分
 def leg_of(a, b, via):
     k = f"{a}|{b}" + ("|walk" if via == "walk" else "|shuttle" if via == "shuttle" else "")  # taxi 用開車那一段

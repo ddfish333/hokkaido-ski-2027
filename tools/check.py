@@ -332,6 +332,51 @@ for lst, name in ((spots, "spots.js"), (food, "food.js")):
             m = SUNSET.search(t)
             if m: E(f"{name}：{x['name']} {k} 寫死日落「{m.group(0)}」，改成 {{sun:set}}（卡片有 day 才換得出來）")
             if "{sun:" in t and not x.get("day"): E(f"{name}：{x['name']} {k} 用了 {{sun:}} 但卡片沒有 day，換不出來")
+# 0i. 導航（10/26 第六輪：北之峰、Fenix、富良野區、砂川 SA 偏了 1–5 km，司機照導航會開錯地方）
+#   (a) 同一個地方在不同檔案的座標要一致（150 m 內）：plan.json 是唯一來源，trip.js places／resorts／gates、food.js、spots.js 都要跟它對
+#       對法：id 相同、Google 地點 id（pid／g.pid）相同、或名稱相同
+#   (b) 開車到的站點要有核對過的 Google 地點（pid 或 park.pid）；沒有的列警告
+#   (c) legs.json 的路段起訖要和現在的導航點一致（地點或停車場改了就要重算：python3 tools/refresh_legs.py）
+from plan_lib import leg_stale, drive_pt
+def _nm(x): return re.sub(r"（.*?）|\(.*?\)|\s", "", x or "")
+_pid_of = {}
+for k, p in PLAN["places"].items():
+    if p.get("pid"): _pid_of[p["pid"]] = (k, p)
+    if (p.get("park") or {}).get("pid"): _pid_of[p["park"]["pid"]] = (k + ".park", p["park"])
+_by_name = {}
+for k, p in PLAN["places"].items():
+    for n in (p.get("name"), p.get("ja")):
+        if _nm(n): _by_name.setdefault(_nm(n), (k, p))
+def _cross(src, x, xid=None):
+    if not x or x.get("lat") is None: return
+    hits = []
+    if xid and xid in PLAN["places"]: hits.append((xid, PLAN["places"][xid]))
+    pid = x.get("pid") or (x.get("g") or {}).get("pid")
+    if pid and pid in _pid_of: hits.append(_pid_of[pid])
+    for n in (x.get("name"), x.get("ja")):
+        if _nm(n) in _by_name: hits.append(_by_name[_nm(n)])
+    seen = set()
+    for k, p in hits:
+        if k in seen: continue
+        seen.add(k); d = _hav(p, x)
+        if d > 0.15: E(f"{src}「{x.get('name')}」和 plan.json「{p.get('name')}」（{k}）是同一個地方，座標卻差 {d*1000:.0f} m——以 plan.json 為準改過來（導航會導錯）")
+for x in trip.get("places", []): _cross("trip.js places", x)
+for r in trip.get("resorts", []):
+    for sid in r.get("stops") or []:
+        if sid in PLAN["places"] and _hav(PLAN["places"][sid], r) > 0.15 and sid == (r.get("stops") or [None])[0]:
+            E(f"trip.js 雪場 {r['name']} 的座標和 plan.json 站點 {sid} 差 {_hav(PLAN['places'][sid], r)*1000:.0f} m（雪場頁導航會導錯）")
+    for g in r.get("gates") or []:
+        _cross(f"trip.js 雪場 {r['name']} 入口", g, g.get("stop"))
+        if g.get("approx") and any(st["id"] in (r.get("stops") or []) for v in PLAN["days"].values() for st in v["stops"]):
+            W(f"trip.js 雪場 {r['name']} 入口「{g['name']}」位置概略，但行程有排這座雪場——去前核對")
+for x in food: _cross("food.js", x, x["id"])
+for x in spots: _cross("spots.js", x, x["id"])  # stop 只表示排在哪一站，不一定是同一個點（堺町通 → 運河那天）
+_unchecked = sorted({st["id"] for v in PLAN["days"].values() for i, st in enumerate(v["stops"]) if i and st.get("via", "drive") == "drive"
+                     and not (PLAN["places"][st["id"]].get("pid") or (PLAN["places"][st["id"]].get("park") or {}).get("pid"))})
+if _unchecked: W(f"開車到的站點還沒核對 Google 地點（plan.json places 加 pid 或 park.pid）：{_unchecked}")
+_stale = [k for k, L in LEGS.items() if leg_stale(k, L)]
+if _stale: E(f"這些路段的起訖和現在的導航點對不上（地點或停車場改過）：{_stale}——跑 python3 tools/refresh_legs.py")
+
 # 0h. plan.json 的站點 id 和 spots.js／food.js 的 id 相同時，必須是同一個地方（300 m 內）——
 #     撞名會讓單日頁抓到別張卡（10/26：temiya 溫泉抓到舊手宮線「全天・免費」）
 for lst, name in ((spots, "spots.js"), (food, "food.js")):
