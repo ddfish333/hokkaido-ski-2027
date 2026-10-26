@@ -172,11 +172,11 @@ for f, marks in {"assets/editor.js": [("/git/refs/heads/main", "一次儲存一�
                  "assets/foodmap.js": [("Plan.picksHTML(", "美食地圖的這天怎麼吃讀同一份（10/26）")],
                  "tools/build_days.py": [("def sync_tabbar", "手機底部分頁列由 build_days 一份產生（10/26）")],
                  "assets/spotmap.js": [("Plan.followList(", "手機捲清單地圖跟著走（10/26）"), ("cooperativeGestures: !Plan.touch", "手機一指拖地圖（10/26）")]}.items():
-for f in ("assets/app.js", "assets/foodmap.js", "assets/skimap.js", "assets/spotmap.js"):
-    if "cooperativeGestures: true" in open(os.path.join(ROOT, f), encoding="utf-8").read(): E(f"{f}：cooperativeGestures 要用 !Plan.touch（手機一指就能拖地圖，寫死 true 手機會像卡住）")
     src = open(os.path.join(ROOT, f), encoding="utf-8").read()
     for mark, what in marks:
         if what and mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被拿掉或被舊檔案蓋掉了")
+for f in ("assets/app.js", "assets/foodmap.js", "assets/skimap.js", "assets/spotmap.js"):
+    if "cooperativeGestures: true" in open(os.path.join(ROOT, f), encoding="utf-8").read(): E(f"{f}：cooperativeGestures 要用 !Plan.touch（手機一指就能拖地圖，寫死 true 手機會像卡住）")
 
 # 1. 三份資料的日期要一致
 for d in days:
