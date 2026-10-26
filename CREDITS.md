@@ -54,6 +54,7 @@ No freely licensed photos found on Wikimedia Commons for these hotels; no images
 - 住宿照片（山郷 春 Villa -SHUN-、BEST DAY EVER FURANO LODGES、FAV LUX 札幌薄野）：各住宿官方網站／訂房頁，僅供同行家人行前參考，版權屬原業者。
 - 序幕音樂：網頁以 Web Audio 即時生成，無外部音檔。
 - 首頁三章「山と雪」的滑鼠移入影片（assets/video/furano-hover*.mp4）：BEST DAY EVER FURANO LODGES 官方宣傳影片，Sean 於 2026-10-26 自官網螢幕錄影後剪成 30 秒無聲循環；僅供同行家人行前參考，不對外宣傳。
+- 首頁三章「海と雪」的滑鼠移入影片（assets/video/villa-hover*.mp4）：山郷 香 Villa -KAORU- 官網影片（秋季）＋ Snow Cruise Onze 官方／IG 的海景日滑、夜滑片段，Sean 於 2026-10-26 螢幕錄影，剪成 25 秒無聲循環；僅供同行家人行前參考。所有素材與剪輯檔存在 `hokkaido-videos/`。
 
 ## 2026-10-25 第二批（家人依「照片清單」抓的，來源寫在各檔同名 .txt）
 

@@ -14,6 +14,7 @@ window.TRIP = {
       from: "2027-01-07", to: "2027-01-11", nights: 4, checkin: "15:00–20:00", checkout: "11:00",
       notes: ["**走路 5 分到 Onze 雪場**（夜滑到 22:45），面海滑雪；開車 35 分上 Kiroro、25 分進札幌", "145 m² 一棟包：挑高大窗對著森林、檜木浴缸、森林景觀的廚房；洗烘衣機、洗碗機", "三五工務店蓋的「像住在北海道一樣」的房子，用的是北海道的木頭；停車每棟 2 格、免費"],
       facts: ["走路 5 分到 Onze", "145 m² 一棟包", "檜木浴缸・洗烘衣機", "停車 2 格"],
+      video: "villa-hover.mp4", videoSm: "villa-hover-sm.mp4",
       links: [["官網", "https://mt-sango.com/stay/shun/"], ["訂房", "https://www.ikyu.com/00051685/"]], g: { rating: 5.0, n: 2, pid: "ChIJv-YvGwDfCl8Rybz1BtgpE2w" } },
     { id: "furano", name: "BEST DAY EVER FURANO LODGES", short: "富良野・北之峰", area: "富良野", lat: 43.3325009, lon: 142.3631996,
       from: "2027-01-11", to: "2027-01-16", nights: 5, checkin: "15:00", checkout: "10:00",
