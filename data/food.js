@@ -21,7 +21,7 @@ window.FOOD = [
   { id: "nihonbashi", g: {"rating": 3.8, "n": 571, "pid": "ChIJkSfL2FPgCl8RiRIPlM3RQCI", "q": "小樽 日本橋 寿司", "date": "2026-10-25"}, key: "日本橋", name: "小樽寿司屋通り 日本橋", area: "小樽", kind: "壽司", what: "掘りごたつ和室、50 人大廣間", hours: "11:00–15:00、17:00–21:00", closed: [4], fit: "best", lat: 43.1949, lon: 140.9984, approx: true },
   { id: "takeno", g: {"rating": 4.3, "n": 599, "pid": "ChIJY1lg3lHgCl8RDQH6y9wjON4", "q": "Otaru Takeno Sushi", "date": "2026-10-25"}, name: "小樽 たけの寿司（堺町）", area: "小樽", kind: "壽司", what: "壽司、丼；2 樓大桌", hours: "11:00–16:00、17:00–21:00", closed: [4], fit: "ok", lat: 43.192, lon: 141.002, approx: true },
   { id: "fukuzushi", g: {"rating": 4.1, "n": 687, "pid": "ChIJ_YB_GFDgCl8RpBZ2nkotx9Y", "q": "Otaru Fuku Sushi", "date": "2026-10-25"}, closed: [3], name: "小樽 福鮨（堺町）", area: "小樽", kind: "壽司", what: "大桌與座敷；中午人多", hours: "10:30–20:00", fit: "ok", lat: 43.1915, lon: 141.003, approx: true },
-  { id: "masazushi", key: "政寿司", rec: 1, g: {"rating": 4.2, "n": 2934, "pid": "ChIJuUOVZVHgCl8RCUm0xBUU6Cs", "q": "Otaru Masazushi Main", "date": "2026-10-25"}, closed: [3], name: "おたる政寿司 本店", area: "小樽", kind: "壽司", what: "小樽壽司屋通り最有名的老店：260 席、**個室 2–30 人**、座敷＋掘りごたつ，**有兒童餐、可推嬰兒車**；店旁 5 台＋店後 10 台停車。晚餐約 ¥5,000–6,000／人。評論兩極：服務好、環境好，但也有人嫌貴、份量小、不訂要等 1 小時。1/8 晚餐首選（因為個室＋兒童餐＋停車），一定要先訂。", hours: "11:00–15:00、17:00–21:00（LO 20:30）", fit: "best", meal: "dinner", lat: 43.19427, lon: 141.00011, src: [["HOT PEPPER 店舗情報", "https://www.hotpepper.jp/strJ000100296/"]] },
+  { id: "masazushi", key: "政寿司", rec: 1, g: {"rating": 4.2, "n": 2934, "pid": "ChIJuUOVZVHgCl8RCUm0xBUU6Cs", "q": "Otaru Masazushi Main", "date": "2026-10-25"}, closed: [3], name: "おたる政寿司 本店", area: "小樽", kind: "壽司", what: "小樽壽司屋通り最有名的老店：260 席、**個室 2–30 人**、座敷＋掘りごたつ，**有兒童餐、可推嬰兒車**；官網寫停車位只有 6 台，兩台 Delica 不一定停得進，訂位時先問。晚餐約 ¥5,000–6,000／人。評論兩極：服務好、環境好，但也有人嫌貴、份量小、不訂要等 1 小時。1/8 晚餐首選（因為個室＋兒童餐），一定要先訂。", hours: "11:00–15:00、17:00–21:00（LO 20:30）", fit: "best", meal: "dinner", lat: 43.19427, lon: 141.00011, src: [["HOT PEPPER 店舗情報", "https://www.hotpepper.jp/strJ000100296/"]] },
   /* ↓ 10/25 Sean 給的「札幌小樽おすすめ海鮮 5 選」（@_terutabi_hokkaido） */
   /* ↓ 10/25 Sean 請 Bot 從 IG 整理的（按讚數／出現篇數挑的） */
   { id: "kitakaro_otaru", via: "IG 整理", g: {"rating": 4.3, "n": 1864, "pid": "ChIJb54BmlrgCl8RSSKykITg9MM", "q": "Kitakaro Otaru Main Shop", "date": "2026-10-25"}, name: "北菓楼 小樽本館", area: "小樽", kind: "甜點", what: "堺町通上，IG 四篇都有：拳頭大的泡芙（¥324，當場吃）、年輪蛋糕、霜淇淋。店小、觀光客多要排一下；小樽店的東西下午常賣完，1/10 下午 13:45 到就先買。和六花亭運河店同一棟。", hours: "10:00–18:00", closed: [], fit: "ok", lat: 43.1918, lon: 141.0073, meal: "snack" },
@@ -99,12 +99,12 @@ window.FOOD = [
 /* 每個住宿地，當天會看到哪些區域的店 */
 window.FOOD_AREAS = { villa: ["小樽", "銭函", "Kiroro"], furano: ["富良野", "美瑛・旭川"], sapporo: ["札幌"] };
 
-/* 每一天怎麼吃：Claude 依「8 人帶 4 個幼兒」的條件挑出來的建議，和已經決定的。
-   status：proposed＝Claude 建議（還沒拍板）／decided＝已決定／booked＝已訂位。
+/* 每一天怎麼吃：依「8 人帶 4 個幼兒」的條件挑出來的建議，和已經決定的。
+   status：proposed＝建議（還沒拍板）／decided＝已決定／booked＝已訂位。
    新的店進來時，會重新比對同一個時段：硬條件（那天有開、坐得下 8 人、不用排很久、走路或有停車）先過，再比特色、評價、來源數、和其他晚上不重複；
    只有新店在這些條件上贏過現任才會換，而且會在 why 寫清楚換掉誰、為什麼。 */
 window.FOOD_PICKS = [
-  { date: "2027-01-08", slot: "dinner", pick: "masazushi", backup: ["toppi", "waraku"], status: "proposed", why: "第一次在小樽吃壽司，選最有名的政寿司本店：個室放得下 8 人、有兒童餐和嬰兒車位、店旁店後 15 個車位，滑完雪帶小孩不用找停車。價位高（大人約 ¥5–6 千）；想省就改 とっぴ～ 回轉（有停車場、不用訂、¥2–3 千）。", book: "0134-64-1101 訂 18:45 個室 8 人（4 幼兒），週三休" },
+  { date: "2027-01-08", slot: "dinner", pick: "masazushi", backup: ["toppi", "waraku"], status: "proposed", why: "第一次在小樽吃壽司，選最有名的政寿司本店：個室放得下 8 人、有兒童餐和嬰兒車位、店旁只有 6 個車位，兩台車不一定停得進，滑完雪帶小孩不用找停車。價位高（大人約 ¥5,000–6,000）；想省就改 とっぴ～ 回轉（有停車場、不用訂、¥2,000–3,000）。", book: "0134-64-1101 訂 18:45 個室 8 人（4 幼兒），週三休" },
   { date: "2027-01-10", slot: "dinner", pick: "naruto", backup: ["toppi", "waraku"], status: "decided", why: "小樽半身炸雞的老店，大桌多、小孩愛吃；運河逛完走過去 10 分。", book: "不用訂，17:00 前到" },
   { date: "2027-01-15", slot: "dinner", pick: "furanoya", backup: ["kumagera"], status: "proposed", why: "美瑛玩一整天 18:20 才回到富良野：ふらのや湯咖哩 20:00 前到就好、小孩有不辣的；累了就小木屋自己煮（美瑛選果買的東西）。", book: "不用訂" },
   { date: "2027-01-16", slot: "lunch", pick: "ichigen", backup: ["suage", "hanamaru_tokeidai"], status: "proposed", why: "停好車走 2 分就到，蝦湯拉麵小孩也吃得下，營業到凌晨不怕我們晚到；排隊就改 Suage+（走 3 分）。", book: "不用訂" },

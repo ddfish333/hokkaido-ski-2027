@@ -40,13 +40,14 @@
   var CUR_MODES = ["both", "twd", "jpy"], CUR_LABEL = { both: "¥＋NT$", twd: "NT$", jpy: "¥" };
   state.cur = CUR_MODES.indexOf(store("snow13-cur")) >= 0 ? store("snow13-cur") : "both";
   state.rate = T.fx.jpyTwd; state.rateDate = T.fx.date;
+  (function () { var c = store("snow13-fx"); if (c && c.rate > 0.1 && c.rate < 0.4) { state.rate = c.rate; state.rateDate = c.date; } })();   // 上次抓到的即時匯率先用，載入後不會跳
   function twd(n) { var t = n * state.rate; return t >= 100 ? Math.round(t / 10) * 10 : Math.round(t); }
   function nf(n) { return n.toLocaleString("en-US"); }
   function money(s) {
     s = String(s == null ? "" : s);
     if (state.cur === "jpy") return s;
-    return s.replace(/¥\s?([\d,.]+)(?:\s*[–-]\s*¥?([\d,.]+))?(\s*萬)?/g, function (m, a, b, wan) {
-      var k = wan ? 1e4 : 1;
+    return s.replace(/¥\s?([\d,.]+)(?:\s*[–-]\s*¥?([\d,.]+))?(\s*[萬千])?/g, function (m, a, b, wan) {
+      var k = wan ? (wan.trim() === "萬" ? 1e4 : 1e3) : 1;
       var A = parseFloat(a.replace(/,/g, "")) * k, B = b ? parseFloat(b.replace(/,/g, "")) * k : null;
       if (isNaN(A)) return m;
       var t = "NT$" + nf(twd(A)) + (B != null && !isNaN(B) ? "–" + nf(twd(B)) : "");
@@ -54,6 +55,8 @@
     });
   }
   function em(s) { return esc(money(s)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+  /* 文字裡的 {t:站點}／{sun:set}／{T:欄位} 標記 → 推算的時間（見 assets/plan.js） */
+  function fill(text, date, ctx) { return window.Plan && Plan.fill ? Plan.fill(text, date, ctx) : text; }
 
   /* 今天／下一天：出發前指向 1/7，旅程中指向當天，結束後停在最後一天 */
   function focusDayIndex() { var i = T.days.findIndex(function (d) { return d.date === TODAY; }); return i >= 0 ? i : (TODAY > T.end ? T.days.length - 1 : 0); }
@@ -135,7 +138,7 @@
         (p.img ? '<img src="' + BASE + 'assets/img/' + p.img + '" alt="" loading="lazy">' : '<span class="poster-blank"></span>') +
         '<span class="poster-top"><span class="pd">' + md(d.date) + '<small>週' + dow(d.date) + '</small></span>' + (badge ? '<span class="badge">' + badge + '</span>' : "") + '</span>' +
         '<span class="pw" data-pw="' + d.date + '">' + posterWx(d) + '</span>' +
-        '<span class="poster-body"><span class="pn">DAY ' + (i < 9 ? "0" : "") + (i + 1) + ' · ' + esc(b.area) + '</span><span class="pt">' + esc(d.title) + '</span><span class="pl">' + esc(p.line || d.sub) + '</span></span></a>';
+        '<span class="poster-body"><span class="pn">DAY ' + (i < 9 ? "0" : "") + (i + 1) + ' · ' + esc(b.area) + '</span><span class="pt">' + esc(fill(d.title, d.date)) + '</span><span class="pl">' + esc(fill(p.line || d.sub, d.date)) + '</span></span></a>';
     }).join("");
     var f = box.children[focus];
     if (f) box.scrollLeft = Math.max(0, f.offsetLeft - 24);
@@ -180,7 +183,7 @@
         '<p class="ch-jp">' + esc(c.jp) + '</p>' +
         '<p class="ch-area">' + esc(b.short) + '｜' + md(b.from) + '–' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
         '<p class="ch-line">' + esc(c.line) + '</p>' +
-        '<p class="ch-stay">' + esc(b.name) + (b.checkin ? ' · 入住 ' + b.checkin : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
+        '<p class="ch-stay">' + esc(b.name) + (b.checkin ? ' · 入住 ' + esc(fill(b.checkin, b.from)) : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</p>' +
         '<p class="ch-links">' + (site ? arrowLink("官網", site[1]) : "") + arrowLink("導航", navUrl(b.lat, b.lon)) + '</p>' +
         '</div></article>';
     }).join("");
@@ -255,15 +258,15 @@
   function renderDay() {
     if (!has("dayview")) return;
     var d = T.days[state.day], b = baseById[d.base], sch = dayPlan();
-    var html = '<div class="card">' + (has("dayhead") ? '<p class="panel-label">今天的安排</p><p class="day-sub" style="margin:0 0 4px">' + esc(d.sub) + '</p>' : '<p class="day-date">' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p>' +
-      '<h3 class="day-title">' + esc(d.title) + '</h3><p class="day-sub">' + esc(d.sub) + '</p>') +
-      (d.alert ? '<p class="alert">' + esc(d.alert) + '</p>' : "") +
+    var html = '<div class="card">' + (has("dayhead") ? '<p class="panel-label">今天的安排</p><p class="day-sub" style="margin:0 0 4px">' + esc(fill(d.sub, d.date)) + '</p>' : '<p class="day-date">' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p>' +
+      '<h3 class="day-title">' + esc(fill(d.title, d.date)) + '</h3><p class="day-sub">' + esc(fill(d.sub, d.date)) + '</p>') +
+      (d.alert ? '<p class="alert">' + esc(fill(d.alert, d.date)) + '</p>' : "") +
       '<div class="modeseg seg" role="tablist" aria-label="路況"></div>' +
       '<ol class="timeline">' + sch.stops.map(function (s, i) {
         var row = "";
         if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg ' + l.mode + '"><time></time><span>' + (l.mode === "walk" ? "步行" : l.mode === "shuttle" ? "接駁車" : "開車") + ' ' + fmtMin(l.min) + ' <small>· ' + l.km + ' km' + (l.est ? ' · 直線估算' : '') + '</small></span></li>'; }
         var last = i === sch.stops.length - 1;
-        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(s.note) + '</span>' : "") + '</span></li>';
+        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(fill(s.note, d.date, s)) + '</span>' : "") + '</span></li>';
         return row;
       }).join("") + '</ol></div>';
     html += '<div class="side">';
@@ -278,7 +281,7 @@
     html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>' + (state.mode === "snow" ? "下雪" : "一般") + '</span><b>' + fmtMin(sch.total.min) + '</b></div><div><span>' + (state.mode === "snow" ? "一般" : "下雪") + '</span><b>' + fmtMin(alt.total.min) + '</b></div><div><span>距離</span><b>' + sch.total.km + ' km</b></div>' + (sch.end != null ? '<div><span>最後到達</span><b>' + Plan.hm(sch.end) + '</b></div>' : "") + '</div></div>';
     html += '<div class="card"><p class="panel-label">天氣</p>' + dayWeather(d) + '</div>';
     html += '<div class="card"><p class="panel-label">日照</p><div class="sunrow"><div><span>日出</span><b>' + d.sun[0] + '</b></div><div><span>日落</span><b>' + d.sun[1] + '</b></div><div><span>天黑</span><b>' + d.sun[2] + '</b></div></div></div>';
-    html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(d.meals[0]) + '</li><li><span>晚</span>' + esc(d.meals[1]) + '</li></ul><a class="jump" href="#dayfood">看附近有哪些店 ↓</a></div>';
+    html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(fill(d.meals[0], d.date)) + '</li><li><span>晚</span>' + esc(fill(d.meals[1], d.date)) + '</li></ul><a class="jump" href="#dayfood">看附近有哪些店 ↓</a></div>';
     html += '</div>';
     $("#dayview").innerHTML = html;
     if (has("dayfood") && !document.querySelector("#dayfood .fp-embed:not([hidden])")) $("#dayfood").innerHTML = foodBlock(d, b);
@@ -303,7 +306,7 @@
     }
     if (!renderDay.hashDone) { renderDay.hashDone = true; openFoldFor(location.hash); }
     var hd = $("#dayhead");
-    if (hd) hd.innerHTML = '<p class="dh-k">DAY ' + (state.day < 9 ? "0" : "") + (state.day + 1) + ' · ' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p><h1 class="dh-h">' + esc(d.title) + '</h1><p class="dh-s">' + esc(((SC[d.date] || {}).poster || {}).line || d.sub) + '</p>';
+    if (hd) hd.innerHTML = '<p class="dh-k">DAY ' + (state.day < 9 ? "0" : "") + (state.day + 1) + ' · ' + md(d.date) + '（' + dow(d.date) + '）· 住 ' + esc(b.short) + '</p><h1 class="dh-h">' + esc(d.title) + '</h1><p class="dh-s">' + esc(fill(((SC[d.date] || {}).poster || {}).line || d.sub, d.date)) + '</p>';
   }
 
   /* ---------- 地圖：預設跟著日期走；地區按鈕切到探索模式 ---------- */
@@ -331,7 +334,7 @@
   function renderModeSeg() {
     document.querySelectorAll(".modeseg").forEach(function (box) {
       box.innerHTML = [["normal", "一般路況"], ["snow", "下雪路況"]].map(function (m) { return '<button type="button" role="tab" aria-selected="' + (state.mode === m[0]) + '" data-mode="' + m[0] + '">' + m[1] + '</button>'; }).join("");
-      box.onclick = function (e) { var b = e.target.closest("[data-mode]"); if (!b) return; state.mode = Plan.mode(b.dataset.mode); renderModeSeg(); renderDay(); updateRoute(true); };
+      box.onclick = function (e) { var b = e.target.closest("[data-mode]"); if (!b) return; state.mode = Plan.mode(b.dataset.mode); Plan.clearCache(); renderModeSeg(); renderDay(); updateRoute(true); };
     });
   }
 
@@ -375,7 +378,7 @@
     dayPlan().stops.forEach(function (s, i) {
       var g = groups.filter(function (x) { return Math.abs(x.lat - s.lat) < 0.0004 && Math.abs(x.lon - s.lon) < 0.0004; })[0];
       if (g) { g.nums.push(i + 1); g.times.push(s.time); }
-      else groups.push({ name: s.name, lat: s.lat, lon: s.lon, nums: [i + 1], times: [s.time], note: s.note });
+      else groups.push({ name: s.name, lat: s.lat, lon: s.lon, nums: [i + 1], times: [s.time], note: fill(s.note, T.days[state.day].date, s) });
     });
     return groups;
   }
@@ -400,7 +403,8 @@
     try {
       map = new maplibregl.Map({
         container: "mapcanvas", style: "https://tiles.openfreemap.org/styles/" + (isDark ? "dark" : "positron"),
-        center: [141.75, 43.28], zoom: 7, cooperativeGestures: true, attributionControl: { compact: true }
+        center: [141.75, 43.28], zoom: 7, cooperativeGestures: true, attributionControl: { compact: true },
+        locale: { "CooperativeGesturesHandler.WindowsHelpText": "按住 Ctrl 再捲動可縮放地圖", "CooperativeGesturesHandler.MacHelpText": "按住 ⌘ 再捲動可縮放地圖", "CooperativeGesturesHandler.MobileHelpText": "用兩指移動地圖", "NavigationControl.ZoomIn": "放大", "NavigationControl.ZoomOut": "縮小", "AttributionControl.ToggleAttribution": "資料來源" }
       });
     } catch (e) { $("#mapfallback").hidden = false; return; }
     window.SNOW13_MAP = map;
@@ -542,7 +546,7 @@
           : '<a href="' + navUrl(s.lat, s.lon, prev) + '" target="_blank" rel="noopener">導航</a>';
         html += '<li class="hop"><span>' + (l.mode === "walk" ? "步行 " : l.mode === "shuttle" ? "接駁 " : "") + l.km + ' km · ' + fmtMin(l.min) + (l.mode === "drive" ? '<em>' + (state.mode === "snow" ? "一般 " + fmtMin(l.normal) : "雪 " + fmtMin(l.snow)) + '</em>' : "") + '</span>' + nav + '</li>';
       }
-      html += '<li class="stop' + role + (s.late ? " late" : "") + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + '</div><div class="sn">' + (s.stay && i < plan.stops.length - 1 ? '<span class="stay" style="margin:0 8px 4px 0">停 ' + fmtMin(s.stay) + ' → ' + s.timeDep + '</span>' : "") + lateTag(s) + em(s.note) + '</div></div></li>';
+      html += '<li class="stop' + role + (s.late ? " late" : "") + '" data-s="' + i + '"><b class="n">' + (i + 1) + '</b><div><div class="st"><time>' + esc(s.time) + '</time> ' + esc(s.name) + '</div><div class="sn">' + (s.stay && i < plan.stops.length - 1 ? '<span class="stay" style="margin:0 8px 4px 0">停 ' + fmtMin(s.stay) + ' → ' + s.timeDep + '</span>' : "") + lateTag(s) + em(fill(s.note, d.date, s)) + '</div></div></li>';
     });
     html += '</ol>';
     $("#stoppanel").innerHTML = html;
@@ -738,7 +742,7 @@
   function picksBlock(d, linkBase) {
     var picks = (window.FOOD_PICKS || []).filter(function (p) { return p.date === d.date; }).sort(function (a, b) { return PICK_ORDER.indexOf(a.slot) - PICK_ORDER.indexOf(b.slot); });
     if (!picks.length) return "";
-    return '<div class="picks"><p class="picks-h">這天怎麼吃 <small>Claude 依 8 人帶 4 個幼兒的條件挑的；藍色是建議、金色是已決定。新的店進來會重新比對，換掉會寫原因。</small></p><ul class="picklist">' + picks.map(function (p) {
+    return '<div class="picks"><p class="picks-h">這天怎麼吃 <small>依 8 人帶 4 個幼兒的條件挑的；藍色是建議、金色是已決定。新的店進來會重新比對，換掉會寫原因。</small></p><ul class="picklist">' + picks.map(function (p) {
       var f = foodById(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
       var bk = (p.backup || []).map(function (id) { var g = foodById(id); return g ? '<a href="' + linkBase + '#' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</a>' : ""; }).filter(Boolean).join("、");
       return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><a class="pick-name" href="' + linkBase + '#' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</a><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
@@ -878,8 +882,10 @@
   function loadFx() {
     fetch("https://open.er-api.com/v6/latest/JPY").then(function (r) { return r.json(); }).then(function (j) {
       if (j && j.rates && j.rates.TWD) {
-        state.rate = j.rates.TWD;
         if (j.time_last_update_unix) state.rateDate = new Date(j.time_last_update_unix * 1000).toISOString().slice(0, 10);
+        store("snow13-fx", { rate: j.rates.TWD, date: state.rateDate });
+        if (Math.abs(j.rates.TWD - state.rate) < 1e-6) return;
+        state.rate = j.rates.TWD;
         rerenderMoney();
       }
     }).catch(function () { /* 用內建匯率 */ });

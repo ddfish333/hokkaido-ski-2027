@@ -6,42 +6,10 @@
   照片資料夾預設找 ../hokkaido-photos-web（在 Mac 上）；找不到就略過照片檢查。
 回傳非 0 = 有錯（網站會壞或內容不一致）；警告不影響回傳值。"""
 import json, os, re, subprocess, sys
-
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-def load_js(file, var):
-    code = "global.window={};require(process.argv[1]);console.log(JSON.stringify(window." + var + "||null))"
-    return json.loads(subprocess.run(["node", "-e", code, os.path.join(ROOT, file)], capture_output=True, text=True, check=True).stdout)
-
-trip = load_js("data/trip.js", "TRIP")
-PLAN = json.load(open(os.path.join(ROOT, "data/plan.json"), encoding="utf-8"))
-LEGS = json.load(open(os.path.join(ROOT, "data/legs.json"), encoding="utf-8"))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+from plan_lib import TRIP as trip, PLAN, LEGS, load_js, mins, hm, leg_of, schedule, fill, hardcoded_times, TokenError
 scenes = load_js("data/scenes.js", "SCENES")
-
-def mins(t): h, m = t.split(":"); return int(h) * 60 + int(m)
-def hm(x): return f"{x // 60:02d}:{x % 60:02d}"
-def leg_of(a, b, via):
-    k = f"{a}|{b}" + ("|walk" if via == "walk" else "|shuttle" if via == "shuttle" else "")
-    return LEGS.get(k)
-def schedule(date, mode):
-    """跟 assets/plan.js 同一套算法：前一站離開＋移動＝抵達；at 早到就等、晚到算遲；by 超過算遲。"""
-    out, t = [], None
-    stops = PLAN["days"][date]["stops"]
-    for i, s in enumerate(stops):
-        via = s.get("via", "drive")
-        if i == 0: arr = mins(s["at"]) if s.get("at") else 480
-        else:
-            L = leg_of(stops[i - 1]["id"], s["id"], via)
-            arr = t + (L[mode] if L else 0)
-        wait = late = 0
-        if i > 0 and s.get("at"):
-            a = mins(s["at"])
-            if arr < a: wait, arr = a - arr, a
-            elif arr > a: late = arr - a
-        if s.get("by") and arr > mins(s["by"]): late = max(late, arr - mins(s["by"]))
-        stay = 0 if i == len(stops) - 1 else int(s.get("stay") or 0)
-        out.append(dict(id=s["id"], arr=arr, dep=arr + stay, late=late, wait=wait))
-        t = arr + stay
-    return out
 # 相容舊的變數名：dayplan[date]["stops"] 需要 id/time/name
 dayplan = {d: {"stops": [dict(id=s["id"], time=hm(x["arr"]), name=PLAN["places"].get(s["id"], {}).get("name", s["id"])) for s, x in zip(v["stops"], schedule(d, "normal"))]} for d, v in PLAN["days"].items()}
 place_of = load_js("data/scenes.js", "PLACE_OF_STOP")
@@ -61,6 +29,69 @@ for d, v in PLAN["days"].items():
         for x in schedule(d, mode):
             if x["late"]: W(f"{d}：{'下雪' if mode=='snow' else '一般'}路況下「{PLAN['places'].get(x['id'],{}).get('name',x['id'])}」會晚 {x['late']} 分（{hm(x['arr'])} 到）")
 
+
+# 0b. 事實只能有一個來源 ——
+#   (a) trip.js 每天不能再有 plan／legs 陣列（時間表只在 plan.json）
+#   (b) 標題、副標、提醒、餐點、序幕文字、站點備註裡不能寫死 HH:MM，要用 {t:站點}／{dep:站點}／{open:站點}／{sun:set}／{T:欄位} 標記
+#   (c) 站點備註、序幕不能寫價格（¥／NT$），價格只住在 spots.js／food.js／trip.js 的 places／resorts
+#   (d) 標記一定要換得出來
+#   (e) 金額不能寫「¥5–6 千」這種換算不了的格式；內容不能出現內部用語「Claude」
+MONEY_BAD = re.compile(r"¥\s?[\d,.]+(?:\s*[–-]\s*¥?[\d,.]+)?\s*千")
+def text_fields():
+    for d in trip["days"]:
+        for k in ("title", "sub", "alert"):
+            if d.get(k): yield f"trip.js {d['date']} {k}", d[k], d["date"], None, True
+        for i, m in enumerate(d.get("meals") or []): yield f"trip.js {d['date']} meals[{i}]", m, d["date"], None, True
+    for d, sc in scenes.items():
+        if (sc.get("poster") or {}).get("line"): yield f"scenes.js {d} poster.line", sc["poster"]["line"], d, None, True
+        for i, s in enumerate(sc.get("scenes") or [], 1):
+            for k in ("h", "s", "t", "eyebrow"):
+                if isinstance(s.get(k), str): yield f"scenes.js {d} 第 {i} 幕 {k}", s[k], d, s.get("stop"), True
+    for d, v in PLAN["days"].items():
+        for i, s in enumerate(v["stops"], 1):
+            if s.get("note"): yield f"plan.json {d} 第 {i} 站 {s['id']} note", s["note"], d, s["id"], True
+for d in trip["days"]:
+    for k in ("plan", "legs"):
+        if k in d: E(f"trip.js {d['date']}：還有 {k} 陣列——時間表只能在 plan.json，請刪掉")
+for where, text, d, ctx, _ in text_fields():
+    hc = hardcoded_times(text)
+    if hc: E(f"{where}：寫死的時間 {hc}，改用標記（{{t:站點}}／{{open:站點}}／{{sun:set}}／{{T:欄位}}）→「{text[:60]}」")
+    if (where.startswith("plan.json") or where.startswith("scenes.js")) and re.search(r"¥|NT\$", text): E(f"{where}：不要在這裡寫價格，價格只放地點卡（spots／food／places／resorts）→「{text[:60]}」")
+    try: fill(text, d, ctx, strict=True)
+    except TokenError as ex: E(f"{where}：{ex}")
+    if "Claude" in text: E(f"{where}：內容出現「Claude」")
+def walk(o, path):
+    if isinstance(o, str):
+        if MONEY_BAD.search(o): E(f"{path}：金額「{MONEY_BAD.search(o).group(0)}」換算不了，寫成 ¥5,000–6,000")
+        if "Claude" in o and not path.endswith("note") and "comment" not in path: E(f"{path}：內容出現「Claude」，同行的人會看到")
+    elif isinstance(o, dict):
+        for k, v in o.items(): walk(v, f"{path}.{k}")
+    elif isinstance(o, list):
+        for i, v in enumerate(o): walk(v, f"{path}[{i}]")
+walk(trip, "trip.js"); walk(scenes, "scenes.js"); walk(PLAN, "plan.json")
+walk(load_js("data/food.js", "FOOD") or [], "food.js FOOD"); walk(load_js("data/food.js", "FOOD_PICKS") or [], "food.js FOOD_PICKS"); walk(load_js("data/spots.js", "SPOTS") or [], "spots.js")
+for f in ("assets/app.js", "assets/foodmap.js", "assets/spotmap.js", "assets/skimap.js", "assets/film.js", "assets/editor.js", "index.html", "food/index.html", "spots/index.html", "ski/index.html", "plan/index.html", "tools/day.template.html"):
+    if not os.path.exists(os.path.join(ROOT, f)): continue
+    for ln, line in enumerate(open(os.path.join(ROOT, f), encoding="utf-8"), 1):
+        if "Claude" in line and ("'" in line or '"' in line) and "Co-Authored" not in line and not line.strip().startswith(("/*", "*", "//")): E(f"{f}:{ln}：畫面文字出現「Claude」")
+
+# 0c. 開門／關門：抵達早於開門會乾等、離開晚於關門是來不及；長時間停留又沒有 at／by／open 的站點提醒一下
+resort_pts = [(r["lat"], r["lon"]) for r in trip.get("resorts", [])] + [(b["lat"], b["lon"]) for b in trip.get("bases", [])]
+def is_resort_or_base(pid):
+    pl = PLAN["places"].get(pid, {})
+    return "滑雪場" in pl.get("name", "") or any(abs(pl.get("lat", 0) - la) < 0.01 and abs(pl.get("lon", 0) - lo) < 0.01 for la, lo in resort_pts)
+for d, v in PLAN["days"].items():
+    for mode in ("normal", "snow"):
+        for s, x in zip(v["stops"], schedule(d, mode)):
+            pl = PLAN["places"].get(s["id"], {}); nm = pl.get("name", s["id"]); lab = "下雪" if mode == "snow" else "一般"
+            if pl.get("open") and not s.get("at") and not is_resort_or_base(s["id"]) and x["arr"] + 5 < mins(pl["open"]):
+                W(f"{d}：{lab}路況 {hm(x['arr'])} 到「{nm}」，但 {pl['open']} 才開，要等 {mins(pl['open']) - x['arr']} 分（給這站加 at 或調前面的停留）")
+            if pl.get("close") and x["stay"] and x["dep"] > mins(pl["close"]):
+                W(f"{d}：{lab}路況在「{nm}」待到 {hm(x['dep'])}，但 {pl['close']} 關門")
+    for i, s in enumerate(v["stops"], 1):
+        if int(s.get("stay") or 0) >= 180 and not (s.get("at") or s.get("by")) and not is_resort_or_base(s["id"]) and not PLAN["places"].get(s["id"], {}).get("open"):
+            W(f"{d}：第 {i} 站「{PLAN['places'].get(s['id'], {}).get('name', s['id'])}」停 {s['stay']} 分又沒有固定時間——是不是把別的事塞在同一站？拆成兩站比較清楚")
+
 # 1. 三份資料的日期要一致
 for d in days:
     if d not in dayplan: E(f"{d}：trip.js 有這天，plan.json 沒有站點")
@@ -78,7 +109,7 @@ for d in days:
     html = open(f, encoding="utf-8").read()
     t = next(x for x in trip["days"] if x["date"] == d)
     if f'window.DAY = "{d}"' not in html: E(f"{d}：day/{mmdd}/index.html 的日期不對")
-    if t["title"] not in html: W(f"{d}：day/{mmdd}/index.html 的標題跟 trip.js 不同（重跑 build_days.py）")
+    if fill(t["title"], d) not in html: W(f"{d}：day/{mmdd}/index.html 的標題跟 trip.js 不同（重跑 build_days.py）")
 for mmdd in (os.listdir(os.path.join(ROOT, "day")) if os.path.isdir(os.path.join(ROOT, "day")) else []):
     if f"2027-{mmdd[:2]}-{mmdd[2:]}" not in days: E(f"day/{mmdd}/ 多出來了，行程裡沒有這天")
 

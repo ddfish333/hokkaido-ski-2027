@@ -12,15 +12,29 @@
   var dayIdx = T.days.indexOf(day);
   var def = S[date] || {};
   var plan = (window.Plan && Plan.plan) ? Plan.schedule(date, Plan.mode()) : { stops: [] };
-  function stopOf(id) { return plan.stops.filter(function (x) { return x.id === id; })[0]; }
+  /* 同一站一天來兩次（例如早上出發、晚上回住宿）：照序幕順序往後找，不會兩幕都拿到早上的時間 */
+  var cursor = 0;
+  function stopOf(id, advance) {
+    var hit = plan.stops.filter(function (x, i) { return x.id === id && i >= cursor; })[0] || plan.stops.filter(function (x) { return x.id === id; })[0];
+    if (hit && advance) cursor = hit.i;
+    return hit;
+  }
   var scenes = def.scenes;
   if (scenes) {
     scenes = scenes.filter(function (sc) {
       if (!sc.stop) return true;
-      var st = stopOf(sc.stop);
+      var st = stopOf(sc.stop, true);
       if (!st) { if (window.console) console.warn("序幕略過：" + date + " 已經沒有站點 " + sc.stop); return false; }
       if (!sc.t) sc.t = st.time + " · " + (sc.label || st.name);
       return true;
+    });
+    /* 文字裡的 {t}／{t:站點}／{sun:set} 標記：由 plan.json 推算帶入 */
+    cursor = 0;
+    if (window.Plan && Plan.fill) scenes = scenes.map(function (sc) {
+      var o = {}; for (var k in sc) o[k] = sc[k];
+      var ctx = sc.stop ? stopOf(sc.stop, true) : null;
+      ["h", "s", "t", "eyebrow"].forEach(function (k) { if (typeof o[k] === "string") o[k] = Plan.fill(o[k], date, ctx); });
+      return o;
     });
   }
   if (!scenes) {
@@ -29,6 +43,7 @@
       { type: "title", eyebrow: "DAY " + (dayIdx < 9 ? "0" : "") + (dayIdx + 1) + " · HOKKAIDO", h: day.title, s: p.line || day.sub, amb: "snow", dur: 6500 },
       { type: "end", t: day.date.slice(5).replace("-", "/") + " · " + day.sub, h: p.line || day.sub, img: p.img, amb: "quiet", kb: "in", dur: 9000 }
     ];
+    if (window.Plan && Plan.fill) scenes.forEach(function (sc) { ["h", "s", "t"].forEach(function (k) { if (typeof sc[k] === "string") sc[k] = Plan.fill(sc[k], date, null); }); });
   }
 
   /* ---------- DOM ---------- */

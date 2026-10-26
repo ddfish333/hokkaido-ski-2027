@@ -129,7 +129,7 @@
   function initMap() {
     if (!window.maplibregl) { $("#fmfallback").hidden = false; return; }
     try {
-      map = new maplibregl.Map({ container: "fmcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.5, 43.2], zoom: 7.3, cooperativeGestures: true, attributionControl: { compact: true } });
+      map = new maplibregl.Map({ container: "fmcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.5, 43.2], zoom: 7.3, cooperativeGestures: true, locale: { "CooperativeGesturesHandler.WindowsHelpText": "按住 Ctrl 再捲動可縮放地圖", "CooperativeGesturesHandler.MacHelpText": "按住 ⌘ 再捲動可縮放地圖", "CooperativeGesturesHandler.MobileHelpText": "用兩指移動地圖", "NavigationControl.ZoomIn": "放大", "NavigationControl.ZoomOut": "縮小", "AttributionControl.ToggleAttribution": "資料來源" }, attributionControl: { compact: true } });
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "280px", className: "fm-pop" });
@@ -199,7 +199,7 @@
     if (!c.d) return "";
     var picks = (window.FOOD_PICKS || []).filter(function (p) { return p.date === c.d.date; }).sort(function (a, b) { return PICK_ORDER.indexOf(a.slot) - PICK_ORDER.indexOf(b.slot); });
     if (!picks.length) return "";
-    return '<li class="picks"><p class="picks-h">' + md(c.d.date) + ' 這天怎麼吃 <small>藍色是 Claude 的建議、金色是已決定；點店名跳到卡片。</small></p><ul class="picklist">' + picks.map(function (p) {
+    return '<li class="picks"><p class="picks-h">' + md(c.d.date) + ' 這天怎麼吃 <small>藍色是建議、金色是已決定；點店名跳到卡片。</small></p><ul class="picklist">' + picks.map(function (p) {
       var f = byId(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
       var bk = (p.backup || []).map(function (id) { var g = byId(id); return g ? '<button type="button" class="lnk" data-go="' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</button>' : ""; }).filter(Boolean).join("、");
       return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><button type="button" class="pick-name lnk" data-go="' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</button><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +

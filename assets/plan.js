@@ -44,6 +44,31 @@
   /* 舊介面相容：給地圖用的 stops（含 time）與 legs（normal／snow） */
   function dayPlan(date, mode) { return schedule(date, mode); }
 
+  /* 文字裡的時間標記 → 由 plan.json 推算帶入，文字裡不再寫死時間（tools/check.py 會擋寫死的 HH:MM）
+       {t:villa}  抵達    {dep:kiroro}  離開    {t:villa#2}  當天第 2 次到同一站    {t:favlux@01-19}  別天
+       {t}        這一幕／這一站自己的抵達時間（ctx）
+       {open:zoo} {close:zoo}  plan.json places 的開門／關門    {at:beer} {by:rental}  站點的固定時間
+       {sun:rise|set|dark}  trip.js 當天的日出／日落／天黑    {T:rental.hours}  trip.js 任一欄位 */
+  var TOKEN = /\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}/g;
+  var schedCache = {};
+  function fill(text, date, ctx) {
+    if (!text || String(text).indexOf("{") < 0) return text;
+    return String(text).replace(TOKEN, function (m, kind, id, nth, md, sun, tpath) {
+      var T = window.TRIP || {};
+      if (sun) { var d = (T.days || []).filter(function (x) { return x.date === date; })[0]; return d && d.sun ? d.sun[{ rise: 0, set: 1, dark: 2 }[sun]] : m; }
+      if (tpath) { var v = T; tpath.split(".").forEach(function (k) { v = v == null ? v : v[k]; }); return v == null ? m : String(v); }
+      var dd = md ? date.slice(0, 5) + md : date;
+      if (kind === "open" || kind === "close") { var pl = P.plan && P.plan.places[id]; return pl && pl[kind] ? pl[kind] : m; }
+      if (kind === "at" || kind === "by") { var day = P.plan && P.plan.days[dd], sts = day ? day.stops.filter(function (s) { return s.id === id; }) : [], st = nth ? sts[(+nth) - 1] : sts.filter(function (s) { return s[kind]; })[0]; return st && st[kind] ? st[kind] : m; }
+      var key = dd + "|" + P.mode(), sch = schedCache[key] || (schedCache[key] = schedule(dd, P.mode()));
+      var hits = sch.stops.filter(function (s) { return s.id === (id || (ctx && ctx.id)); });
+      var s = (!id && ctx && ctx.i != null && sch.stops[ctx.i] && sch.stops[ctx.i].id === ctx.id) ? sch.stops[ctx.i] : hits[nth ? (+nth) - 1 : 0];
+      if (!s) return m;
+      return kind === "dep" ? s.timeDep : s.time;
+    });
+  }
+  P.fill = fill; P.clearCache = function () { schedCache = {}; };
+
   function fetchJSON(u) { return fetch(u, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }); }
   P.ready = Promise.all([fetchJSON(BASE + "data/plan.json"), fetchJSON(BASE + "data/legs.json")]).then(function (r) { P.plan = r[0]; P.legs = r[1]; return P; });
   P.schedule = schedule; P.dayPlan = dayPlan; P.hm = hm; P.mins = mins; P.legKey = legKey; P.leg = leg; P.estLeg = estLeg; P.r5 = r5; P.hav = hav;
