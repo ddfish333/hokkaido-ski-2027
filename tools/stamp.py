@@ -11,7 +11,7 @@ def stamp(file):
     def rep(m): return m.group(1) + m.group(2) + "?v=" + h(m.group(2).replace("../", "")) + m.group(3)
     t = PAT.sub(rep, s)
     if t != s: open(file, "w", encoding="utf-8").write(t)
-for f in ["index.html", "plan/index.html", "food/index.html", "spots/index.html", "tools/day.template.html"]:
+for f in ["index.html", "plan/index.html", "food/index.html", "spots/index.html", "ski/index.html", "tools/day.template.html"]:
     stamp(os.path.join(ROOT, f))
 # plan.js 裡 fetch 的 json 也帶版本
 pj = os.path.join(ROOT, "assets", "plan.js"); s = open(pj, encoding="utf-8").read()

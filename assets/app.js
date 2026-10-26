@@ -626,67 +626,15 @@
     }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
   });
 
-  /* ---------- 雪場 ---------- */
-  function seasonPill(r) {
-    if (!r.season) return '<span class="pill">' + esc(r.seasonNote) + '</span>';
-    if (TODAY < r.season[0]) return '<span class="pill soon">' + (r.openLabel ? esc(r.openLabel) : '預定 ' + md(r.season[0]) + ' 開季') + '</span>';
-    if (TODAY <= r.season[1]) return '<span class="pill open">雪季營業中</span>';
-    return '<span class="pill">本季已結束</span>';
-  }
-  function resortWx(r) {
-    var base = state.wx["r_" + r.id], top = state.wx["t_" + r.id];
-    function cell(lbl, w) {
-      if (!w || !w.daily) return "";
-      var k = 0, m = wmo(w.daily.weather_code[k]);
-      return '<div><span>' + lbl + '・今天</span><b>' + Math.round(w.daily.temperature_2m_max[k]) + '° / ' + Math.round(w.daily.temperature_2m_min[k]) + '°</b><span>' + m[0] + '・新雪 ' + (w.daily.snowfall_sum[k] || 0).toFixed(1) + ' cm</span></div>';
-    }
-    var h = cell("山腳" + (r.base ? " " + r.base + " m" : ""), base) + (r.summit ? cell("山頂 " + r.summit + " m", top) : "");
-    return h ? '<div class="r-wx">' + h + '</div>' : "";
-  }
-  var RESORT_GROUPS = [
-    ["main", "正式行程的三座", "Onze 走路到、Kiroro 一天、富良野四天。"],
-    ["sapporo", "札幌近郊・不在行程裡", "想滑的話，1/16–1/18 看雪況和大人怎麼分組再挑一天。標 2025-26 的是上一季票價，出發前再查。"],
-    ["otaru", "小樽近郊備案", "回程順路泡湯的小雪場。"]
-  ];
-  function resortCard(r) {
-    var minor = r.group !== "main" && r.group !== "sapporo" || r.id === "fus" || r.id === "asari";
-    var d = T.drive, est = r.est ? '<small class="est">（估算）</small>' : "";
-    var dist = "山鄉 " + fmtMin(d.villa[r.id][1]) + "｜富良野 " + fmtMin(d.furano[r.id][1]) + "｜札幌 " + fmtMin(d.sapporo[r.id][1]) + est;
-    function tixRows(list) { return list.map(function (t) { return '<tr><td>' + esc(t[0]) + '</td><td>' + money(esc(t[1])).replace("（", "<br><small>").replace("）", "</small>") + (t[2] ? '<br><small class="alt">' + money(esc(t[2])) + '</small>' : "") + '</td></tr>'; }).join(""); }
-    var mainTix = r.tickets.slice(0, 4), moreTix = r.tickets.slice(4);
-    var gates = r.gates && r.gates.length ? '<div class="gates"><p class="g-k">入口・停車（兩邊不相通）</p><ul>' + r.gates.map(function (g) {
-      var url = g.pid ? 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(g.ja || g.name) + '&destination_place_id=' + g.pid : navUrl(g.lat, g.lon);
-      return '<li><div><b>' + esc(g.name) + '</b>' + (g.sub ? '<span class="g-sub">' + esc(g.sub) + '</span>' : "") + (g.note ? '<span class="g-note">' + em(g.note) + (g.approx ? "（位置概略）" : "") + '</span>' : "") + '</div><a href="' + url + '" target="_blank" rel="noopener">導航 ↗</a></li>';
-    }).join("") + '</ul></div>' : "";
-    /* 其他票種、雪具、課程、提醒收在「更多」裡，卡片才不會一長條 */
-    var more = (moreTix.length ? '<table class="tix"><tbody>' + tixRows(moreTix) + '</tbody></table>' : "") +
-      '<dl class="r-dl">' + (r.gear && r.gear !== "—" ? '<div><dt>雪具</dt><dd>' + em(r.gear) + '</dd></div>' : "") + (r.lessons && r.lessons !== "—" ? '<div><dt>課程</dt><dd>' + em(r.lessons) + '</dd></div>' : "") + '</dl>' +
-      (r.tips.length ? '<ul class="bullets">' + r.tips.map(function (t) { return '<li>' + em(t) + '</li>'; }).join("") + '</ul>' : "");
-    var moreN = moreTix.length + (r.tips || []).length;
-    return '<article class="card resort' + (minor ? " minor" : "") + '" id="resort-' + r.id + '">' +
-      '<div class="r-top"><div><h3 class="r-name">' + esc(r.name) + '</h3><p class="r-ja">' + esc(r.ja) + '・' + esc(r.tier) + '</p></div>' + seasonPill(r) + '</div>' +
-      (r.rec ? '<p class="r-rec">' + esc(r.rec) + '</p>' : "") +
-      '<p class="r-meta">' + esc(r.scale) + '<br>' + esc(r.hours) + '<br><span class="num">' + dist + '</span></p>' +
-      '<div data-rwx="' + r.id + '">' + resortWx(r) + '</div>' +
-      (r.tixSeason ? '<p class="tix-season">票價：' + esc(r.tixSeason) + '</p>' : "") +
-      '<table class="tix"><tbody>' + tixRows(mainTix) + '</tbody></table>' +
-      '<dl class="r-dl"><div><dt>小孩</dt><dd>' + em(r.kids) + '</dd></div></dl>' +
-      gates +
-      (moreN ? '<details class="r-more"><summary>更多<small>' + (moreTix.length ? '其他票種 ' + moreTix.length + ' · ' : "") + '雪具・提醒 ' + (r.tips || []).length + '</small></summary><div class="r-more-in">' + more + '</div></details>' : "") +
-      '<div class="ch-links">' + r.links.map(function (l) { return linkPill(l[0], l[1]); }).join("") +
-      (r.gates && r.gates.length ? "" : linkPill("導航", navUrl(r.lat, r.lon))) + '</div>' +
-      '</article>';
-  }
-  function renderResorts() {
-    if (!has("resorts")) return;
-    $("#resorts").innerHTML = RESORT_GROUPS.map(function (g) {
-      var list = T.resorts.filter(function (r) { return (r.group || "main") === g[0]; });
-      if (!list.length) return "";
-      return '<div class="r-group" id="ski-' + g[0] + '"><div class="r-group-h"><h3 class="h3">' + esc(g[1]) + '</h3><p>' + esc(g[2]) + '</p></div><div class="resorts-grid">' + list.map(resortCard).join("") + '</div></div>';
-    }).join("");
-  }
-  function refreshResortWx() {
-    T.resorts.forEach(function (r) { var box = document.querySelector('[data-rwx="' + r.id + '"]'); if (box) box.innerHTML = resortWx(r); });
+  /* ---------- 雪場：卡片搬到 ski/（滑雪地圖），首頁只留一塊縮圖 ---------- */
+  var SKI_GROUP_COLOR = { main: "#E8B36A", sapporo: "#6AA4FF", otaru: "#8E98A6" };
+  function renderSkiStats() {
+    if (!has("skistats")) return;
+    var n = { main: 0, sapporo: 0, otaru: 0 }; T.resorts.forEach(function (r) { n[r.group || "main"]++; });
+    var open = T.resorts.filter(function (r) { return r.season && TODAY >= r.season[0] && TODAY <= r.season[1]; }).length;
+    var next = T.resorts.filter(function (r) { return r.season && TODAY < r.season[0]; }).sort(function (a, b) { return a.season[0] < b.season[0] ? -1 : 1; })[0];
+    $("#skistats").innerHTML = '<span class="fs-total"><b>' + T.resorts.length + '</b> 座雪場 · 正式行程 ' + n.main + ' · 札幌近郊 ' + n.sapporo + ' · 備案 ' + n.otaru + (open ? ' · 營業中 ' + open : next ? ' · 最早 ' + md(next.season[0]) + ' 開季（' + esc(next.name.replace(/（.*?）/g, "")) + '）' : "") + '</span>' +
+      '<span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.main + '"><i></i>Kiroro 1/8–1/10</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.main + '"><i></i>富良野 1/12–1/14</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.sapporo + '"><i></i>Teine 想滑再去</span>';
   }
 
   /* ---------- 天氣 ---------- */
@@ -713,7 +661,7 @@
       return u;
     }
     function take(list, j) { (Array.isArray(j) ? j : [j]).forEach(function (o, k) { if (list[k]) state.wx[list[k][0]] = o; }); }
-    function done() { renderWxStrip(); renderDay(); refreshResortWx(); refreshPosterWx(); }
+    function done() { renderWxStrip(); renderDay(); refreshPosterWx(); }
     function get(list, elev, retry) {
       return fetch(url(list, elev)).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (j) { take(list, j); done(); })
@@ -841,7 +789,7 @@
     var wd = new Date(d.date + "T00:00:00").getDay();
     var todayIds = (window.Plan && Plan.plan ? Plan.schedule(d.date, state.mode).stops : []).map(function (s) { return s.id; });
     var areas = SPOT_AREAS[d.base] || [];
-    /* 停車場有自己的「車停哪裡」卡；雪場在首頁「雪場」比較，不混進景點清單 */
+    /* 停車場有自己的「車停哪裡」卡；雪場在「滑雪地圖」比較，不混進景點清單 */
     var list = SPOTS.filter(function (s) { return s.status !== "plan" && areas.indexOf(s.area) >= 0 && s.kind !== "停車" && s.kind !== "雪場"; }).map(function (s) {
       var near = Math.min.apply(null, [haversine(b, s)].concat(todayIds.map(function (id) { var p = Plan.plan.places[id]; return p ? haversine(p, s) : 99; })));
       return { s: s, near: near };
@@ -849,7 +797,7 @@
     if (!list.length) return "";
     var skiNear = d.base === "sapporo" ? T.resorts.filter(function (r) { return r.group === "sapporo"; }) : [];
     var html = '<div class="sec-head"><h2>附近還可以去</h2><p class="sec-note">還沒排進今天、但離今天路線 30 公里內的收藏景點：天氣不好、小孩狀況不對、或提早結束時的備案。點「加入行程」會帶進編輯器。</p></div>';
-    if (skiNear.length) html += '<p class="ski-hint">大人想滑雪？札幌近郊 ' + skiNear.length + ' 座雪場（' + skiNear.map(function (r) { return esc(r.name.replace(/（.*?）|滑雪場|雪場/g, "")) + ' ' + fmtMin(T.drive.sapporo[r.id][1]); }).join("、") + '）的票價、入口和建議在 <a href="' + BASE + '#ski-sapporo">首頁「雪場」→</a></p>';
+    if (skiNear.length) html += '<p class="ski-hint">大人想滑雪？札幌近郊 ' + skiNear.length + ' 座雪場（' + skiNear.map(function (r) { return esc(r.name.replace(/（.*?）|滑雪場|雪場/g, "")) + ' ' + fmtMin(T.drive.sapporo[r.id][1]); }).join("、") + '）的票價、入口、天氣和建議在 <a href="' + BASE + 'ski/?day=' + d.date + '#g-sapporo">滑雪地圖 →</a></p>';
     var body = '<a class="btn btn-ghost fm-link" href="' + BASE + 'spots/?day=' + d.date + '">在景點地圖上看 →</a><ul class="foodpick">';
     list.forEach(function (x) {
       var s = x.s, st = SPOT_STATUS[s.status] || SPOT_STATUS.saved, closed = s.closed && s.closed.indexOf(wd) >= 0, g = s.g;
@@ -875,14 +823,14 @@
   }
 
   /* 首頁：美食地圖縮圖（不可操作，點整塊進入 food/） */
-  function initFoodTile() { initTile("foodtilemap", FOOD); initTile("spottilemap", SPOTS); }
+  function initFoodTile() { initTile("foodtilemap", FOOD); initTile("spottilemap", SPOTS); initTile("skitilemap", T.resorts.map(function (r) { return { lat: r.lat, lon: r.lon, color: SKI_GROUP_COLOR[r.group || "main"] }; })); }
   function initTile(cid, pts) {
     if (!has(cid) || !window.maplibregl || !pts.length) return;
     var col = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
     var m;
     try { m = new maplibregl.Map({ container: cid, style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 6.6, interactive: false, attributionControl: false }); } catch (e) { return; }
     m.on("load", function () {
-      var feats = pts.map(function (f) { return { type: "Feature", properties: { c: col[f.area] || "#fff" }, geometry: { type: "Point", coordinates: [f.lon, f.lat] } }; });
+      var feats = pts.map(function (f) { return { type: "Feature", properties: { c: f.color || col[f.area] || "#fff" }, geometry: { type: "Point", coordinates: [f.lon, f.lat] } }; });
       m.addSource("ft", { type: "geojson", data: { type: "FeatureCollection", features: feats } });
       m.addLayer({ id: "ft-glow", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 9, "circle-opacity": 0.25, "circle-blur": 0.8 } });
       m.addLayer({ id: "ft-dot", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 4, "circle-stroke-width": 1.5, "circle-stroke-color": "#070B12" } });
@@ -918,8 +866,8 @@
     if (has("fxnote")) $("#fxnote").textContent = "匯率：1 日圓 ≈ NT$" + state.rate.toFixed(4) + "（" + state.rateDate + "）。台幣金額為概算，刷卡或換匯實際約再高 1.5–3%。";
   }
   function rerenderMoney() {
-    renderFx(); renderDay(); renderResorts(); renderFood(); renderPrep(); renderChapters(); renderStops();
-    /* 從單日頁連到 #ski-sapporo 之類的錨點：內容是 JS 畫出來的，畫完再捲一次才會對位 */
+    renderFx(); renderDay(); renderFood(); renderPrep(); renderChapters(); renderStops();
+    /* 從別頁連到 #weather 之類的錨點：內容是 JS 畫出來的，畫完再捲一次才會對位 */
     if (PAGE === "home" && location.hash && location.hash.length > 1) { try { var tgt = document.querySelector(location.hash); if (tgt) setTimeout(function () { tgt.scrollIntoView({ block: "start" }); }, 400); } catch (e) { } }
   }
   if (has("curbtn")) $("#curbtn").addEventListener("click", function () {
@@ -977,7 +925,7 @@
   renderDay();
   renderOrigin();
   renderDrive();
-  renderResorts();
+  renderSkiStats();
   renderWxTabs();
   renderWxStrip();
   renderClimate();

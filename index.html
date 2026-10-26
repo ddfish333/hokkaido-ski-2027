@@ -24,8 +24,9 @@
     <nav class="nav" aria-label="主要區塊">
       <a href="#days">13 天</a>
       <a href="#chapters">三章</a>
-      <a href="#ski">雪場</a>
+      <a href="#ski">地圖</a>
       <a href="#weather">天氣</a>
+      <a href="ski/">滑雪地圖</a>
       <a href="food/">美食地圖</a>
       <a href="spots/">景點</a>
       <a href="#prep">準備</a>
@@ -75,8 +76,8 @@
   <section class="band band-alt" id="ski" aria-labelledby="ski-h">
     <div class="wrap">
       <div class="sec-head">
-        <h2 id="ski-h">雪場與車程</h2>
-        <p class="sec-note">選出發點或用目前位置，看各雪場車程。小孩：Kiroro 5 歲以下、富良野小學生以下纜車免費。</p>
+        <h2 id="ski-h">地圖與車程</h2>
+        <p class="sec-note">選出發點或用目前位置，看雪場、景點、餐廳的車程；開圖層看附近有什麼。</p>
       </div>
     </div>
     <div class="wrap maptools" id="map">
@@ -99,7 +100,15 @@
       </aside>
     </div>
     <div class="wrap">
-      <div class="resorts" id="resorts"></div>
+      <a class="fm-tile fm-tile-ski" href="ski/" id="skitile">
+        <div class="fm-tile-map" id="skitilemap" aria-hidden="true"></div>
+        <div class="fm-tile-in">
+          <p class="eyebrow">SKI MAP</p>
+          <h3>滑雪地圖 →</h3>
+          <p class="fm-tile-sub">滑雪那天打開：那天滑哪裡、幾點要到、從住宿開多久、山腳山頂的天氣與逐時新雪陣風、纜車有沒有開、票怎麼買、車停哪個入口。九座雪場的影片、票價和小孩資訊都在。</p>
+          <div class="fm-tile-stats" id="skistats"></div>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -183,11 +192,11 @@
 </footer>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-<script src="data/trip.js?v=5a37881c"></script>
+<script src="data/trip.js?v=b4c48edb"></script>
 <script src="data/scenes.js?v=a3ae0c5f"></script>
-<script src="data/spots.js?v=de95274c"></script>
+<script src="data/spots.js?v=40f9bc94"></script>
 <script src="data/food.js?v=7b372dee"></script>
 <script src="assets/plan.js?v=5437128b"></script>
-<script src="assets/app.js?v=fe66c89e"></script>
+<script src="assets/app.js?v=04196df8"></script>
 </body>
 </html>

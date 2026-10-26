@@ -1,0 +1,146 @@
+/* 滑雪地圖頁（ski/）：版型沿用 foodmap.css 的左地圖右清單；這裡只放雪場專用的卡片、天氣條、地圖點。 */
+.skipage .fm { grid-template-columns: minmax(0, 1fr) 520px; }
+@media (max-width: 900px) { .skipage .fm { grid-template-columns: minmax(0, 1fr); } .skipage .fm-map { height: 40vh; } }
+.sk .lnk { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+.sk .lnk:hover { text-decoration: underline; text-underline-offset: 3px; }
+.sk .muted { color: var(--muted); }
+.sk .fm-tools { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+.sk .seg { flex-wrap: nowrap; }
+.sk .seg button { padding: 9px 12px; white-space: nowrap; }
+@media (max-width: 480px) { .sk .fm-tools { grid-template-columns: minmax(0, 1fr); } }
+.sk .resorts { gap: 36px; margin-top: 8px; }
+.sk-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.sk .card { padding: 18px; }
+.sk .r-group { scroll-margin-top: 84px; }
+.sk .fm-count { margin-top: 26px; }
+.sk .eyebrow { margin: 0 0 6px; }
+
+/* 今天滑哪裡 */
+.sk-hero { margin-top: 16px; border-color: rgba(232,179,106,.45); background: linear-gradient(180deg, rgba(232,179,106,.07), rgba(232,179,106,.015)); display: grid; gap: 10px; scroll-margin-top: 84px; }
+.sk-hero.none { border-color: var(--line); background: var(--paper); }
+.sk-hero h2 { margin: 0; font: 300 28px/1.2 var(--f-body); letter-spacing: .06em; }
+.sk-hero h2 small { display: block; font-size: 13px; color: var(--muted); letter-spacing: .08em; margin-top: 2px; }
+.sk-hero-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.sk-hero-meta .r-rec { margin: 0; }
+.sk-sub { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.sk-note { margin: 0; font-size: 13.5px; line-height: 1.7; color: var(--ink); padding: 10px 12px; border-radius: 10px; background: rgba(7,11,18,.4); border-left: 2px solid var(--gold); }
+.sk-note b { color: #FFE2B3; }
+.sk-planline { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 4px; }
+.sk-planline li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; font-size: 14px; align-items: baseline; }
+.sk-planline .tm { font: 400 13px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.sk-planline li.ski .tm, .sk-planline li.ski .nm { color: var(--gold); font-weight: 500; }
+.sk-planline .nm small { display: inline-block; margin-left: 8px; font-size: 12px; color: var(--muted); font-weight: 300; }
+.sk-planline .nm small.late { color: var(--accent); }
+.sk-drive { margin: 0; font-size: 14px; line-height: 1.7; }
+.sk-drive b { font-weight: 500; font-family: var(--f-display); font-size: 17px; }
+.sk-drive small { color: var(--muted); font-size: 12px; margin-left: 4px; }
+.sk-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sk-actions .btn { text-decoration: none; padding: 11px 14px; font-size: 14px; }
+.sk-actions a:not(.btn) { font-size: 12.5px; letter-spacing: .04em; color: var(--ink); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px; }
+.sk-actions a:not(.btn):hover { border-color: var(--ink); }
+.sk-k { margin: 6px 0 0; font: 400 11px/1.4 var(--f-display); letter-spacing: .25em; color: var(--muted); text-transform: uppercase; }
+.sk-k .sun { letter-spacing: .04em; text-transform: none; margin-left: 10px; color: var(--muted); font-family: var(--f-body); }
+.sk-wxhead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px; }
+.sk-wxtabs { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); }
+.sk-wxtabs button { border: 0; background: none; color: var(--muted); font: 400 12px var(--f-body); padding: 5px 10px; border-radius: 999px; cursor: pointer; }
+.sk-wxtabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.sk-wxgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.wxcell { background: var(--soft); border: 1px solid var(--line); border-radius: 12px; padding: 12px 12px 10px; display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 2px 8px; }
+.wxcell .l { grid-column: 1 / -1; font: 400 11px/1.3 var(--f-display); letter-spacing: .18em; color: var(--muted); text-transform: uppercase; }
+.wxcell svg { grid-column: 2; grid-row: 2 / span 2; width: 40px; height: 40px; color: var(--glacier); }
+.wxcell b { font: 400 24px/1.1 var(--f-display); }
+.wxcell b small { font-size: 14px; color: var(--muted); }
+.wxcell .c { font-size: 13px; }
+.wxcell .s, .wxcell .g { grid-column: 1 / -1; font: 400 12px/1.5 var(--f-mono); color: var(--glacier); }
+.wxcell .g { color: var(--muted); }
+.wxcell .g.warn, .sk-wxc .gu.warn, .sk-h .gu.warn, .sk-cardwx .warn { color: var(--warn); }
+.wxcell .g.bad, .sk-wxc .gu.bad, .sk-h .gu.bad, .sk-cardwx .bad { color: var(--accent); font-weight: 500; }
+.sk-wxmsg { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.7; }
+.sk-strip { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(64px, 1fr); gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.sk-wxc { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; display: grid; gap: 2px; justify-items: center; text-align: center; min-width: 0; }
+.sk-wxc.trip { border-color: rgba(255,90,76,.6); }
+.sk-wxc.sel { background: rgba(232,179,106,.12); border-color: var(--gold); }
+.sk-wxc .d { font: 400 12px/1 var(--f-display); }
+.sk-wxc .w { font-size: 10px; color: var(--muted); }
+.sk-wxc svg { width: 26px; height: 26px; color: var(--glacier); }
+.sk-wxc .hi { font: 400 14px/1 var(--f-display); }
+.sk-wxc .lo { font: 300 11px/1 var(--f-display); color: var(--muted); }
+.sk-wxc .sn { font: 400 11px/1.2 var(--f-mono); color: var(--glacier); }
+.sk-wxc .gu { font: 400 10px/1.2 var(--f-mono); color: var(--muted); }
+.sk-hours { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(52px, 1fr); gap: 4px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.sk-h { display: grid; gap: 2px; justify-items: center; text-align: center; padding: 6px 2px; border-radius: 8px; background: rgba(7,11,18,.35); border: 1px solid var(--line); }
+.sk-h .t { font: 400 11px/1 var(--f-display); color: var(--muted); }
+.sk-h svg { width: 22px; height: 22px; color: var(--glacier); }
+.sk-h .tp { font: 400 13px/1 var(--f-display); }
+.sk-h .sn { font: 400 10px/1.2 var(--f-mono); color: var(--glacier); }
+.sk-h .gu { font: 400 10px/1.2 var(--f-mono); color: var(--muted); }
+.sk-h .vis { font-size: 9px; color: var(--warn); }
+.sk-hours2 { margin: 0; }
+.sk-hero .sk-hours { margin: 0; font-size: 13.5px; line-height: 1.7; }
+.sk-tixline { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; }
+.sk-tixline b { font-weight: 500; font-family: var(--f-mono); }
+.sk-tixline small { display: block; color: var(--glacier); font-size: 12px; }
+.sk .twd { color: var(--muted); font-size: 11px; margin-left: 4px; font-family: var(--f-mono); }
+.sk-kids { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.7; }
+.sk-kids b { color: var(--ink); }
+.sk-nearlist { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+.sk-nearlist li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.sk-nearlist .num { font: 400 15px var(--f-display); }
+.sk-nearlist .num small { color: var(--muted); font-size: 11px; margin-left: 3px; }
+
+/* 出門前 5 分鐘 */
+.sk-check { margin-top: 12px; padding: 4px 18px; }
+.sk-check > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 12px 0; font-size: 15px; font-weight: 500; }
+@media (max-width: 480px) { .sk-check > summary small { flex-basis: calc(100% - 20px); } }
+.sk-check > summary::-webkit-details-marker { display: none; }
+.sk-check > summary small { font-weight: 300; font-size: 12px; color: var(--muted); }
+.sk-check > summary::after { content: ""; margin-left: auto; width: 7px; height: 7px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); transition: transform .25s; }
+.sk-check[open] > summary::after { transform: rotate(-135deg); }
+.sk-check ul { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 10px; }
+.sk-check li { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.sk-check li b { flex-basis: 100%; font-weight: 500; font-size: 12px; letter-spacing: .18em; color: var(--muted); }
+.sk-check li a { color: var(--glacier); text-decoration: none; font-size: 13px; }
+.sk-check li span { flex-basis: 100%; color: var(--ink); line-height: 1.7; }
+
+/* 雪場卡片 */
+.sk-card { display: grid; gap: 12px; border-left: 3px solid var(--gc); scroll-margin-top: 84px; transition: box-shadow .25s; }
+.sk-card.active { box-shadow: 0 0 0 2px var(--gc), 0 12px 30px rgba(0,0,0,.35); }
+.sk-card.today { border-left-color: var(--gold); }
+.sk-media { position: relative; aspect-ratio: 16 / 10; margin: -18px -18px 0 -18px; overflow: hidden; background: #0B111B; border-radius: 0 var(--r) 0 0; }
+.sk-media img, .sk-media .ch-vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.sk-media img { transition: transform 1.4s ease; }
+.sk-card:hover .sk-media img { transform: scale(1.03); }
+.sk-media .ch-vid { opacity: 0; transition: opacity .9s ease; pointer-events: none; }
+.sk-media.playing .ch-vid { opacity: 1; }
+.sk-media .ch-play { position: absolute; left: 14px; bottom: 14px; width: 32px; height: 32px; }
+.sk-media.playing .ch-play { opacity: 0; }
+.sk-media-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; align-items: flex-start; }
+.sk-media-top .pill { background: rgba(7,11,18,.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--ink); border-color: rgba(255,255,255,.14); white-space: normal; text-align: center; line-height: 1.3; max-width: 100%; }
+.sk-media-top .pill.open { color: var(--ok); } .sk-media-top .pill.soon { color: #A9C9FF; }
+.sk-media-top .pill.days { color: var(--gold); margin-left: auto; }
+.sk-card .r-name { font-size: 20px; }
+.sk-card .r-meta { font-size: 13px; }
+.sk-cardwx { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.sk-cardwx b { color: var(--ink); font-weight: 500; font-family: var(--f-display); }
+.sk-links a { font-size: 12px; }
+.sk-wxmore .r-more-in { gap: 10px; }
+.sk-card .tix td:last-child { font-size: 13px; }
+.sk-card .tix small.alt { max-width: 150px; }
+
+/* 地圖上的雪場點 */
+.sk-pin { background: none; border: 0; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 4px; transform: translateY(6px); }
+.sk-pin-d { width: 14px; height: 14px; border-radius: 50%; background: var(--ac); border: 2px solid rgba(7,11,18,.9); box-shadow: 0 0 0 2px rgba(255,255,255,.25), 0 4px 10px rgba(0,0,0,.45); transition: transform .2s; }
+.sk-pin:hover .sk-pin-d, .sk-pin.active .sk-pin-d { transform: scale(1.4); }
+.sk-pin.active .sk-pin-d { box-shadow: 0 0 0 3px rgba(255,255,255,.6), 0 0 0 9px rgba(232,179,106,.25), 0 4px 12px rgba(0,0,0,.5); }
+.sk-pin-l { display: grid; justify-items: center; gap: 1px; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; color: var(--ink); background: rgba(7,11,18,.74); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 4px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid rgba(255,255,255,.1); pointer-events: none; }
+.sk-pin-l b { font-weight: 500; }
+.sk-pin.otaru .sk-pin-l { opacity: .8; }
+.sk-pin.active .sk-pin-l { border-color: var(--ac); }
+.sk-pin-wx { font: 400 10px/1.2 var(--f-mono); color: var(--glacier); }
+.sk-pin-wx:empty { display: none; }
+.sk-gate { display: none; justify-items: center; gap: 2px; pointer-events: none; }
+.sk-gate.show, .sk-gate.active { display: grid; }
+.sk-gate-i { width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: var(--ink); border: 1.5px solid var(--bg); box-shadow: 0 0 0 1.5px rgba(255,255,255,.3); }
+.sk-gate-l { font: 400 10px/1.2 var(--f-body); color: var(--ink); background: rgba(7,11,18,.7); padding: 2px 6px; border-radius: 999px; white-space: nowrap; border: 1px solid rgba(255,255,255,.08); }
+.sk-gate.active .sk-gate-l { color: var(--gold); border-color: rgba(232,179,106,.5); }
+.fm-legend i.route { width: 16px; height: 3px; border-radius: 2px; background: var(--gold); }
