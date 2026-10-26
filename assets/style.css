@@ -115,24 +115,32 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .poster.focus { box-shadow: 0 0 0 1.5px var(--accent); }
 
 /* 三章 */
-/* 三章：三張照片並排；日文標題用細明朝體，英文章節標用 Jost 拉開字距，中文內文維持黑體 */
-.chapters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
-@media (max-width: 900px) { .chapters { grid-template-columns: minmax(0, 1fr); gap: 28px; } }
-.chapter { display: grid; grid-template-rows: auto 1fr; background: var(--paper); }
-.ch-img { aspect-ratio: 4 / 3; overflow: hidden; background: var(--paper); }
-.ch-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.2s ease; }
+/* 三章：上下排，每章一張照片（有影片的滑鼠移上去／手機捲到就播）＋ 日文標題用細明朝體、英文章節標用 Jost 拉開字距、中文內文維持黑體 */
+.chapters { display: grid; gap: 40px; }
+.chapter { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); background: var(--paper); border-radius: 16px; overflow: hidden; }
+.chapter:nth-child(even) .ch-img { order: 2; }
+@media (max-width: 900px) { .chapter { grid-template-columns: minmax(0, 1fr); } .chapter:nth-child(even) .ch-img { order: 0; } .chapters { gap: 28px; } }
+.ch-img { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: #0B111B; }
+@media (max-width: 900px) { .ch-img { aspect-ratio: 16 / 10; } }
+.ch-img img, .ch-vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.ch-img img { transition: transform 1.4s ease; }
 .chapter:hover .ch-img img { transform: scale(1.03); }
-.ch-body { display: grid; gap: 10px; padding: 28px 28px 32px; align-content: start; }
+.ch-vid { opacity: 0; transition: opacity .9s ease; pointer-events: none; }
+.ch-img.playing .ch-vid { opacity: 1; }
+.ch-play { position: absolute; left: 16px; bottom: 16px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: rgba(7,11,18,.55); border: 1px solid rgba(255,255,255,.35); color: var(--hero-ink); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: opacity .5s; }
+.ch-play svg { width: 16px; height: 16px; fill: currentColor; margin-left: 2px; }
+.ch-img.playing .ch-play { opacity: 0; }
+.ch-body { display: grid; gap: 10px; padding: 36px 40px; align-content: center; }
 .ch-k { margin: 0; }
 .ch-jp { margin: 2px 0 0; font: 200 44px/1.2 "Noto Serif JP", "Noto Serif TC", "Hiragino Mincho ProN", "Yu Mincho", serif; letter-spacing: .14em; color: var(--ink); }
 .ch-area { margin: 0; font-size: 13px; letter-spacing: .08em; color: var(--muted); }
-.ch-line { margin: 10px 0 0; font-size: 14.5px; line-height: 1.95; }
+.ch-line { margin: 10px 0 0; font-size: 14.5px; line-height: 1.95; max-width: 46ch; }
 .ch-stay { margin: 8px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--muted); }
 .ch-links { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 8px 22px; }
 .alink { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: .08em; color: var(--ink); text-decoration: none; }
 .alink svg { width: 48px; height: 8px; fill: none; stroke: currentColor; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s; }
 .alink:hover svg { transform: translateX(6px); }
-@media (max-width: 900px) { .ch-img { aspect-ratio: 16 / 10; } .ch-body { padding: 22px 20px 26px; } .ch-jp { font-size: 40px; } }
+@media (max-width: 900px) { .ch-body { padding: 22px 20px 26px; } .ch-jp { font-size: 40px; } }
 .ch-links a:not(.alink) { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px 6px 9px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; letter-spacing: .04em; color: var(--ink); text-decoration: none; transition: border-color .25s, background .25s; }
 .ch-links a:not(.alink):hover { border-color: var(--ink); background: rgba(255,255,255,.04); }
 .ch-links svg:not(.alink svg) { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; opacity: .75; }

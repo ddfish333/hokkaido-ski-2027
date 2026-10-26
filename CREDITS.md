@@ -53,6 +53,7 @@ No freely licensed photos found on Wikimedia Commons for these hotels; no images
 - 海報 1/18（2026-10-26 起）：改用 1/16、1/18 序幕同一張札幌大通俯瞰（assets/img/scene/sapporo-3.jpg 的來源），裁成 3:4；原本的手稻山照片不再使用，因為 1/18 已不是滑雪日。
 - 住宿照片（山郷 春 Villa -SHUN-、BEST DAY EVER FURANO LODGES、FAV LUX 札幌薄野）：各住宿官方網站／訂房頁，僅供同行家人行前參考，版權屬原業者。
 - 序幕音樂：網頁以 Web Audio 即時生成，無外部音檔。
+- 首頁三章「山と雪」的滑鼠移入影片（assets/video/furano-hover*.mp4）：BEST DAY EVER FURANO LODGES 官方宣傳影片，Sean 於 2026-10-26 自官網螢幕錄影後剪成 30 秒無聲循環；僅供同行家人行前參考，不對外宣傳。
 
 ## 2026-10-25 第二批（家人依「照片清單」抓的，來源寫在各檔同名 .txt）
 

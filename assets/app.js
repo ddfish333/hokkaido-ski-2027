@@ -171,8 +171,10 @@
     box.innerHTML = T.bases.map(function (b, i) {
       var k = CHAPTER_IMG[b.id], c = CHAPTER[b.id] || { en: "", jp: "", line: "" };
       var site = (b.links || []).filter(function (l) { return l[0] === "官網"; })[0];
+      /* 影片不先下載：桌機滑鼠移上去、手機捲到畫面裡才載入，載好才淡入；之前都只顯示照片 */
+      var vid = b.video ? '<video class="ch-vid" muted loop playsinline preload="none" data-src="' + BASE + 'assets/video/' + esc(b.video) + '"' + (b.videoSm ? ' data-src-sm="' + BASE + 'assets/video/' + esc(b.videoSm) + '"' : "") + ' aria-hidden="true"></video><span class="ch-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>' : "";
       return '<article class="chapter">' +
-        '<div class="ch-img"><img src="' + BASE + 'assets/img/chapter/' + k + '.jpg" alt="" loading="lazy"></div>' +
+        '<div class="ch-img' + (b.video ? " has-video" : "") + '"><img src="' + BASE + 'assets/img/chapter/' + k + '.jpg" alt="" loading="lazy">' + vid + '</div>' +
         '<div class="ch-body">' +
         '<p class="ch-k">' + esc(c.en) + '</p>' +
         '<p class="ch-jp">' + esc(c.jp) + '</p>' +
@@ -182,6 +184,37 @@
         '<p class="ch-links">' + (site ? arrowLink("官網", site[1]) : "") + arrowLink("導航", navUrl(b.lat, b.lon)) + '</p>' +
         '</div></article>';
     }).join("");
+    initChapterVideos();
+  }
+  function initChapterVideos() {
+    var vids = document.querySelectorAll(".ch-vid"); if (!vids.length) return;
+    var conn = navigator.connection || {}, slow = !!conn.saveData || /(^|[^a-z])(slow-2g|2g)$/.test(conn.effectiveType || "");
+    if (conn.saveData) return; /* 省流量模式：只給照片 */
+    var small = innerWidth < 760 || /3g/.test(conn.effectiveType || "") || slow;
+    function wrap(v) { return v.parentNode; }
+    function play(v) {
+      if (!v.getAttribute("src")) { v.src = (small && v.dataset.srcSm) || v.dataset.src; v.load(); }
+      var pr = v.play(); if (pr && pr.catch) pr.catch(function () { });
+    }
+    function stop(v) { if (!v.paused) v.pause(); wrap(v).classList.remove("playing"); }
+    vids.forEach(function (v) {
+      v.addEventListener("playing", function () { wrap(v).classList.add("playing"); });
+      v.addEventListener("waiting", function () { wrap(v).classList.remove("playing"); }); /* 網路跟不上就先回到照片，不會卡格 */
+      v.addEventListener("pause", function () { wrap(v).classList.remove("playing"); });
+    });
+    var hoverable = matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (hoverable) {
+      vids.forEach(function (v) {
+        var card = v.closest(".chapter");
+        card.addEventListener("pointerenter", function () { play(v); });
+        card.addEventListener("pointerleave", function () { stop(v); });
+      });
+    } else if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target.querySelector(".ch-vid"); if (!v) return; if (e.isIntersecting && e.intersectionRatio >= 0.55) play(v); else stop(v); }); }, { threshold: [0, 0.55] });
+      vids.forEach(function (v) { io.observe(wrap(v)); });
+    }
+    /* 切到別的分頁就停 */
+    document.addEventListener("visibilitychange", function () { if (document.hidden) vids.forEach(stop); });
   }
 
   /* ---------- 每日 ---------- */

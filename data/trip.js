@@ -19,6 +19,7 @@ window.TRIP = {
       from: "2027-01-11", to: "2027-01-16", nights: 5, checkin: "15:00", checkout: "10:00",
       notes: ["開車 5 分到北之峰纜車、10 分到富良野市區；主戰場的 5 晚", "126 m² 小木屋、4 間臥室；全套廚房＋微波爐、洗衣機、陽台", "Google 5.0（48 則）：一進門是木頭香、乾淨得像新的、老闆自己是滑雪人，屋裡到處是雪板的小細節；停車免費"],
       facts: ["開車 5 分到北之峰纜車", "126 m²・4 間臥室", "全套廚房・洗衣機", "停車免費"],
+      video: "furano-hover.mp4", videoSm: "furano-hover-sm.mp4",
       links: [["官網", "https://bestdayeverfurano.com/"], ["訂房", "https://tour.l-tike.com/hotels/domestic/hotel/75033723/"]], g: { rating: 5.0, n: 48, pid: "ChIJPY_8pplTc18Rq5OgungIGww" } },
     { id: "sapporo", name: "FAV LUX 札幌薄野", short: "札幌・薄野", area: "札幌", lat: 43.0523778, lon: 141.3485722,
       from: "2027-01-16", to: "2027-01-19", nights: 3, checkin: "15:00", checkout: "10:00",
