@@ -54,13 +54,14 @@
        {t}        這一幕／這一站自己的抵達時間（ctx）
        {open:zoo} {close:zoo}  plan.json places 的開門／關門    {at:beer} {by:rental}  站點的固定時間
        {sun:rise|set|dark}  trip.js 當天的日出／日落／天黑    {T:rental.hours}  trip.js 任一欄位 */
-  var TOKEN = /\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}|\{leg:([\w-]+)\|([\w-]+)(?:\|(walk|shuttle|taxi))?\}/g;
+  var TOKEN = /\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}|\{leg:([\w-]+)\|([\w-]+)(?:\|(walk|shuttle|taxi))?\}|\{(party)\}/g;
   var schedCache = {};
   function fill(text, date, ctx) {
     if (!text || String(text).indexOf("{") < 0) return text;
     if (!P.plan) return text; /* plan.json 還沒載好：先原樣顯示，載好後各頁會重畫 */
-    return String(text).replace(TOKEN, function (m, kind, id, nth, md, sun, tpath, lgA, lgB, lgVia) {
+    return String(text).replace(TOKEN, function (m, kind, id, nth, md, sun, tpath, lgA, lgB, lgVia, party) {
       var T = window.TRIP || {};
+      if (party) return partyOf(date, ctx); /* {party}＝這天（這一站）的人數：保姆在就 9 人 */
       if (lgA) { var LG = leg(lgA, lgB, lgVia); return LG ? String(P.mode() === "snow" ? LG.snow : LG.normal) : m; } /* {leg:a|b}＝這段路現在路況的分鐘數 */
       if (sun) { var d = (T.days || []).filter(function (x) { return x.date === date; })[0]; return d && d.sun ? d.sun[{ rise: 0, set: 1, dark: 2 }[sun]] : m; }
       if (tpath) { var v = T; tpath.split(".").forEach(function (k) { v = v == null ? v : v[k]; }); return v == null ? m : String(v); }
@@ -74,6 +75,32 @@
       return kind === "dep" ? s.timeDep : s.time;
     });
   }
+  /* 保姆 1/14 {T:nanny.bus} 的巴士走：那天巴士之前的站點／午餐還是 9 人，之後 8 人 */
+  function partyOf(date, ctx) {
+    var T = window.TRIP || {}, N = T.nanny || {}, PT = T.party || { withNanny: "9 人", noNanny: "8 人" };
+    if (!N.lastDay || date > N.lastDay) return PT.noNanny;
+    if (date < N.lastDay) return PT.withNanny;
+    var t = ctx && (ctx.time || (ctx.slot && { breakfast: "08:00", lunch: "12:00", snack: "15:00", dinner: "18:00", late: "21:00" }[ctx.slot]));
+    return t && N.bus && t >= N.bus ? PT.noNanny : PT.withNanny;
+  }
+  P.partyOf = partyOf;
+  /* 地圖頁（food／spots／ski）選了日期之後，在日期選單旁放「看 M/D 行程 →」；沒選就拿掉 */
+  P.dayLink = function (sel, date) {
+    var lab = sel && sel.closest(".fm-day"); if (!lab) return;
+    var old = lab.parentNode.querySelector(".fm-dayjump"); if (old) old.remove();
+    if (!date) return;
+    var a = document.createElement("a"); a.className = "fm-dayjump"; a.href = BASE + "day/" + date.slice(5).replace("-", "") + "/";
+    var p = date.split("-"); a.textContent = "看 " + (+p[1]) + "/" + (+p[2]) + " 的行程 →"; lab.insertAdjacentElement("afterend", a);
+  };
+  /* 長頁面的「回到頂端」：捲超過一個畫面才出現 */
+  document.addEventListener("DOMContentLoaded", function () {
+    if (document.querySelector(".film") && !document.body.classList.contains("daypage")) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "totop"; b.setAttribute("aria-label", "回到頂端"); b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 14l6-6 6 6"/></svg>';
+    b.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+    document.body.appendChild(b);
+    var tick = false; function upd() { b.classList.toggle("show", window.scrollY > window.innerHeight * 0.9); tick = false; }
+    window.addEventListener("scroll", function () { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true }); upd();
+  });
   P.fill = fill; P.clearCache = function () { schedCache = {}; };
 
   /* 共用：跳脫、**粗體**、標記 → HTML。所有頁面的說明文字都走這一個，才不會有的頁面漏掉粗體或時間標記 */

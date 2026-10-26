@@ -335,6 +335,7 @@
       var k = skiStop(d.date), r = k ? resortById[k.rid] : null;
       return '<option value="' + d.date + '"' + (state.day === d.date ? " selected" : "") + '>' + md(d.date) + '（' + dow(d.date) + '）' + (r ? '⛷ ' + r.name.replace(/（.*?）/g, "") : d.title) + ' · 住' + esc(baseById[d.base].short.split("・")[0]) + '</option>';
     }).join("");
+    if (Plan && Plan.dayLink) Plan.dayLink(sel, state.day);
     sel.onchange = function () { state.day = sel.value; state.focus = null; var u = new URL(location.href); u.searchParams.set("day", state.day); u.hash = ""; history.replaceState(null, "", u); render(true); loadHourly(focusResort()).then(function () { render(false); }); };
     var seg = $("#skmode");
     seg.innerHTML = [["normal", "一般路況"], ["snow", "下雪・結冰"]].map(function (m) { return '<button type="button" role="radio" aria-checked="' + (state.mode === m[0]) + '" data-m="' + m[0] + '">' + m[1] + '</button>'; }).join("");

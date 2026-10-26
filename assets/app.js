@@ -257,6 +257,47 @@
     var c = T.climate[d.base];
     return '<div class="wxday"><span class="ico">' + ICON.snow + '</span><div><div class="tt">' + c.tmax + '° / ' + c.tmin + '°</div><div class="ss">' + esc(c.label) + ' 歷年平均・每日新雪約 ' + c.snow + ' cm（進入 16 天預報後改顯示即時）</div></div></div>';
   }
+  /* 站點的營業時間／價錢／停車：照 id 去 spots.js、food.js 找，找不到就用 trip.js places 裡座標相同的點；只讀不抄，資料改了這裡自動跟著變 */
+  function stopFacts(s, d) {
+    if (s.id === d.base || baseById[s.id] || ["villa", "lodge", "favlux"].indexOf(s.id) >= 0) return "";
+    var sp = (window.SPOTS || []).filter(function (x) { return x.id === s.id; })[0], fd = (window.FOOD || []).filter(function (x) { return x.id === s.id; })[0];
+    var rs = T.resorts.filter(function (r) { return (r.stops || []).indexOf(s.id) >= 0; })[0];
+    var parts = [], wd = new Date(d.date + "T00:00:00").getDay(), href = "";
+    if (rs) {
+      parts.push(rs.hours); parts.push(rs.tickets[0][0] + " " + rs.tickets[0][1]); parts.push(rs.kids);
+      href = BASE + "ski/?day=" + d.date + "#" + rs.id;
+    } else if (sp) {
+      if (sp.hours) parts.push(sp.hours); if (sp.fee) parts.push(sp.fee); if (sp.parking) parts.push("停車：" + sp.parking);
+      if (sp.closed && sp.closed.indexOf(wd) >= 0) parts.push("**今天公休**");
+      href = BASE + "spots/?day=" + d.date + "#" + sp.id;
+    } else if (fd) {
+      if (fd.hours) parts.push(fd.hours); if (fd.price) parts.push(fd.price); if (fd.parking) parts.push("停車：" + fd.parking);
+      if (fd.closed && fd.closed.indexOf(wd) >= 0) parts.push("**今天公休**");
+      if (fd.g && fd.g.rating) parts.push("Google " + fd.g.rating.toFixed(1));
+      href = BASE + "food/?day=" + d.date + "#" + fd.id;
+    } else {
+      var pl = T.places.filter(function (p) { return Math.abs(p.lat - s.lat) < 0.0015 && Math.abs(p.lon - s.lon) < 0.002; })[0];
+      if (pl && pl.note) parts.push(pl.note);
+    }
+    if (!parts.length) return "";
+    return '<br><span class="tl-facts">' + parts.map(function (x) { return em(x); }).join(" · ") + (href ? ' <a href="' + href + '">' + (rs ? '滑雪地圖 →' : '卡片 →') + '</a>' : "") + '</span>';
+  }
+  /* 保姆：上班時間、幾點回到住宿、加班多久，從 trip.js nanny 和當天時間表算 */
+  function nannyCard(d, sch) {
+    var N = T.nanny; if (!N || !N.lastDay || d.date > N.lastDay || d.date < T.days[1].date) return "";
+    var last = d.date === N.lastDay, baseStops = sch.stops.filter(function (s, i) { return i > 0 && (s.id === d.base || baseById[s.id] || ["villa", "lodge", "favlux"].indexOf(s.id) >= 0); });
+    var back = baseStops.length ? baseStops[baseStops.length - 1] : null;
+    var lines = [];
+    if (last) lines.push("最後一天：上午照常，" + N.bus + " 送她到富良野站搭巴士；之後兩家自己顧小孩，訂位人數改 " + esc((T.party || {}).noNanny || "8 人"));
+    else {
+      lines.push("上班 " + N.start + "–" + N.end + "，小孩留在住宿");
+      if (back) {
+        var over = Plan.mins(back.time) - Plan.mins(N.end);
+        lines.push(over > 0 ? "今天 **" + back.time + "** 才回到住宿，比下班晚 " + fmtMin(over) + "——算加班（" + esc(N.overtime) + "）或請她先下班" : "今天 " + back.time + " 回到住宿，下班前回得來");
+      }
+    }
+    return '<div class="card nannycard"><p class="panel-label">保姆</p><ul class="bullets">' + lines.map(function (x) { return '<li>' + x.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>") + '</li>'; }).join("") + '</ul></div>';
+  }
   function renderDay() {
     if (!has("dayview")) return;
     var d = T.days[state.day], b = baseById[d.base], sch = dayPlan();
@@ -268,12 +309,12 @@
         var row = "";
         if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg ' + l.mode + '"><time></time><span>' + (l.mode === "walk" ? "步行" : l.mode === "shuttle" ? "接駁車" : l.mode === "taxi" ? "計程車／地鐵" : "開車") + ' ' + fmtMin(l.min) + ' <small>· ' + l.km + ' km' + (l.est ? ' · 直線估算' : '') + '</small></span></li>'; }
         var last = i === sch.stops.length - 1;
-        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + jaTag(s.ja, s.name) + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(fill(s.note, d.date, s)) + '</span>' : "") + '</span></li>';
+        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + jaTag(s.ja, s.name) + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(fill(s.note, d.date, s)) + '</span>' : "") + stopFacts(s, d) + '</span></li>';
         return row;
       }).join("") + '</ol></div>';
     html += '<div class="side">';
     var alt = Plan.schedule(d.date, state.mode === "snow" ? "normal" : "snow");
-    if (d.base === "sapporo" && (window.SPOTS || []).some(function (x) { return x.kind === "停車"; })) {
+    if (d.base === "sapporo" && d.date < b.to && (window.SPOTS || []).some(function (x) { return x.kind === "停車"; })) {
       var plots = (window.SPOTS || []).filter(function (x) { return x.kind === "停車"; });
       html += '<div class="card parkcard"><p class="panel-label">車停哪裡（飯店沒有停車場）</p><ul class="parklist">' + plots.map(function (x) {
         var url = x.g && x.g.pid ? 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(x.ja || x.name) + '&destination_place_id=' + x.g.pid : navUrl(x.lat, x.lon);
@@ -283,7 +324,8 @@
     html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>' + (state.mode === "snow" ? "下雪" : "一般") + '</span><b>' + fmtMin(sch.total.min) + '</b></div><div><span>' + (state.mode === "snow" ? "一般" : "下雪") + '</span><b>' + fmtMin(alt.total.min) + '</b></div><div><span>距離</span><b>' + sch.total.km + ' km</b></div>' + (sch.end != null ? '<div><span>最後到達</span><b>' + Plan.hm(sch.end) + '</b></div>' : "") + '</div></div>';
     html += '<div class="card"><p class="panel-label">天氣</p>' + dayWeather(d) + '</div>';
     html += '<div class="card"><p class="panel-label">日照</p><div class="sunrow"><div><span>日出</span><b>' + d.sun[0] + '</b></div><div><span>日落</span><b>' + d.sun[1] + '</b></div><div><span>天黑</span><b>' + d.sun[2] + '</b></div></div></div>';
-    html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals"><li><span>午</span>' + esc(fill(d.meals[0], d.date)) + '</li><li><span>晚</span>' + esc(fill(d.meals[1], d.date)) + '</li></ul><a class="jump" href="#dayfood">看附近有哪些店 ↓</a></div>';
+    html += '<div class="card"><p class="panel-label">吃什麼</p><ul class="meals">' + (d.breakfast ? '<li><span>早</span>' + em(fill(d.breakfast, d.date)) + '</li>' : "") + '<li><span>午</span>' + em(fill(d.meals[0], d.date)) + '</li><li><span>晚</span>' + em(fill(d.meals[1], d.date)) + '</li></ul><a class="jump" href="#dayfood">看附近有哪些店 ↓</a></div>';
+    html += nannyCard(d, sch);
     html += '</div>';
     $("#dayview").innerHTML = html;
     if (has("dayfood") && !document.querySelector("#dayfood .fp-embed:not([hidden])")) $("#dayfood").innerHTML = foodBlock(d, b);
@@ -301,7 +343,7 @@
       sw.dataset.ready = "1";
       sw.innerHTML = '<div class="wrap ds-in">' +
         (prev ? '<a class="ds-btn prev" href="' + dayHref(prev) + '" aria-label="前一天 ' + md(prev.date) + '"><span class="ar">‹</span><span>' + md(prev.date) + '</span></a>' : '<span class="ds-btn off"></span>') +
-        '<label class="ds-mid"><span class="ds-now">DAY ' + (state.day < 9 ? "0" : "") + (state.day + 1) + ' · ' + md(d.date) + '（' + dow(d.date) + '）· ' + esc(b.area) + '</span><select class="ds-sel" aria-label="換一天">' +
+        '<label class="ds-mid"><span class="ds-now">DAY ' + (state.day < 9 ? "0" : "") + (state.day + 1) + ' · ' + md(d.date) + '（' + dow(d.date) + '）<span class="ds-base">· ' + esc(b.area) + '</span></span><select class="ds-sel" aria-label="換一天">' +
         T.days.map(function (x, i) { return '<option value="' + dayHref(x) + '"' + (i === state.day ? " selected" : "") + '>DAY ' + (i < 9 ? "0" : "") + (i + 1) + ' · ' + md(x.date) + '（' + dow(x.date) + '）' + esc(x.title) + '</option>'; }).join("") + '</select></label>' +
         (next ? '<a class="ds-btn next" href="' + dayHref(next) + '" aria-label="下一天 ' + md(next.date) + '"><span>' + md(next.date) + '</span><span class="ar">›</span></a>' : '<span class="ds-btn off"></span>') + '</div>';
       sw.querySelector(".ds-sel").addEventListener("change", function () { if (this.value) location.href = this.value; });
@@ -342,7 +384,7 @@
 
   function popupHTML(p) {
     var a = '<a href="' + navUrl(p.lat, p.lon) + '" target="_blank" rel="noopener">Google Maps 導航</a>';
-    if (p.link) a = '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' + a;
+    if (p.link) a = '<a href="' + esc(p.link) + '"' + (/^https?:/.test(p.link) ? ' target="_blank" rel="noopener"' : "") + '>' + esc(p.linkText || "看詳細 →") + '</a>' + a;
     if (p.baseId) a += '<button type="button" data-origin="' + p.baseId + '">從這裡算車程</button>';
     return '<p class="pop-t">' + esc(p.name) + jaTag(p.ja, p.name) + '</p>' + (p.sub ? '<p class="pop-s">' + em(p.sub) + '</p>' : '') + (p.note ? '<p class="pop-n">' + em(p.note) + (p.approx ? '（位置為概略）' : '') + '</p>' : '') + '<div class="pop-a">' + a + '</div>';
   }
@@ -361,7 +403,7 @@
   }
   function keyPoints() {
     var pts = [];
-    T.bases.forEach(function (b) { pts.push({ type: "stay", label: b.short.split("・").pop() + " " + b.nights + " 晚", name: b.name, lat: b.lat, lon: b.lon, note: md(b.from) + "–" + md(b.to) + " " + b.nights + " 晚。" + b.notes.map(function (n) { return fill(n, b.from); }).join("；"), baseId: b.id }); });
+    T.bases.forEach(function (b) { pts.push({ type: "stay", label: b.short.split("・").pop() + " " + b.nights + " 晚", name: b.name, lat: b.lat, lon: b.lon, note: md(b.from) + "–" + md(b.to) + " " + b.nights + " 晚。" + b.notes.map(function (n) { return fill(n, b.from); }).join("；"), baseId: b.id, link: ((b.links || []).filter(function (l) { return l[0] === "官網"; })[0] || [])[1], linkText: "官網 ↗" }); });
     T.resorts.forEach(function (r) { pts.push({ type: "ski", label: SKI_LABEL[r.id] || r.name, name: r.name, ja: r.ja, lat: r.lat, lon: r.lon, note: r.tier + "。" + (r.hours || "") }); });
     pts.push({ type: "ski", label: "富良野（富良野區）", name: "富良野滑雪場 富良野區", lat: 43.3266, lon: 142.3394, note: "富良野纜車（新富良野王子飯店旁）" });
     return pts;
@@ -762,7 +804,7 @@
 
   /* ---------- 吃喝：清單在 data/food.js ---------- */
   var FOOD = window.FOOD || [], FOOD_AREAS = window.FOOD_AREAS || {};
-  var FIT = { best: ["很適合 8 人帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
+  var FIT = { best: ["很適合我們這團帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
   function foodItem(f, d, b) {
     var wd = d ? new Date(d.date + "T00:00:00").getDay() : -1, closedToday = f.closed && f.closed.indexOf(wd) >= 0;
     var planned = !!(d && f.key && d.meals.join("").indexOf(f.key) >= 0);
@@ -791,11 +833,11 @@
   function picksBlock(d, linkBase) {
     var picks = (window.FOOD_PICKS || []).filter(function (p) { return p.date === d.date; }).sort(function (a, b) { return PICK_ORDER.indexOf(a.slot) - PICK_ORDER.indexOf(b.slot); });
     if (!picks.length) return "";
-    return '<div class="picks"><p class="picks-h">這天怎麼吃 <small>依 8 人帶 4 個幼兒的條件挑的；藍色是建議、金色是已決定。新的店進來會重新比對，換掉會寫原因。</small></p><ul class="picklist">' + picks.map(function (p) {
+    return '<div class="picks"><p class="picks-h">這天怎麼吃 <small>依 4 大 4 小帶幼兒的條件挑的（保姆在的日子多一位）；藍色是建議、金色是已決定。新的店進來會重新比對，換掉會寫原因。</small></p><ul class="picklist">' + picks.map(function (p) {
       var f = foodById(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
       var bk = (p.backup || []).map(function (id) { var g = foodById(id); return g ? '<a href="' + linkBase + '#' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</a>' : ""; }).filter(Boolean).join("、");
       return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><a class="pick-name" href="' + linkBase + '#' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</a><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
-        '<p class="pick-why">' + em(fill(p.why, p.date)) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date)) + '</p>' : "") + '</li>';
+        '<p class="pick-why">' + em(fill(p.why, p.date, { slot: p.slot })) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date, { slot: p.slot })) + '</p>' : "") + '</li>';
     }).join("") + '</ul></div>';
   }
   /* 可收合的長清單：標題列永遠看得到，內容預設收起；打開狀態在重新渲染後保留 */

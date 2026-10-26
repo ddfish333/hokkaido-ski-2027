@@ -104,16 +104,18 @@ window.FOOD_AREAS = { villa: ["小樽", "銭函", "Kiroro"], furano: ["富良野
    新的店進來時，會重新比對同一個時段：硬條件（那天有開、坐得下 8 人、不用排很久、走路或有停車）先過，再比特色、評價、來源數、和其他晚上不重複；
    只有新店在這些條件上贏過現任才會換，而且會在 why 寫清楚換掉誰、為什麼。 */
 window.FOOD_PICKS = [
-  { date: "2027-01-08", slot: "dinner", pick: "masazushi", backup: ["toppi", "waraku"], status: "proposed", why: "第一次在小樽吃壽司，選最有名的政寿司本店：個室放得下 8 人、有兒童餐和嬰兒車位、店旁只有 6 個車位，兩台車不一定停得進，滑完雪帶小孩不用找停車。價位高（大人約 ¥5,000–6,000）；想省就改 とっぴ～ 回轉（有停車場、不用訂、¥2,000–3,000）。", book: "0134-64-1101 訂 {t:masazushi} 個室 8 人（4 幼兒），週三休；不泡湯就提早一小時" },
+  { date: "2027-01-08", slot: "dinner", pick: "masazushi", backup: ["toppi", "waraku"], status: "proposed", why: "第一次在小樽吃壽司，選最有名的政寿司本店：個室放得下 {party}、有兒童餐和嬰兒車位、店旁只有 6 個車位，兩台車不一定停得進，滑完雪帶小孩不用找停車。價位高（大人約 ¥5,000–6,000）；想省就改 とっぴ～ 回轉（有停車場、不用訂、¥2,000–3,000）。", book: "0134-64-1101 訂 {t:masazushi} 個室 {party}，週三休；不泡湯就提早一小時" },
   { date: "2027-01-10", slot: "dinner", pick: "naruto", backup: ["toppi", "waraku"], status: "decided", why: "小樽半身炸雞的老店，大桌多、小孩愛吃；運河逛完走過去 10 分。", book: "不用訂，{t:naruto} 前到" },
-  { date: "2027-01-15", slot: "dinner", pick: "furanoya", backup: ["kumagera"], status: "proposed", why: "美瑛玩一整天 {t:lodge#2} 才回到富良野：ふらのや湯咖哩開到晚上（時間看店卡）、小孩有不辣的；累了就小木屋自己煮（美瑛選果買的東西）。", book: "不用訂" },
-  { date: "2027-01-16", slot: "lunch", pick: "ichigen", backup: ["suage", "hanamaru_tokeidai"], status: "proposed", why: "停好車走 {leg:favlux|ichigen|walk} 分就到，蝦湯拉麵小孩也吃得下，營業到凌晨不怕我們晚到；排隊就改 Suage+（走 3 分）。", book: "不用訂" },
-  { date: "2027-01-16", slot: "dinner", pick: "gardengrill", backup: ["beer"], status: "decided", why: "啤酒園裡最新、最不吵的 GARDEN GRILL 館，有包廂、成吉思汗之外還有小孩能吃的菜；車不動，搭計程車或地鐵。", book: "0570-098-346 訂 {t:beer}、指定 GARDEN GRILL 個室 8 人（4 幼兒）" },
+  { date: "2027-01-12", slot: "dinner", pick: "fenix", backup: ["kumagera"], status: "proposed", why: "北之峰纜車站對面、森林精靈露台走過去就到：滑完不用再開車找吃的，天婦羅、涮涮鍋、拉麵小孩都有得選；想吃好一點就開 10 分去くまげら（週三休，1/12 有開）。" },
+  { date: "2027-01-13", slot: "dinner", pick: "furanoya", backup: ["yuiga", "fenix"], status: "proposed", why: "週三くまげら公休，改富良野站旁的ふらのや湯咖哩：辣度小孩選 1、飯量自選，{t:furanoya} 到剛好避開排隊，{close:furanoya} 關門。備案 唯我独尊（1/14 午餐也是它）或回北之峰 Fenix。" },
+  { date: "2027-01-15", slot: "dinner", pick: "furanoya", backup: ["kumagera"], status: "proposed", why: "美瑛玩一整天 {t:lodge#2} 才回到富良野：1/13 已經吃過ふらのや的話就小木屋自己煮；想再吃湯咖哩就 ふらのや（開到 {close:furanoya}）；累了就小木屋自己煮（美瑛選果買的東西）。", book: "不用訂" },
+  { date: "2027-01-16", slot: "lunch", pick: "ichigen", backup: ["suage", "hanamaru_tokeidai"], status: "proposed", why: "停好車走 {leg:favlux|ichigen|walk} 分就到，蝦湯拉麵小孩也吃得下，營業到凌晨不怕我們晚到；排隊就改 Suage+（隔幾條街）。", book: "不用訂" },
+  { date: "2027-01-16", slot: "dinner", pick: "gardengrill", backup: ["beer"], status: "decided", why: "啤酒園裡最新、最不吵的 GARDEN GRILL 館，有包廂、成吉思汗之外還有小孩能吃的菜；車不動，搭計程車或地鐵。", book: "0570-098-346 訂 {t:beer}、指定 GARDEN GRILL 個室 {party}" },
   { date: "2027-01-16", slot: "late", pick: "shingen", backup: ["keyaki", "araki", "kaishin"], status: "proposed", why: "小孩睡了之後大人的宵夜：信玄南 6 条店就在飯店旁邊，開到凌晨 1 點，味噌拉麵。", book: "不用訂，排隊 10–20 分" },
   { date: "2027-01-17", slot: "lunch", pick: "toriton", backup: ["matale", "hanamaru_tokeidai"], status: "proposed", why: "羊之丘玩完往白色戀人的路上剛好經過円山：回轉壽司小孩自己會選，4.3 分 4,600 則。週日中午人多，到了先取號、一組先進去佔桌。", book: "不能訂，取號" },
-  { date: "2027-01-17", slot: "dinner", pick: "kujira", backup: ["soul", "suage"], status: "proposed", why: "飯店走 5 分的義大利菜，在地人推薦；披薩、義大利麵小孩都能吃，週日有開（週一二休）。玩了一天不想再開車。", book: "打電話問 8 人（4 幼兒）{t:kujira}，011-522-6655" },
-  { date: "2027-01-18", slot: "breakfast", pick: "donbe", backup: ["ohiso", "sakanaya"], status: "proposed", why: "最後一個早上，想吃海鮮丼的大人一早走 10 分去二条市場，{dep:favlux} 前回來帶小孩出門；小孩在飯店吃前一天買的麵包。", book: "不用訂" },
-  { date: "2027-01-18", slot: "lunch", pick: "ippin", backup: ["yoshiyama", "hanamaru_tokeidai"], status: "proposed", why: "走路行程的中間點：JR 塔下來走 10 分，豚丼不辣、份量可以分，{open:ippin} 開門排隊短。", book: "不用訂" },
+  { date: "2027-01-17", slot: "dinner", pick: "kujira", backup: ["soul", "suage"], status: "proposed", why: "飯店走 {leg:favlux|kujira|walk} 分的義大利菜，在地人推薦；披薩、義大利麵小孩都能吃，週日有開（週一二休）。玩了一天不想再開車。", book: "打電話問 {party} {t:kujira}，011-522-6655" },
+  { date: "2027-01-18", slot: "breakfast", pick: "donbe", backup: ["ohiso", "sakanaya"], status: "proposed", why: "最後一個早上，想吃海鮮丼的大人一早走路去二条市場（約十分鐘路程），{dep:favlux} 前回來帶小孩出門；小孩在飯店吃前一天買的麵包。", book: "不用訂" },
+  { date: "2027-01-18", slot: "lunch", pick: "ippin", backup: ["yoshiyama", "hanamaru_tokeidai"], status: "proposed", why: "走路行程的中間點：JR 塔下來走 {leg:t38|ippin|walk} 分，豚丼不辣、份量可以分，{open:ippin} 開門排隊短。", book: "不用訂" },
   { date: "2027-01-18", slot: "snack", pick: "rokkatei", backup: ["kitakaro_cafe"], status: "proposed", why: "六花亭本店 2 樓喫茶室：下午茶給小孩放電前的休息，週一有開（週三休）。", book: "不用訂" },
-  { date: "2027-01-18", slot: "dinner", pick: "hyosetsu", backup: ["kani"], status: "proposed", why: "最後一晚的螃蟹會席：氷雪の門 4.3 分、評論說服務對小孩很好、有包廂；飯店走 8 分，吃完回去打包雪具。かに本家是備案。", book: "現在就訂：011-521-3046，8 人（4 幼兒）包廂、問有沒有兒童餐；評論說要提前 1–2 個月" }
+  { date: "2027-01-18", slot: "dinner", pick: "hyosetsu", backup: ["kani"], status: "proposed", why: "最後一晚的螃蟹會席：氷雪の門 4.3 分、評論說服務對小孩很好、有包廂；飯店走 {leg:favlux|hyosetsu|walk} 分，吃完回去打包雪具。かに本家是備案。", book: "現在就訂：011-521-3046，{party} 包廂、問有沒有兒童餐；評論說要提前 1–2 個月" }
 ];

@@ -44,6 +44,8 @@ def text_fields():
         for k in ("title", "sub", "alert"):
             if d.get(k): yield f"trip.js {d['date']} {k}", d[k], d["date"], None, True
         for i, m in enumerate(d.get("meals") or []): yield f"trip.js {d['date']} meals[{i}]", m, d["date"], None, True
+        if d.get("breakfast"): yield f"trip.js {d['date']} breakfast", d["breakfast"], d["date"], None, True
+        else: W(f"trip.js {d['date']}：沒寫早餐（breakfast）")
     for d, sc in scenes.items():
         if (sc.get("poster") or {}).get("line"): yield f"scenes.js {d} poster.line", sc["poster"]["line"], d, None, True
         for i, s in enumerate(sc.get("scenes") or [], 1):
@@ -65,7 +67,9 @@ for d in trip["days"]:
 for where, text, d, ctx, no_fixed in text_fields():
     hc = hardcoded_times(text) if no_fixed else []
     if hc: E(f"{where}：寫死的時間 {hc}，改用標記（{{t:站點}}／{{open:站點}}／{{sun:set}}／{{T:欄位}}）→「{text[:60]}」")
-    dur = re.findall(r"[一二三四五六七八九十兩半\d]+\s*(?:分鐘|分)(?:就到|到家|車程|的車程|就回)", TOKEN.sub("", str(text)))
+    dur = re.findall(r"[一二三四五六七八九十兩半\d]+\s*(?:分鐘|分)(?:就到|到家|車程|的車程|就回)|走\s?\d+\s?分", TOKEN.sub("", str(text)))
+    hc_party = re.findall(r"\b[89] 人", TOKEN.sub("", str(text)))
+    if hc_party: E(f"{where}：人數寫死 {hc_party}，改用 {{party}}（保姆在的日子 9 人、之後 8 人會自己換）→「{text[:60]}」")
     if dur: E(f"{where}：寫死的車程 {dur}，改用 {{leg:起點|終點}} 標記（會跟著路況模式變）→「{text[:60]}」")
     if (where.startswith("plan.json") or where.startswith("scenes.js")) and re.search(r"¥|NT\$", text): E(f"{where}：不要在這裡寫價格，價格只放地點卡（spots／food／places／resorts）→「{text[:60]}」")
     try: fill(text, d, ctx, strict=True)
@@ -200,7 +204,7 @@ else:
 food = load_js("data/food.js", "FOOD") or []
 food_areas = load_js("data/food.js", "FOOD_AREAS") or {}
 all_areas = {a for v in food_areas.values() for a in v}
-all_meals = "".join("".join(d.get("meals", [])) for d in trip["days"])
+all_meals = "".join("".join(d.get("meals", [])) + (d.get("breakfast") or "") for d in trip["days"])
 seen = set()
 for f in food:
     if f["id"] in seen: E(f"food.js：id {f['id']} 重複")

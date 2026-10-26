@@ -32,7 +32,7 @@
     ["甜點・咖啡", /甜點|咖啡|下午茶|美食街/]
   ];
   function groupOf(f) { if (f.area === "Kiroro") return "雪場裡"; for (var i = 0; i < KIND_GROUP.length; i++) if (KIND_GROUP[i][1].test(f.kind)) return KIND_GROUP[i][0]; return "其他"; }
-  var FIT = { best: ["很適合 8 人帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
+  var FIT = { best: ["很適合我們這團帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
   var baseById = {}; T.bases.forEach(function (b) { baseById[b.id] = b; });
 
   var qs = new URLSearchParams(location.search);
@@ -106,6 +106,7 @@
     sel.innerHTML = '<option value="">不選日期（看全部）</option>' + T.days.map(function (d) {
       return '<option value="' + d.date + '"' + (state.day === d.date ? " selected" : "") + '>' + md(d.date) + '（' + dow(d.date) + '）' + esc(d.title) + ' · 住' + esc(baseById[d.base].short.split("・")[0]) + '</option>';
     }).join("");
+    if (window.Plan && Plan.dayLink) Plan.dayLink(sel, state.day);
     sel.onchange = function () {
       state.day = sel.value || null; state.area = state.day ? "附近" : "全部";
       var u = new URL(location.href); if (state.day) u.searchParams.set("day", state.day); else u.searchParams.delete("day"); history.replaceState(null, "", u);
@@ -185,7 +186,8 @@
     var g = f.g;
     popup.setLngLat([f.lon, f.lat]).setHTML('<b>' + esc(f.name) + '</b><span>' + esc(f.kind) + ' · ' + esc(f.area) + (g ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
       (isPlanned(f, c) ? '<em class="gold">' + md(c.d.date) + ' 預計</em>' : "") + (isClosed(f, c) ? '<em class="red">' + md(c.d.date) + ' 公休</em>' : "") +
-      '<small>' + em(f.hours) + (c.b ? ' · 從' + esc(c.b.short.split("・").pop()) + '約 ' + driveMin(f, c) + ' 分' : "") + '</small>').addTo(map);
+      '<small>' + em(f.hours) + (c.b ? ' · 從' + esc(c.b.short.split("・").pop()) + '約 ' + driveMin(f, c) + ' 分' : "") + '</small>' +
+      '<a href="#' + f.id + '" data-go="' + f.id + '">看詳情 ↓</a> <a href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + f.lat + ',' + f.lon + (c.b ? '&origin=' + c.b.lat + ',' + c.b.lon : "") + '" target="_blank" rel="noopener">導航 ↗</a>').addTo(map);
   }
   function scrollToCard(id) {
     var li = document.getElementById(id); if (!li) return;
@@ -204,7 +206,7 @@
       var f = byId(p.pick), st = PICK_STATUS[p.status] || PICK_STATUS.proposed;
       var bk = (p.backup || []).map(function (id) { var g = byId(id); return g ? '<button type="button" class="lnk" data-go="' + g.id + '">' + esc(g.name.replace(/（.*?）/g, "")) + '</button>' : ""; }).filter(Boolean).join("、");
       return '<li class="pick ' + st[1] + '"><div class="pick-top"><span class="pick-slot">' + PICK_SLOT[p.slot] + '</span><button type="button" class="pick-name lnk" data-go="' + (f ? f.id : "") + '">' + esc(f ? f.name : p.pick) + '</button><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (f && f.g && f.g.rating ? '<span class="pick-r">★ ' + f.g.rating.toFixed(1) + '</span>' : "") + '</div>' +
-        '<p class="pick-why">' + em(fill(p.why, p.date)) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date)) + '</p>' : "") + '</li>';
+        '<p class="pick-why">' + em(fill(p.why, p.date, { slot: p.slot })) + '</p>' + (bk ? '<p class="pick-bk">備案：' + bk + '</p>' : "") + (p.book ? '<p class="pick-book">📞 ' + esc(fill(p.book, p.date, { slot: p.slot })) + '</p>' : "") + '</li>';
     }).join("") + '</ul></li>';
   }
 

@@ -110,6 +110,7 @@
     sel.innerHTML = '<option value="">不選日期（看全部）</option>' + T.days.map(function (d) {
       return '<option value="' + d.date + '"' + (state.day === d.date ? " selected" : "") + '>' + md(d.date) + '（' + dow(d.date) + '）' + esc(d.title) + ' · 住' + esc(baseById[d.base].short.split("・")[0]) + '</option>';
     }).join("");
+    if (window.Plan && Plan.dayLink) Plan.dayLink(sel, state.day);
     sel.onchange = function () {
       state.day = sel.value || null; state.area = state.day ? "附近" : "全部";
       var u = new URL(location.href); if (state.day) u.searchParams.set("day", state.day); else u.searchParams.delete("day"); history.replaceState(null, "", u);

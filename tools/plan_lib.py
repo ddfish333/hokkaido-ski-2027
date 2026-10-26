@@ -41,7 +41,7 @@ def schedule(date, mode="normal"):
         t = arr + stay
     return out
 
-TOKEN = re.compile(r"\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}|\{leg:([\w-]+)\|([\w-]+)(?:\|(walk|shuttle|taxi))?\}")
+TOKEN = re.compile(r"\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}|\{leg:([\w-]+)\|([\w-]+)(?:\|(walk|shuttle|taxi))?\}|\{(party)\}")
 HHMM = re.compile(r"(?<![\d:])\d{1,2}:\d{2}(?![\d:])")
 
 class TokenError(Exception): pass
@@ -50,7 +50,16 @@ def fill(text, date, ctx_id=None, mode="normal", strict=False):
     """把 {t:villa}、{dep:kiroro}、{t:favlux@01-19}、{open:zoo}、{sun:set}、{T:rental.hours} 換成實際值。strict=True 時換不出來就丟 TokenError。"""
     if not text or "{" not in str(text): return text
     def rep(m):
-        kind, id_, nth, md, sun, tpath, lg_a, lg_b, lg_via = m.groups()
+        kind, id_, nth, md, sun, tpath, lg_a, lg_b, lg_via, party = m.groups()
+        if party:
+            N, PT = TRIP.get("nanny", {}), TRIP.get("party", {"withNanny": "9 人", "noNanny": "8 人"})
+            if not N.get("lastDay") or date > N["lastDay"]: return PT["noNanny"]
+            if date < N["lastDay"]: return PT["withNanny"]
+            t = None
+            if ctx_id:
+                hits = [x for x in schedule(date, mode) if x["id"] == ctx_id]
+                if hits: t = hits[0]["time"]
+            return PT["noNanny"] if (t and N.get("bus") and t >= N["bus"]) else PT["withNanny"]
         if lg_a:
             L = leg_of(lg_a, lg_b, lg_via or "drive")
             if L: return str(L[mode])
