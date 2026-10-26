@@ -159,7 +159,8 @@ for f, marks in {"assets/editor.js": [("/git/refs/heads/main", "一次儲存一�
                  "assets/plan.js": [("fromGitHub(", "有金鑰的手機直接讀 GitHub 最新版（10/26）"), ("snow13-saved", "剛存的手機先用自己存的版本（10/26）")],
                  "plan/index.html": [("id=\"toast\"", "儲存狀態固定在畫面底部（10/26）")],
                  "assets/app.js": [("Plan.legHTML(", "路段一行（交通方式顏色）單日頁和編輯器共用一份（10/26）"), ("Plan.mealCardHTML(", "吃什麼卡讀 FOOD_PICKS（10/26）")],
-                 "assets/foodmap.js": [("Plan.picksHTML(", "美食地圖的這天怎麼吃讀同一份（10/26）")]}.items():
+                 "assets/foodmap.js": [("Plan.picksHTML(", "美食地圖的這天怎麼吃讀同一份（10/26）")],
+                 "tools/build_days.py": [("def sync_tabbar", "手機底部分頁列由 build_days 一份產生（10/26）")]}.items():
     src = open(os.path.join(ROOT, f), encoding="utf-8").read()
     for mark, what in marks:
         if what and mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被拿掉或被舊檔案蓋掉了")

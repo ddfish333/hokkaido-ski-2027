@@ -156,6 +156,24 @@
     }).join("") + '</ul>';
   };
 
+  /* ---------- 手機底部分頁列 ----------
+     「行程」連到：正在看的那天 → 旅程中的今天 → 上次看的那天 → 第一天；標籤帶日期。
+     滑雪／美食／景點：正在看某一天、或旅程中，就帶 ?day= 過去（地圖會先顯示那天附近）。 */
+  function navInit() {
+    var bar = document.querySelector(".tabbar"), T0 = window.TRIP; if (!bar || !T0) return;
+    var days = T0.days.map(function (d) { return d.date; }), root = bar.dataset.root || "";
+    var q = new URLSearchParams(location.search).get("day"), here = window.DAY || (days.indexOf(q) >= 0 ? q : null);
+    var today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), inTrip = days.indexOf(today) >= 0 ? today : null;
+    if (here) lsSet("snow13-lastday", here);
+    var last = lsGet("snow13-lastday"), d = here || inTrip || (days.indexOf(last) >= 0 ? last : days[0]), ctx = here || inTrip;
+    bar.querySelectorAll("a[data-tab]").forEach(function (a) {
+      var t = a.dataset.tab;
+      if (t === "day") { if (!window.DAY || window.DAY !== d) a.href = root + "day/" + d.slice(5).replace("-", "") + "/"; a.querySelector("span").textContent = "行程 " + (+d.slice(5, 7)) + "/" + (+d.slice(8)); }
+      else if (t !== "home" && ctx) a.href = root + t + "/?day=" + ctx;
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", navInit); else navInit();
+
   P.legMode = function (l) { return P.LEGMODE[l && l.mode] ? l.mode : "drive"; };
   P.legHTML = function (l) {
     var m = P.legMode(l);

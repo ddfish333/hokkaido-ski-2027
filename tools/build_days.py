@@ -20,7 +20,33 @@ def topbar_html(root, brand, links, curbtn, edit_href):
             f'    <a class="brand" href="{brand}" aria-label="{"回到頂端" if brand == "#top" else "回首頁"}"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">北海道・雪上的大小腳印</span></a>\n'
             '    <input type="checkbox" class="nav-tog" id="navtog" aria-label="打開選單"><label class="nav-lab" for="navtog">選單</label>\n'
             '    <nav class="nav" aria-label="主要區塊">\n' + nav + f'      <a href="{edit_href}" class="nav-edit">編輯</a>\n    </nav>\n' +
+            f'    <a class="m-edit" href="{edit_href}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>編輯</a>\n' +
             ('    <button type="button" class="curbtn" id="curbtn" aria-label="切換金額顯示">¥＋NT$</button>\n' if curbtn else "") + '  </div>\n</header>')
+# ---- 手機底部分頁列：首頁／行程／滑雪／美食／景點，五個入口一直看得到（不用先點「選單」）。也由這裡一份產生 ----
+TAB_ICON = {
+    "home": '<path d="M4 11l8-6.5 8 6.5M6 9.5V19h4.5v-5h3v5H18V9.5"/>',
+    "day": '<rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4M8 13.5h3M8 16.5h6"/>',
+    "ski": '<path d="M3 19l6.5-10 3.5 5 2.5-3.5L21 19z"/><path d="M8 12l1.5 1.5 1.5-1.5"/>',
+    "food": '<path d="M4 12h16a8 8 0 0 1-16 0zM9 20h6M14.5 4l-3 6M18.5 5l-4 5"/>',
+    "spots": '<path d="M12 21s6-5.6 6-11a6 6 0 0 0-12 0c0 5.4 6 11 6 11z"/><circle cx="12" cy="10" r="2.2"/>',
+}
+TABS = [("home", "首頁", ""), ("day", "行程", "day/0107/"), ("ski", "滑雪", "ski/"), ("food", "美食", "food/"), ("spots", "景點", "spots/")]
+TABBAR = {"index.html": ("", "home"), "ski/index.html": ("../", "ski"), "food/index.html": ("../", "food"), "spots/index.html": ("../", "spots"), "tools/day.template.html": ("../../", "day")}
+def tabbar_html(root, active, is_day):
+    out = []
+    for key, label, href in TABS:
+        h = "./" if (is_day and key == "day") else root + href + ("?day={{DATE}}" if is_day and key in ("ski", "food", "spots") else "")
+        cur = ' aria-current="page"' if key == active else ""
+        out.append(f'  <a href="{h}" data-tab="{key}"{cur}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{TAB_ICON[key]}</svg><span>{label}</span></a>\n')
+    return f'<nav class="tabbar" data-root="{root}" aria-label="主要頁面">\n' + "".join(out) + '</nav>'
+def sync_tabbar():
+    for f, (root, active) in TABBAR.items():
+        path = os.path.join(ROOT, f); html = open(path, encoding="utf-8").read()
+        bar = tabbar_html(root, active, "day.template" in f)
+        if '<nav class="tabbar"' in html: new = re.sub(r'<nav class="tabbar".*?</nav>', lambda m: bar, html, count=1, flags=re.S)
+        else: new = html.replace("</body>", bar + "\n</body>", 1)
+        if new != html: open(path, "w", encoding="utf-8").write(new); print("tabbar:", f)
+
 def sync_topbar():
     for f, (root, brand, links, curbtn) in TOPBAR.items():
         path = os.path.join(ROOT, f); html = open(path, encoding="utf-8").read()
@@ -28,6 +54,7 @@ def sync_topbar():
         new = re.sub(r'<header class="topbar">.*?</header>', lambda m: topbar_html(root, brand, links, curbtn, edit_href), html, count=1, flags=re.S)
         if new != html: open(path, "w", encoding="utf-8").write(new); print("topbar:", f)
 sync_topbar()
+sync_tabbar()
 subprocess.run(["python3", os.path.join(ROOT, "tools/stamp.py")], check=True)
 TPL = open(os.path.join(ROOT, "tools/day.template.html"), encoding="utf-8").read()
 for i, d in enumerate(days):
