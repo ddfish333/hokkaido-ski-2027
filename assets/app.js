@@ -168,16 +168,12 @@
     var box = $("#chapterlist"); if (!box) return;
     box.innerHTML = T.bases.map(function (b, i) {
       var k = CHAPTER_IMG[b.id], days = T.days.filter(function (d) { return d.base === b.id; });
-      var links = (b.links || []).map(function (l) { return linkPill(l[0], l[1]); }).join("") +
-        (b.g && b.g.pid ? linkPill("評論", "https://www.google.com/maps/place/?q=place_id:" + b.g.pid, b.g.rating ? "★ " + b.g.rating.toFixed(1) : "") : "") +
-        linkPill("導航", navUrl(b.lat, b.lon));
       return '<article class="chapter">' +
         '<div class="ch-img"><img src="' + BASE + 'assets/img/chapter/' + k + '.jpg" alt="" loading="lazy"></div>' +
         '<div class="ch-body"><p class="ch-k">第 ' + ["一", "二", "三"][i] + ' 章 · ' + md(b.from) + ' – ' + md(b.to) + ' · ' + b.nights + ' 晚</p>' +
         '<h3 class="ch-h">' + esc(b.short) + '</h3><p class="ch-line">' + esc(CHAPTER_LINE[b.id]) + '</p>' +
-        '<div class="staycard"><p class="stay-name">' + esc(b.name) + '</p>' +
-        '<p class="stay-meta">' + (b.checkin ? '入住 ' + b.checkin + ' · ' : "") + (b.checkout ? '退房 ' + b.checkout : "") + (b.facts ? ' · ' + b.facts.map(esc).join(" · ") : "") + '</p>' +
-        '<div class="ch-links">' + links + '</div></div>' +
+        '<p class="ch-stay"><span>住 ' + esc(b.name) + (b.checkin ? ' · 入住 ' + b.checkin : "") + (b.checkout ? ' · 退房 ' + b.checkout : "") + '</span>' +
+        '<span class="ch-links">' + ((b.links || []).filter(function (l) { return l[0] === "官網"; }).map(function (l) { return linkPill(l[0], l[1]); }).join("")) + linkPill("導航", navUrl(b.lat, b.lon)) + '</span></p>' +
         '<div class="ch-days">' + days.map(function (d) { return '<a href="' + dayHref(d) + '">' + md(d.date) + ' ' + esc(d.title) + '</a>'; }).join("") + '</div>' +
         '<div class="ch-gal">' + [1, 2, 3, 4].map(function (n) { return '<img src="' + BASE + 'assets/img/stay/' + b.id + '-' + n + '.jpg" alt="" loading="lazy">'; }).join("") + '</div>' +
         '</div></article>';

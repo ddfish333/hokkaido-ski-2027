@@ -124,12 +124,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .ch-body { display: grid; gap: 14px; }
 .ch-h { margin: 0; font: 300 clamp(26px, 3.4vw, 36px)/1.2 var(--f-body); letter-spacing: .14em; }
 .ch-line { margin: 0; font-size: 15px; line-height: 1.9; }
-.ch-stay { margin: 0; font-size: 13px; color: var(--muted); }
+.ch-stay { margin: 0; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.ch-stay .ch-links { margin: 0; gap: 6px; }
+.ch-stay .ch-links a { padding: 5px 10px 5px 8px; font-size: 11.5px; color: var(--ink); }
 .ch-notes { margin: 0; padding-left: 1.1em; font-size: 13px; color: var(--muted); display: grid; gap: 3px; }
 .staycard { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
 .stay-name { margin: 0; font: 500 15px/1.4 var(--f-body); letter-spacing: .04em; }
 .stay-meta { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--muted); }
-.ch-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.ch-links { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .ch-links a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px 6px 9px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; letter-spacing: .04em; color: var(--ink); text-decoration: none; transition: border-color .25s, background .25s; }
 .ch-links a:hover { border-color: var(--ink); background: rgba(255,255,255,.04); }
 .ch-links svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; opacity: .75; }
