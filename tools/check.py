@@ -158,7 +158,7 @@ for d in trip["days"]:
     if PLAN_TOKEN.search(d.get("title", "")): E(f"{d['date']}：標題用了行程推算的標記（{d['title']}）——標題會寫進靜態頁面，編輯器改時間後會對不上；推算的時間放到 sub 或提醒")
 if "{{SUB}}" in open(os.path.join(ROOT, "tools/day.template.html"), encoding="utf-8").read():
     E("tools/day.template.html：靜態頁面不能放 {{SUB}}（裡面有推算時間，編輯器一存就和頁面不一致）")
-for f, marks in {"assets/editor.js": [("/git/refs/heads/main", "一次儲存一個 commit、快轉更新（10/26）"), ("merge3(", "多人同時改以天為單位合併（10/26）"), ("readPlan(commitSha)", "存完讀回比對才顯示已儲存（10/26）")],
+for f, marks in {"assets/editor.js": [("/git/refs/heads/main", "一次儲存一個 commit、快轉更新（10/26）"), ("merge3(", "多人同時改以天為單位合併（10/26）"), ("readPlan(commitSha)", "存完讀回比對才顯示已儲存（10/26）"), ("stopsSig(", "改數字只更新字、不重畫正在輸入的欄位（10/26 時間轉輪會跳掉）"), ("function candidates(", "新增站點用選的，資料讀 trip／spots／food（10/26）")],
                  "assets/plan.js": [("fromGitHub(", "有金鑰的手機直接讀 GitHub 最新版（10/26）"), ("snow13-saved", "剛存的手機先用自己存的版本（10/26）")],
                  "plan/index.html": [("id=\"toast\"", "儲存狀態固定在畫面底部（10/26）")]}.items():
     src = open(os.path.join(ROOT, f), encoding="utf-8").read()

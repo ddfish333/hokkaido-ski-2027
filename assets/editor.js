@@ -135,13 +135,14 @@
   function day() { return P.plan.days[state.date]; }
   function renderAll() { renderTabs(); renderHead(); renderStops(); renderMap(); setBtn(); }
   function renderTabs() {
-    var s = $("#daytabs");
+    var s = $("#daytabs"), sl = s.scrollLeft;
     s.innerHTML = T.days.map(function (d) {
       var sch = P.schedule(d.date, state.mode), lates = sch.stops.filter(function (x) { return x.late; }).length;
       var changed = JSON.stringify(P.plan.days[d.date]) !== JSON.stringify(state.base.days[d.date]);
       return '<button type="button" role="tab" class="dchip" aria-selected="' + (d.date === state.date) + '" data-d="' + d.date + '"><span class="d">' + md(d.date) + (changed ? '<i class="dot-dirty"></i>' : "") + '</span><span class="w">週' + dow(d.date) + (lates ? ' · <em>' + lates + ' 晚</em>' : "") + '</span><span class="b">' + esc(d.title) + '</span></button>';
     }).join("");
     s.onclick = function (e) { var b = e.target.closest("[data-d]"); if (!b) return; state.date = b.dataset.d; location.hash = state.date; renderAll(); };
+    s.scrollLeft = sl;
   }
   function renderHead() {
     var d = T.days.filter(function (x) { return x.date === state.date; })[0];
@@ -157,32 +158,52 @@
       (sch.end != null ? '<div><span>最後到達</span><b>' + P.hm(sch.end) + '</b></div>' : "") +
       '<div><span>固定時間</span><b class="' + (lates.length ? "bad" : "ok") + '">' + (lates.length ? lates.length + " 個會晚到" : "都趕得上") + '</b></div>';
   }
-  function placeOptions() { return Object.keys(P.plan.places).map(function (id) { return '<option value="' + esc(P.plan.places[id].name) + '">'; }).join(""); }
+  /* ---------- 站點清單 ----------
+     只有「結構」變了（換天、加減站、換順序、換交通方式）才整張重畫；改停留、時間、備註只更新推算出來的字，
+     正在輸入的欄位一律不動。以前每改一個數字就整張重畫：iPhone 的時間轉輪轉一格就被關掉、輸入框失焦、畫面跳動。 */
+  var lastSig = null;
+  function stopsSig() { return state.date + "|" + day().stops.map(function (s) { return s.id + ":" + (s.via || ""); }).join(","); }
+  var VIA = { walk: "步行", shuttle: "接駁", taxi: "計程車／地鐵" };
+  function legHTML(l) { return (VIA[l.mode] || "開車") + ' ' + fmtMin(l.min) + ' · ' + l.km + ' km' + (l.est ? ' <em>直線估算，儲存時會查路網</em>' : ""); }
+  function timeHTML(s, last) { return s.time + (last || !s.stay ? "" : ' <small>– ' + s.timeDep + '</small>'); }
+  function badgeHTML(s, last) { return (last || !s.stay ? "" : '<span class="stay">停 ' + fmtMin(s.stay) + '</span>') + (s.late ? '<span class="late">晚 ' + s.late + ' 分</span>' : s.wait ? '<span class="wait">早到，等 ' + s.wait + ' 分</span>' : ""); }
+  function notePrev(note) { return /\{/.test(note || "") ? "網站上顯示：" + P.fill(note, state.date) : ""; }
+  function setVal(el, v) { if (el && el !== document.activeElement && el.value !== String(v == null ? "" : v)) el.value = v == null ? "" : v; }
   function renderStops() {
-    var sch = P.schedule(state.date, state.mode), stops = day().stops, box = $("#stoplist");
+    var sch = P.schedule(state.date, state.mode), stops = day().stops, box = $("#stoplist"), sig = stopsSig();
+    if (sig === lastSig && box.children.length) {
+      sch.stops.forEach(function (s, i) {
+        var card = box.querySelector('.stopcard[data-i="' + i + '"]'), last = i === sch.stops.length - 1; if (!card) return;
+        card.classList.toggle("is-late", !!s.late);
+        card.querySelector(".sc-time").innerHTML = timeHTML(s, last); card.querySelector(".sc-badges").innerHTML = badgeHTML(s, last);
+        setVal(card.querySelector(".stayin"), s.stay); setVal(card.querySelector("[data-at]"), s.at); setVal(card.querySelector("[data-by]"), s.by); setVal(card.querySelector(".notein"), stops[i].note || "");
+        var np = card.querySelector(".note-prev"); if (np) np.textContent = notePrev(stops[i].note);
+        if (i > 0) { var lt = box.querySelector('.leg[data-i="' + i + '"] .legtxt'); if (lt) lt.innerHTML = legHTML(sch.legs[i - 1]); }
+      });
+      return;
+    }
+    lastSig = sig;
     box.innerHTML = sch.stops.map(function (s, i) {
       var raw = stops[i], last = i === sch.stops.length - 1, html = "";
       if (i > 0) {
-        var l = sch.legs[i - 1];
-        html += '<li class="leg"><span class="legline"></span><span class="legtxt">' + (l.mode === "walk" ? "步行" : l.mode === "shuttle" ? "接駁" : l.mode === "taxi" ? "計程車／地鐵" : "開車") + ' ' + fmtMin(l.min) + ' · ' + l.km + ' km' + (l.est ? ' <em>直線估算，儲存前會查路網</em>' : "") + '</span>' +
+        html += '<li class="leg" data-i="' + i + '"><span class="legline"></span><span class="legtxt">' + legHTML(sch.legs[i - 1]) + '</span>' +
+          '<button type="button" class="ins" data-ins="' + i + '" aria-label="在這裡加一站">＋ 加一站</button>' +
           '<select class="via" data-i="' + i + '" aria-label="到達方式"><option value="drive"' + (s.via === "drive" ? " selected" : "") + '>開車</option><option value="walk"' + (s.via === "walk" ? " selected" : "") + '>步行</option><option value="shuttle"' + (s.via === "shuttle" ? " selected" : "") + '>接駁</option><option value="taxi"' + (s.via === "taxi" ? " selected" : "") + '>計程車／地鐵</option></select></li>';
       }
       html += '<li class="stopcard' + (s.late ? " is-late" : "") + '" data-i="' + i + '">' +
         '<button type="button" class="handle" aria-label="拖拉改順序" data-i="' + i + '">⋮⋮</button>' +
         '<div class="sc-body">' +
-          '<div class="sc-top"><span class="sc-time">' + s.time + (last || !s.stay ? "" : ' <small>– ' + s.timeDep + '</small>') + '</span><span class="sc-name">' + esc(s.name) + '</span>' + (last || !s.stay ? "" : '<span class="stay">停 ' + fmtMin(s.stay) + '</span>') +
-            (s.late ? '<span class="late">晚 ' + s.late + ' 分</span>' : s.wait ? '<span class="wait">早到，等 ' + s.wait + ' 分</span>' : "") +
+          '<div class="sc-top"><span class="sc-time">' + timeHTML(s, last) + '</span><span class="sc-name">' + esc(s.name) + '</span><span class="sc-badges">' + badgeHTML(s, last) + '</span>' +
             '<span class="sc-menu"><select data-move="' + i + '" aria-label="搬到別天"><option value="">⋯</option>' + dates.filter(function (x) { return x !== state.date; }).map(function (x) { return '<option value="' + x + '">搬到 ' + md(x) + '</option>'; }).join("") + '<option value="__del">刪除這站</option></select></span></div>' +
           (last ? '<p class="sc-hint">最後一站：到了就結束，不算停留。</p>' :
           '<div class="sc-row"><span class="lbl">停留</span><button type="button" class="step" data-stay="-15" data-i="' + i + '">−15</button><input type="number" class="stayin" data-i="' + i + '" value="' + s.stay + '" min="0" step="5" inputmode="numeric"><button type="button" class="step" data-stay="15" data-i="' + i + '">＋15</button><span class="unit">分</span></div>') +
           '<div class="sc-row sc-fixed"><span class="lbl">' + (i === 0 ? "出發" : "固定") + '</span>' +
             '<label>' + (i === 0 ? "時間" : "開始") + ' <input type="time" data-at="' + i + '" value="' + esc(s.at) + '"></label>' +
             (i === 0 ? "" : '<label>最晚到 <input type="time" data-by="' + i + '" value="' + esc(s.by) + '"></label>') + '</div>' +
-          '<div class="sc-row"><span class="lbl">備註</span><input type="text" class="notein" data-i="' + i + '" value="' + esc(raw.note || "") + '" placeholder="要做什麼、提醒"></div>' +
+          '<div class="sc-row"><span class="lbl">備註</span><input type="text" class="notein" data-i="' + i + '" value="' + esc(raw.note || "") + '" placeholder="要做什麼、提醒"><small class="note-prev">' + esc(notePrev(raw.note)) + '</small></div>' +
         '</div></li>';
       return html;
     }).join("");
-    $("#placelist").innerHTML = placeOptions();
   }
 
   /* ---------- 互動 ---------- */
@@ -252,26 +273,105 @@
   }
   $("#stoplist").addEventListener("pointerup", endDrag); $("#stoplist").addEventListener("pointercancel", endDrag);
 
-  /* 新增站點：既有地點名稱，或 Google Maps 連結，或用名稱查座標 */
+  /* ---------- 新增站點：從網站上已經整理好的資料用選的 ----------
+     類別和首頁地圖同一套（住宿、雪場、景點、餐廳、溫泉、購物、超市、交通、醫院），資料直接讀 trip.js（住宿、雪場、其他地點）、
+     spots.js、food.js，不另外抄一份。清單照「離插入位置前一站多遠」排序；可以搜尋；都沒有才到「其他」貼 Google Maps。 */
+  var CATS = [["ski", "雪場"], ["sight", "景點"], ["food", "餐廳"], ["onsen", "溫泉"], ["stay", "住宿"], ["shop", "購物"], ["grocery", "超市"], ["transport", "交通"], ["hospital", "醫院"], ["other", "其他"]];
+  var CATN = {}; CATS.forEach(function (c) { CATN[c[0]] = c[1]; });
+  var ST = { plan: "正式行程", saved: "收藏", check: "待確認" }, MEAL = { lunch: "午餐", dinner: "晚餐", snack: "點心" };
+  var STAY = { stay: 30, ski: 240, sight: 60, food: 60, onsen: 90, shop: 60, grocery: 40, transport: 30, hospital: 30, other: 60 };
+  var pk = { cat: store("snow13-pkcat") || "sight", pos: 1, list: [], q: "" };
+  function hid(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return "x" + h.toString(36); }
+  function rating(o) { return o.g && o.g.rating ? " · ★ " + o.g.rating.toFixed(1) : ""; }
+  function candidates() {
+    var L = [], key = {};
+    function add(c) { var k = c.cat + "|" + (c.pid || c.name), k2 = c.cat + "|" + c.name.replace(/\s|（.*?）/g, ""); if (key[k] || key[k2]) return; key[k] = key[k2] = 1; L.push(c); }
+    /* 雪場：一個雪場有兩個入口（富良野北之峰／富良野區）就列兩筆，名稱照行程裡的地點 */
+    (T.resorts || []).forEach(function (r) {
+      var sub = [r.tier, r.hours].filter(Boolean).join(" · ");
+      if (r.stops && r.stops.length) r.stops.forEach(function (id) { var x = P.plan.places[id] || r; add({ cat: "ski", pid: id, name: x.name || r.name, ja: x.ja || r.ja, lat: x.lat, lon: x.lon, sub: sub, stay: STAY.ski }); });
+      else add({ cat: "ski", pid: r.id, name: r.name, ja: r.ja, lat: r.lat, lon: r.lon, sub: sub, stay: STAY.ski });
+    });
+    (window.SPOTS || []).forEach(function (x) {
+      var cat = x.kind === "雪場" ? "ski" : x.kind === "停車" ? "transport" : "sight";
+      add({ cat: cat, pid: x.stop || x.id, name: x.name, ja: x.ja, lat: x.lat, lon: x.lon, area: x.area, sub: [ST[x.status], x.kind, x.hours && x.hours !== "🔎" ? x.hours : ""].filter(Boolean).join(" · ") + rating(x), stay: x.time || STAY[cat] });
+    });
+    (window.FOOD || []).forEach(function (f) { add({ cat: "food", pid: f.id, name: f.name, ja: f.ja, lat: f.lat, lon: f.lon, area: f.area, sub: [f.kind, MEAL[f.meal], f.hours].filter(Boolean).join(" · ") + rating(f), stay: f.meal === "dinner" ? 90 : f.meal === "snack" ? 30 : 60 }); });
+    (T.bases || []).forEach(function (x) { add({ cat: "stay", pid: basePlace(x), name: x.name, ja: x.ja, lat: x.lat, lon: x.lon, sub: x.short + " · " + md(x.from) + "–" + md(x.to) + " 住 " + x.nights + " 晚", stay: STAY.stay }); });
+    var names = {}; L.forEach(function (c) { names[c.name] = 1; });
+    (T.places || []).forEach(function (x) { if (names[x.name]) return; var cat = CATN[x.type] && x.type !== "other" ? x.type : "sight"; add({ cat: cat, name: x.name, ja: x.ja, lat: x.lat, lon: x.lon, sub: (x.note || "").replace(/\*\*/g, "").replace(/\{[^}]*\}/g, "").slice(0, 46), stay: STAY[cat] }); names[x.name] = 1; });
+    var ids = {}; L.forEach(function (c) { if (c.pid) ids[c.pid] = 1; });
+    Object.keys(P.plan.places).forEach(function (id) { var x = P.plan.places[id]; if (ids[id] || names[x.name]) return; add({ cat: "other", pid: id, name: x.name, ja: x.ja, lat: x.lat, lon: x.lon, sub: "之前加過的地點", stay: STAY.other }); });
+    return L;
+  }
+  /* 住宿在 trip.js 和 plan.json 的 id 不一樣（furano↔lodge、sapporo↔favlux），用座標對起來 */
+  function basePlace(b) { var hit = Object.keys(P.plan.places).filter(function (k) { var x = P.plan.places[k]; return P.hav(x, b) < 0.3; })[0]; return hit || b.id; }
+  function isBase(id) { var x = P.plan.places[id]; return !!x && (T.bases || []).some(function (b) { return b.id === id || P.hav(x, b) < 0.3; }); }
+  /* 選中的資料 → plan.json 的地點 id（已經有就用，沒有就建一筆，名稱和座標照資料） */
+  function placeId(c) {
+    if (c.pid && P.plan.places[c.pid]) return c.pid;
+    var same = Object.keys(P.plan.places).filter(function (k) { return P.plan.places[k].name === c.name; })[0]; if (same) return same;
+    var id = c.pid && /^[\w-]+$/.test(c.pid) ? c.pid : hid(c.name);
+    P.plan.places[id] = { name: c.name, lat: c.lat, lon: c.lon }; if (c.ja) P.plan.places[id].ja = c.ja;
+    return id;
+  }
+  function usedOn(c) {
+    var id = c.pid && P.plan.places[c.pid] ? c.pid : Object.keys(P.plan.places).filter(function (k) { return P.plan.places[k].name === c.name; })[0];
+    if (!id) return [];
+    return dates.filter(function (d) { return P.plan.days[d].stops.some(function (s) { return s.id === id; }); });
+  }
+  /* 預設插在哪：最後一站如果是住宿（回家），就插在它前面；否則加在最後 */
+  function defaultPos() { var st = day().stops; return st.length > 1 && isBase(st[st.length - 1].id) ? st.length - 1 : st.length; }
+  function openPicker(pos) {
+    var st = day().stops; pk.pos = pos == null ? defaultPos() : Math.max(1, Math.min(pos, st.length)); pk.q = ""; pk.list = candidates();
+    $("#pktitle").textContent = "加一站到 " + md(state.date);
+    $("#pkpos").innerHTML = st.map(function (s, i) { return '<option value="' + (i + 1) + '"' + (i + 1 === pk.pos ? " selected" : "") + '>' + esc(P.plan.places[s.id].name) + " 之後" + (i + 1 < st.length ? "" : "（最後）") + '</option>'; }).join("");
+    $("#pkq").value = ""; renderPicker(); $("#picker").showModal(); $("#pklist").scrollTop = 0;
+  }
+  function renderPicker() {
+    var st = day().stops, from = P.plan.places[st[Math.max(0, pk.pos - 1)].id], q = pk.q.trim().toLowerCase();
+    var counts = {}; pk.list.forEach(function (c) { counts[c.cat] = (counts[c.cat] || 0) + 1; });
+    $("#pkcats").innerHTML = CATS.filter(function (c) { return counts[c[0]] || c[0] === "other"; }).map(function (c) { return '<button type="button" role="tab" class="chip" data-cat="' + c[0] + '" aria-selected="' + (!q && pk.cat === c[0]) + '">' + c[1] + (counts[c[0]] ? " <small>" + counts[c[0]] + "</small>" : "") + '</button>'; }).join("");
+    var rows = pk.list.filter(function (c) { return q ? (c.name + " " + (c.ja || "") + " " + (c.sub || "") + " " + (c.area || "")).toLowerCase().indexOf(q) >= 0 : c.cat === pk.cat; });
+    rows.forEach(function (c) { c.km = from ? P.hav(from, c) : 0; }); rows.sort(function (a, b) { return a.km - b.km; });
+    $("#pkother").hidden = !(pk.cat === "other" && !q) && !(q && !rows.length);
+    $("#pklist").innerHTML = rows.length ? rows.map(function (c) {
+      var used = usedOn(c), today = used.indexOf(state.date) >= 0;
+      return '<button type="button" class="pk-item' + (today ? " is-today" : "") + '" data-k="' + pk.list.indexOf(c) + '">' +
+        '<span class="pk-name">' + esc(c.name) + (c.ja && c.ja !== c.name ? ' <small>' + esc(c.ja) + '</small>' : "") + '</span>' +
+        (c.sub ? '<span class="pk-sub">' + esc(c.sub) + '</span>' : "") +
+        '<span class="pk-meta">' + (q ? '<i>' + CATN[c.cat] + '</i>' : "") + '離前一站約 ' + (c.km < 10 ? c.km.toFixed(1) : Math.round(c.km)) + ' km' + (used.length ? ' · <b>' + (today ? "今天已排" : used.map(md).join("、") + " 已排") + '</b>' : "") + '</span></button>';
+    }).join("") : (q ? '<p class="pk-empty">找不到「' + esc(pk.q) + '」。可以換個字，或在下面貼 Google Maps 網址。</p>' : "");
+  }
+  $("#addopen").addEventListener("click", function () { openPicker(); });
+  $("#stoplist").addEventListener("click", function (e) { var b = e.target.closest("[data-ins]"); if (b) openPicker(+b.dataset.ins); });
+  $("#pkclose").addEventListener("click", function () { $("#picker").close(); });
+  $("#picker").addEventListener("click", function (e) { if (e.target === $("#picker")) $("#picker").close(); });
+  $("#pkpos").addEventListener("change", function () { pk.pos = +this.value; renderPicker(); });
+  $("#pkq").addEventListener("input", function () { pk.q = this.value; renderPicker(); });
+  $("#pkcats").addEventListener("click", function (e) { var b = e.target.closest("[data-cat]"); if (!b) return; pk.cat = b.dataset.cat; store("snow13-pkcat", pk.cat); pk.q = ""; $("#pkq").value = ""; renderPicker(); $("#pklist").scrollTop = 0; });
+  $("#pklist").addEventListener("click", function (e) { var b = e.target.closest("[data-k]"); if (!b) return; var c = pk.list[+b.dataset.k]; insertStop(placeId(c), c.stay, c.name); });
+  function insertStop(pid, stay, name) {
+    var st = day().stops, pos = Math.max(1, Math.min(pk.pos, st.length)), after = st[pos - 1] ? P.plan.places[st[pos - 1].id].name : "";
+    st.splice(pos, 0, { id: pid, stay: stay || 60, note: "" });
+    $("#picker").close(); afterReorder();
+    toast("已加「" + name + "」在「" + after + "」之後，停 " + fmtMin(stay || 60) + "。", "ok", [["復原", function () { var i = st.indexOf(st.filter(function (x, k) { return k === pos && x.id === pid; })[0]); if (i >= 0) { st.splice(i, 1); afterReorder(); toast("已復原。", "info"); } }]]);
+    setTimeout(function () { var card = document.querySelector('.stopcard[data-i="' + pos + '"]'); if (card) { card.scrollIntoView({ block: "center", behavior: "smooth" }); card.classList.add("flash"); setTimeout(function () { card.classList.remove("flash"); }, 1600); } }, 60);
+  }
+  /* 「其他」：貼 Google Maps 網址或打地名（以前唯一的新增方式，現在是最後的備案） */
   $("#addbtn").addEventListener("click", addStop);
   $("#addq").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addStop(); } });
   function addStop() {
     var q = $("#addq").value.trim(); if (!q) return;
-    var id = Object.keys(P.plan.places).filter(function (k) { return P.plan.places[k].name === q; })[0];
-    var p = Promise.resolve(id);
-    if (!id) {
-      var m = q.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || q.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) || q.match(/[?&](?:q|query|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/) || q.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
-      if (m) { var nm = prompt("這個地點叫什麼？"); if (!nm) return; p = Promise.resolve(newPlace(nm, +m[1], +m[2])); }
-      else if (/^https?:/.test(q)) { msg("這種 Google Maps 短網址看不到座標。請在 Google Maps 打開地點，網址列會出現 @緯度,經度，整段貼過來。", true); return; }
-      else p = fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=jp&q=" + encodeURIComponent(q), { headers: { "Accept-Language": "zh-TW,ja" } })
-        .then(function (r) { return r.json(); }).then(function (j) { if (!j.length) { msg("找不到「" + q + "」，請貼 Google Maps 連結。", true); return null; } if (!confirm("找到：" + j[0].display_name + "\n是這裡嗎？")) return null; return newPlace(q, +j[0].lat, +j[0].lon); });
-    }
-    p.then(function (pid) {
-      if (!pid) return; var stops = day().stops;
-      stops.push({ id: pid, stay: 60, note: "" }); $("#addq").value = ""; afterReorder();
-    });
+    var p;
+    var m = q.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || q.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) || q.match(/[?&](?:q|query|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/) || q.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
+    if (m) { var nm = prompt("這個地點叫什麼？"); if (!nm) return; p = Promise.resolve({ name: nm, lat: +m[1], lon: +m[2] }); }
+    else if (/^https?:/.test(q)) { msg("這種 Google Maps 短網址看不到座標。請在 Google Maps 打開地點，網址列會出現 @緯度,經度，整段貼過來。", true); return; }
+    else p = fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=jp&q=" + encodeURIComponent(q), { headers: { "Accept-Language": "zh-TW,ja" } })
+      .then(function (r) { return r.json(); }).then(function (j) { if (!j.length) { msg("找不到「" + q + "」，請貼 Google Maps 網址。", true); return null; } if (!confirm("找到：" + j[0].display_name + "\n是這裡嗎？")) return null; return { name: q, lat: +j[0].lat, lon: +j[0].lon }; });
+    p.then(function (c) { if (!c) return; $("#addq").value = ""; insertStop(placeId(c), STAY.other, c.name); });
   }
-  function newPlace(name, lat, lon) { var id = "p" + Date.now().toString(36); P.plan.places[id] = { name: name, lat: lat, lon: lon }; return id; }
+  function newPlace(name, lat, lon) { return placeId({ name: name, lat: lat, lon: lon }); }
 
   /* ---------- 地圖 ---------- */
   function renderMap() {
@@ -295,7 +395,7 @@
     state.map.getSource("route").setData({ type: "FeatureCollection", features: sch.legs.filter(function (l) { return l.geom; }).map(function (l) { return { type: "Feature", properties: { mode: l.mode === "walk" ? "walk" : "drive" }, geometry: { type: "LineString", coordinates: l.geom } }; }) });
     state.map.getSource("stops").setData({ type: "FeatureCollection", features: sch.stops.map(function (s) { return { type: "Feature", properties: { n: String(s.i + 1), label: s.name + " " + s.time, late: !!s.late }, geometry: { type: "Point", coordinates: [s.lon, s.lat] } }; }) });
     var pts = []; sch.stops.forEach(function (s) { pts.push([s.lon, s.lat]); }); sch.legs.forEach(function (l) { (l.geom || []).forEach(function (c) { pts.push(c); }); });
-    if (pts.length) { var b = new maplibregl.LngLatBounds(pts[0], pts[0]); pts.forEach(function (c) { b.extend(c); }); state.map.fitBounds(b, { padding: 60, maxZoom: 13, duration: 500 }); }
+    if (pts.length && state.fitSig !== lastSig) { state.fitSig = lastSig; var b = new maplibregl.LngLatBounds(pts[0], pts[0]); pts.forEach(function (c) { b.extend(c); }); state.map.fitBounds(b, { padding: 60, maxZoom: 13, duration: 500 }); }
   }
 
   /* ---------- 設定 ---------- */

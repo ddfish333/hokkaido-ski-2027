@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="../assets/style.css?v=d7c5d9bd">
-<link rel="stylesheet" href="../assets/editor.css?v=953b0fe5">
+<link rel="stylesheet" href="../assets/editor.css?v=39609b74">
 <script>window.BASE = "../";</script>
 </head>
 <body class="editor">
@@ -44,11 +44,7 @@
       </div>
       <div class="ed-summary" id="summary"></div>
       <ol class="stoplist" id="stoplist"></ol>
-      <div class="addrow">
-        <input type="text" id="addq" list="placelist" placeholder="新增站點：輸入地點名稱，或貼 Google Maps 連結" autocomplete="off">
-        <datalist id="placelist"></datalist>
-        <button type="button" class="btn" id="addbtn">加到最後</button>
-      </div>
+      <button type="button" class="btn addstop" id="addopen">＋ 新增站點</button>
       <p class="ed-note">站點時間都是推算：前一站離開＋移動時間。改停留分鐘、固定時間、順序，後面全部自動重算。紅色＝晚於固定時間。</p>
     </section>
     <aside class="ed-right">
@@ -82,12 +78,27 @@
   </form>
 </dialog>
 
+<dialog id="picker" class="picker" aria-label="新增站點">
+  <div class="pk-head">
+    <div class="pk-title"><b id="pktitle">加一站</b><button type="button" class="pk-close" id="pkclose" aria-label="關閉">×</button></div>
+    <label class="pk-pos">加在 <select id="pkpos"></select></label>
+    <input type="search" id="pkq" placeholder="搜尋名稱（中文、日文、英文都可以）" autocomplete="off" enterkeyhint="search">
+    <div class="pk-cats" id="pkcats" role="tablist" aria-label="類別"></div>
+  </div>
+  <div class="pk-list" id="pklist"></div>
+  <div class="pk-other" id="pkother" hidden>
+    <p>清單裡都沒有？在 Google Maps 打開那個地點，把網址整段貼過來（網址裡要有 @緯度,經度），或直接打地名找。</p>
+    <div class="addrow"><input type="text" id="addq" placeholder="Google Maps 網址或地名" autocomplete="off"><button type="button" class="btn" id="addbtn">加入</button></div>
+  </div>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="../data/trip.js?v=70221e0f"></script>
+<script src="../data/food.js?v=53537af8"></script>
 <script src="../data/spots.js?v=40f9bc94"></script>
 <script src="../assets/plan.js?v=a71e4e7b"></script>
-<script src="../assets/editor.js?v=db5fb2de"></script>
+<script src="../assets/editor.js?v=d2826c3e"></script>
 </body>
 </html>
