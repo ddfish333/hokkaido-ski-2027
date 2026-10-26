@@ -41,7 +41,7 @@
       if (i > 0 && at != null) { if (arr < at) { wait = at - arr; arr = at; } else if (arr > at) late = arr - at; }
       if (by != null && arr > by) late = Math.max(late, arr - by);
       var stay = i === stops.length - 1 ? 0 : (+s.stay || 0), dep = arr + stay;
-      out.push({ i: i, id: s.id, name: pl.name, ja: pl.ja || "", lat: pl.lat, lon: pl.lon, arr: arr, dep: dep, stay: stay, wait: wait, late: late, at: s.at || "", by: s.by || "", via: via, note: s.note || "", time: hm(arr), timeDep: hm(dep) });
+      out.push({ i: i, id: s.id, name: pl.name, ja: pl.ja || "", lat: pl.lat, lon: pl.lon, arr: arr, dep: dep, stay: stay, wait: wait, late: late, at: s.at || "", by: s.by || "", via: via, note: s.note || "", alts: s.alts || null, altNotes: s.altNotes || null, time: hm(arr), timeDep: hm(dep) });
       t = dep;
     }
     return { stops: out, legs: legs, total: { km: Math.round(tk), min: tm }, end: out.length ? out[out.length - 1].arr : null };
@@ -173,6 +173,26 @@
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", navInit); else navInit();
+
+  /* ---------- 雪場票：停多久就給對應的票（半天給 4 小時券），單日頁、替代方案共用 ---------- */
+  P.ticketFor = function (rs, stay) {
+    var t = (rs && rs.tickets) || []; if (!t.length) return null;
+    if (stay && stay <= 300) { var h = t.filter(function (x) { return /4\s*小時|半日|半天/.test(x[0]); })[0]; if (h) return h; }
+    return t[0];
+  };
+  P.resortOf = function (id) { return ((window.TRIP && TRIP.resorts) || []).filter(function (r) { return (r.stops || []).indexOf(id) >= 0; })[0] || null; };
+  /* ---------- 這一站也可以換成…（plan.json 站點的 alts／altNotes） ----------
+     每個替代地點算：從上一站過去、再到下一站要開多久，和現在的安排差幾分鐘。 */
+  P.altsFor = function (date, i, mode) {
+    var sch = P.schedule(date, mode || P.mode()), s = sch.stops[i]; if (!s || !s.alts || !s.alts.length) return [];
+    var prev = sch.stops[i - 1], next = sch.stops[i + 1], cur = (i > 0 ? sch.legs[i - 1].min : 0) + (next ? sch.legs[i].min : 0);
+    var m = mode || P.mode();
+    return s.alts.filter(function (id) { return P.plan.places[id]; }).map(function (id) {
+      var pl = P.plan.places[id], a = prev ? leg(prev.id, id, "drive") : null, b = next ? leg(id, next.id, next.via) : null;
+      var tot = (a ? a[m] : 0) + (b ? b[m] : 0);
+      return { id: id, name: pl.name, ja: pl.ja || "", prev: prev, next: next, toLeg: a, fromLeg: b, delta: tot - cur, resort: P.resortOf(id), note: (s.altNotes || {})[id] || "" };
+    });
+  };
 
   P.legMode = function (l) { return P.LEGMODE[l && l.mode] ? l.mode : "drive"; };
   P.legHTML = function (l) {

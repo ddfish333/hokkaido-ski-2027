@@ -258,13 +258,28 @@
     return '<div class="wxday"><span class="ico">' + ICON.snow + '</span><div><div class="tt">' + c.tmax + '° / ' + c.tmin + '°</div><div class="ss">' + esc(c.label) + ' 歷年平均・每日新雪約 ' + c.snow + ' cm（進入 16 天預報後改顯示即時）</div></div></div>';
   }
   /* 站點的營業時間／價錢／停車：照 id 去 spots.js、food.js 找，找不到就用 trip.js places 裡座標相同的點；只讀不抄，資料改了這裡自動跟著變 */
+  /* 這一站也可以換成…：替代地點的車程（從上一站、到下一站）、和現在差幾分鐘、雪場時間與票價、為什麼可以考慮 */
+  function altsHTML(s, i, d) {
+    var alts = Plan.altsFor(d.date, i, state.mode); if (!alts.length) return "";
+    var cur = (s.altNotes || {})[s.id];
+    return '<div class="alts"><p class="alts-h">這站也可以換成 <small>給大家參考，決定了在「編輯」裡一鍵換</small></p>' + (cur ? '<p class="alt-cur"><b>現在：' + esc(s.name) + '</b>　' + em(fill(cur, d.date, s)) + '</p>' : "") +
+      alts.map(function (a) {
+        var rs = a.resort, tk = rs ? Plan.ticketFor(rs, s.stay) : null, mins = function (l) { return l ? fmtMin(l[state.mode === "snow" ? "snow" : "normal"]) : ""; };
+        var trip = (a.prev ? "從" + esc(a.prev.name.replace(/（.*?）/g, "")) + " 開車 " + mins(a.toLeg) : "") + (a.next ? "，再開 " + mins(a.fromLeg) + " 到" + esc(a.next.name.replace(/（.*?）/g, "")) : "");
+        var dl = a.delta < 0 ? '<span class="alt-save">比現在少開 ' + fmtMin(-a.delta) + '</span>' : a.delta > 0 ? '<span class="alt-more">多開 ' + fmtMin(a.delta) + '</span>' : "";
+        var facts = rs ? [rs.tier, rs.hours, tk ? tk[0] + " " + tk[1] : "", rs.kids].filter(Boolean) : [];
+        return '<div class="alt"><div class="alt-top"><b>' + esc(a.name) + '</b>' + jaTag(a.ja, a.name) + dl + '</div><p class="alt-trip">' + trip + '</p>' +
+          (a.note ? '<p class="alt-note">' + em(fill(a.note, d.date, s)) + '</p>' : "") +
+          (facts.length ? '<p class="alt-facts">' + facts.map(function (x) { return em(x); }).join(" · ") + (rs ? ' <a href="' + BASE + 'ski/?day=' + d.date + '#' + rs.id + '">滑雪地圖 →</a>' : "") + '</p>' : "") + '</div>';
+      }).join("") + '</div>';
+  }
   function stopFacts(s, d) {
     if (s.id === d.base || baseById[s.id] || ["villa", "lodge", "favlux"].indexOf(s.id) >= 0) return "";
     var sp = (window.SPOTS || []).filter(function (x) { return x.id === s.id; })[0], fd = (window.FOOD || []).filter(function (x) { return x.id === s.id; })[0];
     var rs = T.resorts.filter(function (r) { return (r.stops || []).indexOf(s.id) >= 0; })[0];
     var parts = [], wd = new Date(d.date + "T00:00:00").getDay(), href = "";
     if (rs) {
-      parts.push(rs.hours); parts.push(rs.tickets[0][0] + " " + rs.tickets[0][1]); parts.push(rs.kids);
+      var tk = Plan.ticketFor(rs, s.stay); parts.push(rs.hours); if (tk) parts.push(tk[0] + " " + tk[1]); parts.push(rs.kids);
       href = BASE + "ski/?day=" + d.date + "#" + rs.id;
     } else if (sp) {
       if (sp.hours) parts.push(sp.hours); if (sp.fee) parts.push(sp.fee); if (sp.parking) parts.push("停車：" + sp.parking);
@@ -309,7 +324,7 @@
         var row = "";
         if (i > 0) { var l = sch.legs[i - 1]; row += '<li class="tl-leg ' + Plan.legMode(l) + ' m-' + Plan.legMode(l) + '"><time></time>' + Plan.legHTML(l) + '</li>'; }
         var last = i === sch.stops.length - 1;
-        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + jaTag(s.ja, s.name) + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(fill(s.note, d.date, s)) + '</span>' : "") + stopFacts(s, d) + '</span></li>';
+        row += '<li class="' + (s.late ? "is-late" : "") + '"><time>' + s.time + (last || !s.stay ? "" : '<small>– ' + s.timeDep + '</small>') + '</time><span><b>' + esc(s.name) + '</b>' + jaTag(s.ja, s.name) + (s.stay && !last ? ' <span class="stay">停 ' + fmtMin(s.stay) + '</span>' : "") + lateTag(s) + (s.note ? '<br><span class="tl-note">' + em(fill(s.note, d.date, s)) + '</span>' : "") + stopFacts(s, d) + altsHTML(s, i, d) + '</span></li>';
         return row;
       }).join("") + '</ol></div>';
     html += '<div class="side">';

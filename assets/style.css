@@ -708,3 +708,20 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   body:has(.tabbar) .film { height: calc(100svh - 62px - env(safe-area-inset-bottom)); }
 }
 
+/* 這站也可以換成…（plan.json 的 alts） */
+.alts { margin: 12px 0 2px; padding: 12px 14px; border-radius: 12px; background: rgba(106,164,255,.06); border: 1px dashed rgba(106,164,255,.35); display: grid; gap: 10px; }
+.alts-h { margin: 0; font: 500 13.5px/1.4 var(--f-body); letter-spacing: .06em; color: var(--glacier); }
+.alts-h small { display: block; font-weight: 300; font-size: 11.5px; color: var(--muted); letter-spacing: .02em; margin-top: 2px; }
+.alt-cur { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--muted); }
+.alt-cur b { color: var(--ink); font-weight: 500; }
+.alt { display: grid; gap: 4px; padding-top: 10px; border-top: 1px solid var(--line); }
+.alt-top { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.alt-top b { font-weight: 500; font-size: 15px; }
+.alt-save, .alt-more { font: 400 11.5px/1 var(--f-display); letter-spacing: .04em; padding: 4px 8px; border-radius: 999px; margin-left: auto; }
+.alt-save { background: rgba(69,192,138,.15); color: var(--ok); }
+.alt-more { background: rgba(240,164,58,.14); color: var(--warn); }
+.alt-trip { margin: 0; font: 400 12.5px/1.6 var(--f-display); color: var(--glacier); letter-spacing: .02em; }
+.alt-note { margin: 0; font-size: 13px; line-height: 1.7; color: var(--ink); }
+.alt-facts { margin: 0; font-size: 12px; line-height: 1.7; color: var(--muted); }
+.alt-facts a { color: var(--glacier); text-decoration: none; }
+

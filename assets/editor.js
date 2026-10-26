@@ -201,6 +201,7 @@
             '<label>' + (i === 0 ? "時間" : "開始") + ' <input type="time" data-at="' + i + '" value="' + esc(s.at) + '"></label>' +
             (i === 0 ? "" : '<label>最晚到 <input type="time" data-by="' + i + '" value="' + esc(s.by) + '"></label>') + '</div>' +
           '<div class="sc-row"><span class="lbl">備註</span><input type="text" class="notein" data-i="' + i + '" value="' + esc(raw.note || "") + '" placeholder="要做什麼、提醒"><small class="note-prev">' + esc(notePrev(raw.note)) + '</small></div>' +
+          ((raw.alts || []).length ? '<div class="sc-row sc-alts"><span class="lbl">也可換</span>' + raw.alts.filter(function (id) { return P.plan.places[id]; }).map(function (id) { return '<button type="button" class="altswap" data-i="' + i + '" data-alt="' + esc(id) + '">換成 ' + esc(P.plan.places[id].name) + '</button>'; }).join("") + '</div>' : "") +
         '</div></li>';
       return html;
     }).join("");
@@ -345,6 +346,19 @@
   }
   $("#addopen").addEventListener("click", function () { openPicker(); });
   $("#stoplist").addEventListener("click", function (e) { var b = e.target.closest("[data-ins]"); if (b) openPicker(+b.dataset.ins); });
+  /* 一鍵換成替代地點：原本的地點變成替代選項，停留、固定時間、備註照舊 */
+  $("#stoplist").addEventListener("click", function (e) {
+    var b = e.target.closest(".altswap"); if (!b) return;
+    var i = +b.dataset.i, stops = day().stops, st = stops[i], to = b.dataset.alt, from = st.id, prev = stops[i - 1], next = stops[i + 1], stay0 = st.stay;
+    /* 之後的行程時間不動：換過去省下（或多出）的車程，加減在這一站的停留上 */
+    function legMin(a, z, via) { var L = P.leg(a, z, via); return L ? (L[state.mode] || L.normal || 0) : 0; }
+    function drive(id) { return (prev ? legMin(prev.id, id, st.via) : 0) + (next ? legMin(id, next.id, next.via) : 0); }
+    var diff = drive(from) - drive(to);
+    function swap(a, z, stay) { st.id = z; st.alts = st.alts.map(function (x) { return x === z ? a : x; }); st.stay = stay; afterReorder(); }
+    swap(from, to, Math.max(30, (+stay0 || 0) + diff));
+    toast("已把「" + P.plan.places[from].name + "」換成「" + P.plan.places[to].name + "」。" + (diff > 0 ? "少開的 " + fmtMin(diff) + " 加在這站（多滑一點）" : diff < 0 ? "多開的 " + fmtMin(-diff) + " 從這站扣掉" : "") + "，之後的行程時間不變；想多睡就把出發時間往後調。", "ok",
+      [["復原", function () { swap(to, from, stay0); toast("已復原。", "info"); }]]);
+  });
   $("#pkclose").addEventListener("click", function () { $("#picker").close(); });
   $("#picker").addEventListener("click", function (e) { if (e.target === $("#picker")) $("#picker").close(); });
   $("#pkpos").addEventListener("change", function () { pk.pos = +this.value; renderPicker(); });

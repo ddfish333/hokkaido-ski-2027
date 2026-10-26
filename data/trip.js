@@ -145,7 +145,7 @@ window.TRIP = {
       links: [["官網", "https://www.fujino-yagai-sports.jp/winter"], ["票價（中文）", "https://www.fujino-yagai-sports.jp/zh-hant/winter/fee"]],
       status: "https://www.fujino-yagai-sports.jp/winter", cams: "https://www.fujino-yagai-sports.jp/winter/live", access: "https://www.fujino-yagai-sports.jp/winter/access",
       summit: null, base: 200, est: true },
-    { id: "asari", group: "otaru", name: "朝里川溫泉滑雪場", ja: "朝里川温泉スキー場", tier: "小樽近郊・中小型", lat: 43.1385, lon: 141.0293,
+    { id: "asari", group: "otaru", stops: ["asari_ski"], name: "朝里川溫泉滑雪場", ja: "朝里川温泉スキー場", tier: "小樽近郊・中小型", lat: 43.1385, lon: 141.0293,
       season: null, seasonNote: "2026-27 待公告", hours: "09:00–16:00（12/20–3/1 到 17:00）；沒有夜滑（2025-26）", scale: "9 條雪道、5 吊椅；山頂 660 m、山腳 140 m；停車 800 台免費",
       tixSeason: "2025-26 參考價（2026-27 待公告，11 月再查）",
       tickets: [["1 日券", "¥5,500"], ["4 小時券", "¥4,900"], ["アフター14（14:00 起）", "¥3,500"], ["小孩 1 日", "¥3,300"], ["小孩 4 小時", "¥3,000"]],

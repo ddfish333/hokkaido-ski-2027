@@ -51,6 +51,7 @@ def text_fields():
     for d, v in PLAN["days"].items():
         for i, s in enumerate(v["stops"], 1):
             if s.get("note"): yield f"plan.json {d} 第 {i} 站 {s['id']} note", s["note"], d, s["id"], True
+            for k, t in (s.get("altNotes") or {}).items(): yield f"plan.json {d} 第 {i} 站 altNotes.{k}", t, d, s["id"], True
     for b in trip.get("bases", []):
         for k in ("checkin", "checkout"):  # 官方入住時間是事實，可以寫死；但裡面的標記一定要換得出來
             if b.get(k) and "{" in str(b[k]): yield f"trip.js bases {b['id']} {k}", b[k], b["from"], None, False
@@ -146,6 +147,15 @@ for f, marks in {"assets/film.js": [("keepAround(", "序幕只掛前後一幕的
     src = open(os.path.join(ROOT, f), encoding="utf-8").read()
     for mark, what in marks:
         if mark not in src: E(f"{f}：找不到「{mark}」——「{what}」這個修正被拿掉或被舊檔案蓋掉了")
+
+# 0e2. 「這站也可以換成…」：替代地點要在 plan.json places 裡，說明只寫給 alts 或目前這站
+for d, v in PLAN["days"].items():
+    for i, s in enumerate(v["stops"], 1):
+        for a in s.get("alts") or []:
+            if a not in PLAN["places"]: E(f"{d} 第 {i} 站：替代地點「{a}」不在 plan.json places")
+            elif not leg_of(v["stops"][i-2]["id"], a, "drive") if i > 1 else False: W(f"{d} 第 {i} 站：替代「{a}」從上一站沒有路段快取，車程用直線估算")
+        for k in (s.get("altNotes") or {}):
+            if k != s["id"] and k not in (s.get("alts") or []): W(f"{d} 第 {i} 站：altNotes 有「{k}」但它不是這站或替代地點")
 
 # 0f. 編輯器儲存的底線（10/26：存了不知道有沒有存、要等一分鐘、多人同時改會互蓋）
 #   (a) 單日頁的靜態 HTML 不能含 plan.json 推算出來的東西，否則編輯器一存，GitHub 檢查就紅叉、頁面標題變舊
