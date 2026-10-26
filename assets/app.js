@@ -395,7 +395,7 @@
   function initMap() {
     if (!has("mapcanvas")) return;
     renderLayers(); renderAreas(); renderStops(); applyMode();
-    KEYS = keyPoints(); POIS = explorePois();
+    KEYS = keyPoints(); POIS = explorePois(); renderDrive();
     if (!window.maplibregl) { $("#mapfallback").hidden = false; return; }
     try {
       map = new maplibregl.Map({
@@ -490,9 +490,10 @@
     box.onclick = function (e) {
       var b = e.target.closest("[data-cat]"); if (!b) return;
       var k = b.dataset.cat; catOn[k] = !catOn[k]; b.setAttribute("aria-pressed", catOn[k]);
-      if (!map || !mapReady) return;
+      if (!map || !mapReady) { renderDrive(); return; }
       if (k === "stay" || k === "ski") { map.setFilter("key-dot", keyFilter()); map.setFilter("key-label", keyFilter()); }
       else map.getSource("poi").setData(poiData());
+      renderDrive();
     };
   }
   function renderAreas() {
@@ -503,7 +504,7 @@
     }).join("");
     box.onclick = function (e) {
       var b = e.target.closest("[data-area]"); if (!b) return;
-      state.area = b.dataset.area; renderAreas(); applyMode(); fitArea(true);
+      state.area = b.dataset.area; renderAreas(); applyMode(); fitArea(true); renderDrive();
     };
   }
   function fitArea(animate) {
@@ -580,32 +581,65 @@
   if (has("origin")) $("#origin").addEventListener("click", function (e) {
     var b = e.target.closest("[data-o]"); if (!b) return;
     if (b.dataset.o !== "gps") { gpsSeq++; if (has("gpsmsg")) $("#gpsmsg").textContent = ""; }
-    state.origin = b.dataset.o; state.originManual = true; renderOrigin(); renderDrive(); showOrigin();
+    state.origin = b.dataset.o; state.originManual = true; renderOrigin(); showOrigin(); renderDrive();
   });
   function originPoint() {
     if (state.origin === "gps") return state.gps;
     var b = baseById[state.origin]; return { lat: b.lat, lon: b.lon };
   }
+  /* ---------- 車程表：出發地 → 目前圖層上、目前地圖範圍內的地點 ----------
+     住宿→雪場用 trip.js 的表；其他組合向 OSRM 查（批次、快取在這支裝置），還沒查到前先用直線估算 */
+  var DRIVE = store("snow13-drive") || {}, driveBusy = {}, driveShowAll = false;
+  T.bases.forEach(function (b) { var tbl = T.drive[b.id] || {}; T.resorts.forEach(function (r) { if (tbl[r.id]) DRIVE[b.id + "|" + r.lon + "," + r.lat] = tbl[r.id]; }); });
+  function originKey() { if (state.origin !== "gps") return state.origin; var g = state.gps; return "gps|" + g.lat.toFixed(3) + "," + g.lon.toFixed(3); }
+  var CAT_NAME = {}; CATS.forEach(function (c) { CAT_NAME[c[0]] = c[1]; });
+  function areaBounds() { var a = AREAS.filter(function (x) { return x[0] === state.area; })[0]; return a && a[2] ? a[2] : null; }
+  function inBounds(p, b) { return !b || (p.lon >= b[0][0] && p.lon <= b[1][0] && p.lat >= b[0][1] && p.lat <= b[1][1]); }
+  function driveTargets() {
+    var list = [], b = areaBounds();
+    if (catOn.ski) T.resorts.forEach(function (r) { list.push({ type: "ski", name: r.name, sub: r.tier, lat: r.lat, lon: r.lon }); });
+    if (catOn.stay) T.bases.forEach(function (x) { if (x.id !== state.origin) list.push({ type: "stay", name: x.name, sub: x.short, lat: x.lat, lon: x.lon }); });
+    POIS.forEach(function (p) { if (p.type !== "ski" && p.type !== "stay" && catOn[p.type]) list.push({ type: p.type, name: p.name, sub: p.sub, lat: p.lat, lon: p.lon, link: p.link, linkText: p.linkText }); });
+    return list.filter(function (p) { return inBounds(p, b); });
+  }
+  function fetchDrive(ok, o, missing) {
+    var key = ok + "#" + missing.length + "#" + missing[0].lon; if (driveBusy[key]) return; driveBusy[key] = true;
+    var chunks = []; for (var i = 0; i < missing.length; i += 80) chunks.push(missing.slice(i, i + 80));
+    Promise.all(chunks.map(function (ch) {
+      var coords = [o.lon + "," + o.lat].concat(ch.map(function (p) { return p.lon + "," + p.lat; })).join(";");
+      return fetch("https://router.project-osrm.org/table/v1/driving/" + coords + "?sources=0&annotations=duration,distance").then(function (r) { return r.json(); }).then(function (j) {
+        if (j.code !== "Ok") throw new Error("route");
+        ch.forEach(function (p, k) { var sec = j.durations[0][k + 1], m = j.distances[0][k + 1]; if (sec != null) DRIVE[ok + "|" + p.lon + "," + p.lat] = [Math.round(m / 100) / 10, r5(sec / 60 * 1.15), r5(sec / 60 * 1.5)]; });
+      });
+    })).then(function () { store("snow13-drive", DRIVE); if (has("gpsmsg") && state.origin === "gps") $("#gpsmsg").textContent = "已用目前位置計算路線車程。"; renderDrive(); })
+      .catch(function () { if (has("gpsmsg") && state.origin === "gps") $("#gpsmsg").textContent = "路線服務暫時連不上，先用直線距離估算。"; })
+      .then(function () { delete driveBusy[key]; });
+  }
   function renderDrive() {
     if (!has("drivelist")) return;
-    var o = originPoint(), rows;
-    if (state.origin === "gps") {
-      rows = T.resorts.map(function (r) {
-        var x = state.gpsDrive && state.gpsDrive[r.id];
-        if (x) return { r: r, km: x[0], n: x[1], s: x[2], est: false };
-        var km = haversine(o, r) * 1.35; var min = km / 45 * 60;
-        return { r: r, km: Math.round(km * 10) / 10, n: r5(min), s: r5(min * 1.3), est: true };
-      });
-    } else {
-      var tbl = T.drive[state.origin];
-      rows = T.resorts.map(function (r) { var x = tbl[r.id]; return { r: r, km: x[0], n: x[1], s: x[2] }; });
-    }
+    var o = originPoint(), ok = originKey(), missing = [];
+    var rows = driveTargets().map(function (p) {
+      var x = DRIVE[ok + "|" + p.lon + "," + p.lat];
+      if (x) return { p: p, km: x[0], n: x[1], s: x[2], est: false };
+      missing.push(p);
+      var km = haversine(o, p) * 1.35, min = km / 45 * 60;
+      return { p: p, km: Math.round(km * 10) / 10, n: r5(min), s: r5(min * 1.3), est: true };
+    });
     rows.sort(function (a, b) { return a.n - b.n; });
-    $("#drivelist").innerHTML = rows.map(function (x) {
-      return '<li><div><div class="nm">' + esc(x.r.name) + '</div><div class="km">' + x.km + ' km' + (x.est ? '（直線估算）' : '') + '</div></div>' +
+    if (missing.length) fetchDrive(ok, o, missing);
+    var cap = $("#drivecap");
+    if (cap) {
+      var on = CATS.filter(function (c) { return catOn[c[0]]; }).map(function (c) { return c[1]; });
+      cap.textContent = rows.length ? "到" + (state.area === "all" || !areaBounds() ? "全北海道" : "這一區") + "的 " + on.join("、") + " " + rows.length + " 個，近的在前" + (missing.length ? "（部分先用直線估算，路線算好會更新）" : "") : "上面的圖層都關了，開「雪場」「景點」「餐廳」等就會列出車程。";
+    }
+    var LIM = 25, shown = driveShowAll ? rows : rows.slice(0, LIM);
+    $("#drivelist").innerHTML = shown.map(function (x) {
+      var p = x.p;
+      return '<li><div><div class="nm"><i class="dot" style="--mc:var(--' + (p.type === "stay" ? "accent" : "c-" + p.type) + ')"></i>' + esc(p.name) + '</div><div class="km">' + esc(CAT_NAME[p.type]) + (p.sub ? ' · ' + esc(p.sub) : '') + ' · ' + x.km + ' km' + (x.est ? '（直線估算）' : '') + '</div></div>' +
         '<div class="t">' + fmtMin(x.n) + '<small>下雪 ' + fmtMin(x.s) + '</small></div>' +
-        '<a href="' + navUrl(x.r.lat, x.r.lon, o) + '" target="_blank" rel="noopener">開 Google Maps 導航 →</a></li>';
-    }).join("");
+        '<span class="lk">' + (p.link ? '<a href="' + esc(p.link) + '">' + esc(p.linkText || "看詳細 →") + '</a>' : '') + '<a href="' + navUrl(p.lat, p.lon, o) + '" target="_blank" rel="noopener">開 Google Maps 導航 →</a></span></li>';
+    }).join("") + (rows.length > shown.length ? '<li class="more"><button type="button" id="drivemore">還有 ' + (rows.length - shown.length) + ' 個，全部顯示</button></li>' : "");
+    var mb = $("#drivemore"); if (mb) mb.onclick = function () { driveShowAll = true; renderDrive(); };
   }
   if (has("gpsbtn")) $("#gpsbtn").addEventListener("click", function () {
     var msg = $("#gpsmsg");
@@ -622,7 +656,7 @@
         return;
       }
       state.gps = here;
-      state.origin = "gps"; state.originManual = true; state.gpsDrive = null;
+      state.origin = "gps"; state.originManual = true;
       msg.textContent = "已定位（誤差約 " + Math.round(pos.coords.accuracy) + " m），正在計算路線…";
       renderOrigin(); renderDrive();
       if (map) {
@@ -632,21 +666,7 @@
         } else gpsMarker.setLngLat([state.gps.lon, state.gps.lat]);
         showOrigin();
       }
-      var coords = [state.gps.lon + "," + state.gps.lat].concat(T.resorts.map(function (r) { return r.lon + "," + r.lat; })).join(";");
-      fetch("https://router.project-osrm.org/table/v1/driving/" + coords + "?sources=0&annotations=duration,distance")
-        .then(function (r) { return r.json(); })
-        .then(function (j) {
-          if (j.code !== "Ok") throw new Error("route");
-          state.gpsDrive = {};
-          T.resorts.forEach(function (r, k) {
-            var sec = j.durations[0][k + 1], m = j.distances[0][k + 1];
-            if (sec != null) state.gpsDrive[r.id] = [Math.round(m / 100) / 10, r5(sec / 60 * 1.15), r5(sec / 60 * 1.5)];
-          });
-          if (state.origin !== "gps") return;
-          msg.textContent = "已用目前位置計算路線車程。";
-          renderDrive();
-        })
-        .catch(function () { if (state.origin === "gps") msg.textContent = "路線服務暫時連不上，先用直線距離估算。"; });
+      renderDrive();   // 會向 OSRM 查目前位置到各地點的車程，算好後自動更新
     }, function (err) {
       msg.textContent = err.code === 1 ? "沒有定位權限。請在瀏覽器設定允許，或直接選住宿。" : "暫時定位不到，請稍後再試或直接選住宿。";
     }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
