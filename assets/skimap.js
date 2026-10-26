@@ -347,7 +347,7 @@
   var map, markers = {}, gateMarkers = [], popup, mapReady = false, geo;
   function initMap() {
     if (!window.maplibregl) { $("#skfallback").hidden = false; return; }
-    try { map = new maplibregl.Map({ container: "skcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 7.4, cooperativeGestures: true, locale: { "CooperativeGesturesHandler.WindowsHelpText": "按住 Ctrl 再捲動可縮放地圖", "CooperativeGesturesHandler.MacHelpText": "按住 ⌘ 再捲動可縮放地圖", "CooperativeGesturesHandler.MobileHelpText": "用兩指移動地圖", "NavigationControl.ZoomIn": "放大", "NavigationControl.ZoomOut": "縮小", "AttributionControl.ToggleAttribution": "資料來源" }, attributionControl: { compact: true } }); }
+    try { map = new maplibregl.Map({ container: "skcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 7.4, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } }); }
     catch (e) { $("#skfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true, showUserHeading: true });

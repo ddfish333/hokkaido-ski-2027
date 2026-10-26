@@ -30,6 +30,7 @@
   var qs = new URLSearchParams(location.search);
   var state = { day: null, status: "全部", area: "全部", kind: "全部", active: (location.hash || "").replace("#", "") || null };
   if (qs.get("day") && dayById[qs.get("day")]) { state.day = qs.get("day"); state.area = "附近"; }
+  else if (!qs.has("day") && !state.active && window.Plan && Plan.defaultDay()) { state.day = Plan.defaultDay(); state.area = "附近"; }
   if (qs.get("status") && STATUS[qs.get("status")]) state.status = qs.get("status");
 
   function ctx() { var d = state.day ? dayById[state.day] : null, b = d ? baseById[d.base] : null; return { d: d, b: b, wd: d ? wday(d.date) : -1 }; }
@@ -98,7 +99,10 @@
       box.hidden = false; btn.textContent = "收起 ▴"; return;
     }
     var go = e.target.closest("[data-go]");
-    if (go) focusSpot(go.dataset.go, true);
+    if (go) { focusSpot(go.dataset.go, true); return; }
+    /* 點卡片本身（不是連結、按鈕）：地圖飛過去 */
+    var li = e.target.closest(".fm-list .fp");
+    if (li && !e.target.closest("a, button, input, select, iframe")) focusSpot(li.dataset.fid, true);
     var ph = e.target.closest("[data-photo]");
     if (ph) { focusSpot(ph.dataset.photo, true); showPhotoPin(ph.dataset.photo, true); }
   });
@@ -153,7 +157,7 @@
   function initMap() {
     if (!window.maplibregl) { $("#fmfallback").hidden = false; return; }
     try {
-      map = new maplibregl.Map({ container: "fmcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 7.2, cooperativeGestures: true, locale: { "CooperativeGesturesHandler.WindowsHelpText": "按住 Ctrl 再捲動可縮放地圖", "CooperativeGesturesHandler.MacHelpText": "按住 ⌘ 再捲動可縮放地圖", "CooperativeGesturesHandler.MobileHelpText": "用兩指移動地圖", "NavigationControl.ZoomIn": "放大", "NavigationControl.ZoomOut": "縮小", "AttributionControl.ToggleAttribution": "資料來源" }, attributionControl: { compact: true } });
+      map = new maplibregl.Map({ container: "fmcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 7.2, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } });
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "300px", className: "fm-pop" });
@@ -181,6 +185,8 @@
       };
       if (window.Plan && Plan.ready) Plan.ready.then(draw); else draw();
       mapReady = true; render(true);
+      /* 手機：捲清單時地圖跟著正在看的那張卡片 */
+      Plan.followList(map, ".fm-list .fp", function (id) { var s = SPOTS.filter(function (x) { return x.id === id; })[0]; return s ? [s.lon, s.lat] : null; }, function (id) { state.active = id; syncPins(visible()); document.querySelectorAll(".fm-list .fp").forEach(function (li) { li.classList.toggle("active", li.dataset.fid === id); }); }, function () { var m = document.querySelector(".fm-map"); return m ? m.getBoundingClientRect().bottom : 0; });
     });
   }
   function fitTo(list) {

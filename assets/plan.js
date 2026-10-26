@@ -194,6 +194,40 @@
     });
   };
 
+  /* ---------- 地圖手勢（四張地圖共用） ----------
+     手機：一根手指就能拖地圖（以前開了 cooperativeGestures，手機要兩指才動，看起來像卡住）；要捲頁面就從地圖外面捲。
+     電腦：維持「按住 Ctrl／⌘ 再捲動才縮放」，不然滑鼠滾輪一碰到地圖頁面就捲不動。 */
+  P.touch = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+  P.mapOpts = function (o) {
+    return Object.assign({ cooperativeGestures: !P.touch, attributionControl: { compact: true },
+      locale: { "CooperativeGesturesHandler.WindowsHelpText": "按住 Ctrl 再捲動可縮放地圖", "CooperativeGesturesHandler.MacHelpText": "按住 ⌘ 再捲動可縮放地圖", "CooperativeGesturesHandler.MobileHelpText": "用兩指移動地圖", "NavigationControl.ZoomIn": "放大", "NavigationControl.ZoomOut": "縮小", "AttributionControl.ToggleAttribution": "資料來源" } }, o || {});
+  };
+  /* 手機的地圖頁：地圖固定在上面、清單在下面。捲清單時，停下來那一刻最上面那張卡片就是「正在看的」，地圖移過去（不改縮放，太遠才拉近到 11 級）。
+     listSel＝卡片的選擇器（要有 data-fid）、getPoint(id)→[lon,lat]、onActive(id)＝標亮卡片和圖釘。 */
+  P.followList = function (map, listSel, getPoint, onActive, topOffset) {
+    if (!P.touch || !map) return;
+    var t = null, last = null;
+    function tick() {
+      var top = (topOffset ? topOffset() : 0) + 8, cards = document.querySelectorAll(listSel), hit = null;
+      for (var i = 0; i < cards.length; i++) { var r = cards[i].getBoundingClientRect(); if (r.bottom > top + 40) { hit = cards[i]; break; } }
+      if (!hit || hit.dataset.fid === last) return; last = hit.dataset.fid;
+      var pt = getPoint(last); if (!pt) return;
+      if (onActive) onActive(last);
+      var z = map.getZoom(), b = map.getBounds(), inside = b && b.contains(pt);
+      if (z >= 10 && inside) return;
+      map.easeTo({ center: pt, zoom: Math.max(z, 11), duration: 600, essential: true });
+    }
+    addEventListener("scroll", function () { clearTimeout(t); t = setTimeout(tick, 220); }, { passive: true });
+  };
+
+  /* 地圖頁沒帶 ?day 時預設看哪一天：旅程中的今天 → 上次看的那天（和底部「行程」分頁同一個）；都沒有就不選（看全部） */
+  P.defaultDay = function () {
+    var T0 = window.TRIP; if (!T0) return null;
+    var days = T0.days.map(function (d) { return d.date; }), today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+    if (days.indexOf(today) >= 0) return today;
+    var last = lsGet("snow13-lastday"); return days.indexOf(last) >= 0 ? last : null;
+  };
+
   P.legMode = function (l) { return P.LEGMODE[l && l.mode] ? l.mode : "drive"; };
   P.legHTML = function (l) {
     var m = P.legMode(l);

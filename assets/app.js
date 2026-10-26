@@ -473,8 +473,7 @@
     try {
       map = new maplibregl.Map({
         container: "mapcanvas", style: "https://tiles.openfreemap.org/styles/" + (isDark ? "dark" : "positron"),
-        center: [141.75, 43.28], zoom: 7, cooperativeGestures: true, attributionControl: { compact: true },
-        locale: { "CooperativeGesturesHandler.WindowsHelpText": "按住 Ctrl 再捲動可縮放地圖", "CooperativeGesturesHandler.MacHelpText": "按住 ⌘ 再捲動可縮放地圖", "CooperativeGesturesHandler.MobileHelpText": "用兩指移動地圖", "NavigationControl.ZoomIn": "放大", "NavigationControl.ZoomOut": "縮小", "AttributionControl.ToggleAttribution": "資料來源" }
+        center: [141.75, 43.28], zoom: 7, cooperativeGestures: !Plan.touch, attributionControl: { compact: true }, locale: Plan.mapOpts().locale
       });
     } catch (e) { $("#mapfallback").hidden = false; return; }
     window.SNOW13_MAP = map;

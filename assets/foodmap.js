@@ -39,6 +39,7 @@
   var state = { day: null, area: "全部", kind: "全部", kids: false, active: (location.hash || "").replace("#", "") || null };
   var dayById = {}; T.days.forEach(function (d) { dayById[d.date] = d; });
   if (qs.get("day") && dayById[qs.get("day")]) { state.day = qs.get("day"); state.area = "附近"; }
+  else if (!qs.has("day") && !state.active && window.Plan && Plan.defaultDay()) { state.day = Plan.defaultDay(); state.area = "附近"; }
 
   /* ---------- 推算 ---------- */
   function ctx() {
@@ -97,7 +98,9 @@
       box.hidden = false; btn.textContent = "收起 ▴"; return;
     }
     var go = e.target.closest("[data-go]");
-    if (go) { focusFood(go.dataset.go, true); }
+    if (go) { focusFood(go.dataset.go, true); return; }
+    var li = e.target.closest(".fm-list .fp");
+    if (li && !e.target.closest("a, button, input, select, iframe")) focusFood(li.dataset.fid, true);
   });
 
   /* ---------- 工具列 ---------- */
@@ -132,7 +135,7 @@
   function initMap() {
     if (!window.maplibregl) { $("#fmfallback").hidden = false; return; }
     try {
-      map = new maplibregl.Map({ container: "fmcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.5, 43.2], zoom: 7.3, cooperativeGestures: true, locale: { "CooperativeGesturesHandler.WindowsHelpText": "按住 Ctrl 再捲動可縮放地圖", "CooperativeGesturesHandler.MacHelpText": "按住 ⌘ 再捲動可縮放地圖", "CooperativeGesturesHandler.MobileHelpText": "用兩指移動地圖", "NavigationControl.ZoomIn": "放大", "NavigationControl.ZoomOut": "縮小", "AttributionControl.ToggleAttribution": "資料來源" }, attributionControl: { compact: true } });
+      map = new maplibregl.Map({ container: "fmcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.5, 43.2], zoom: 7.3, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } });
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "280px", className: "fm-pop" });
@@ -151,7 +154,10 @@
       el.addEventListener("click", function (ev) { ev.stopPropagation(); focusFood(f.id, false); scrollToCard(f.id); });
       markers[f.id] = new maplibregl.Marker({ element: el, anchor: "bottom", offset: off }).setLngLat([f.lon, f.lat]).addTo(map);
     });
-    map.on("load", function () { mapReady = true; render(true); });
+    map.on("load", function () {
+      mapReady = true; render(true);
+      Plan.followList(map, ".fm-list .fp", function (id) { var f = FOOD.filter(function (x) { return x.id === id; })[0]; return f ? [f.lon, f.lat] : null; }, function (id) { state.active = id; syncPins(visible()); document.querySelectorAll(".fm-list .fp").forEach(function (li) { li.classList.toggle("active", li.dataset.fid === id); }); }, function () { var m = document.querySelector(".fm-map"); return m ? m.getBoundingClientRect().bottom : 0; });
+    });
   }
   function fitTo(list) {
     if (!map || !list.length) return;
