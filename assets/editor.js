@@ -72,6 +72,7 @@
     var d = T.days.filter(function (x) { return x.date === state.date; })[0];
     $("#edk").textContent = "DAY " + (dates.indexOf(state.date) + 1) + " · " + md(d.date) + "（" + dow(d.date) + "）";
     $("#edh").textContent = d.title;
+    var back = $("#edback"); if (back) { back.href = "../day/" + d.date.slice(5).replace("-", "") + "/"; back.querySelector("span").textContent = "看 " + md(d.date) + " 的頁面"; }
     $("#modeseg").innerHTML = [["normal", "一般路況"], ["snow", "下雪路況"]].map(function (m) { return '<button type="button" role="tab" aria-selected="' + (state.mode === m[0]) + '" data-mode="' + m[0] + '">' + m[1] + '</button>'; }).join("");
     $("#modeseg").onclick = function (e) { var b = e.target.closest("[data-mode]"); if (!b) return; state.mode = P.mode(b.dataset.mode); renderAll(); };
     var sch = P.schedule(state.date, state.mode), alt = P.schedule(state.date, state.mode === "snow" ? "normal" : "snow");
@@ -258,7 +259,7 @@
       });
     }).then(function () {
       state.base = clone(P.plan); state.baseLegs = clone(P.legs); store("snow13-draft", null);
-      msg("已儲存。網站大約一分鐘後更新；GitHub 會自動跑一致性檢查。"); renderAll();
+      var mm = $("#msg"); mm.classList.remove("bad"); mm.innerHTML = '已儲存，網站大約一分鐘後更新。<a href="../day/' + state.date.slice(5).replace("-", "") + '/">看 ' + md(state.date) + ' 的頁面 →</a><a href="../">回首頁 →</a>'; renderAll();
     }).catch(function (e) { if (e.message !== "cancel") msg("儲存失敗：" + e.message, true); else msg(""); }).then(function () { btn.disabled = false; });
   });
   $("#reload").addEventListener("click", function () {

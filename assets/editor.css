@@ -3,7 +3,11 @@
 .dirty { font: 400 11px/1 var(--f-display); letter-spacing: .2em; color: var(--warn); border: 1px solid var(--warn); border-radius: 999px; padding: 6px 9px; }
 .ed-actions { margin-left: auto; display: flex; gap: 8px; }
 .ed-actions .btn { padding: 10px 14px; font-size: 13px; }
-@media (max-width: 560px) { .ed-actions .btn-ghost { display: none; } .ed-actions #settings { display: inline-block; } }
+.ed-back { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.ed-back svg { width: 14px; height: 14px; }
+.ed-msg a { color: var(--gold); text-decoration: none; margin-left: 14px; }
+.ed-msg a:hover { text-decoration: underline; }
+@media (max-width: 560px) { .ed-actions .btn-ghost { display: none; } .ed-actions #settings, .ed-actions .ed-back { display: inline-flex; } .ed-back span { display: none; } .ed-back { padding: 10px 11px; } }
 .ed-main { padding-top: 20px; padding-bottom: 80px; }
 .ed-msg { margin: 0 0 12px; min-height: 1.4em; font-size: 13px; color: var(--glacier); }
 .ed-msg.bad { color: var(--accent); }
