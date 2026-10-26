@@ -225,7 +225,7 @@
     var T0 = window.TRIP; if (!T0) return null;
     var days = T0.days.map(function (d) { return d.date; }), today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     if (days.indexOf(today) >= 0) return today;
-    var last = lsGet("snow13-lastday"); return days.indexOf(last) >= 0 ? last : null;
+    return today > days[days.length - 1] ? days[days.length - 1] : days[0]; /* 出發前看第一天、結束後停最後一天；不記「上次看的那天」，每個人打開都一樣 */
   };
 
   P.legMode = function (l) { return P.LEGMODE[l && l.mode] ? l.mode : "drive"; };

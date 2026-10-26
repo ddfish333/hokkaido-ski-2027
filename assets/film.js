@@ -25,7 +25,7 @@
       if (!sc.stop) return true;
       var st = stopOf(sc.stop, true);
       if (!st) { if (window.console) console.warn("序幕略過：" + date + " 已經沒有站點 " + sc.stop); return false; }
-      if (!sc.t) sc.t = st.time + " · " + (sc.label || st.name);
+      if (!sc.t) sc.t = (sc.dep ? st.timeDep : st.time) + " · " + (sc.label || st.name);
       return true;
     });
     /* 文字裡的 {t}／{t:站點}／{sun:set} 標記：由 plan.json 推算帶入 */

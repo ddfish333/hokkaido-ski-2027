@@ -307,7 +307,10 @@
     var back = baseStops.length ? baseStops[baseStops.length - 1] : null;
     var lines = [];
     if (last) lines.push("最後一天：上午照常，" + N.bus + " 送她到富良野站搭巴士；之後兩家自己顧小孩，訂位人數改 " + esc((T.party || {}).noNanny || "8 人"));
-    else {
+    else if (d.base !== T.days[T.days.indexOf(d) - 1].base) {
+      /* 搬家日：住宿換地方，小孩和保姆跟著車隊走 */
+      lines.push("搬家日：小孩和保姆跟車一起走，" + (baseStops.length ? baseStops[0].time + " 到新住宿" : "") + "；保姆下班 " + N.end + "，晚餐一起吃");
+    } else {
       lines.push("上班 " + N.start + "–" + N.end + "，小孩留在住宿");
       if (back) {
         var over = Plan.mins(back.time) - Plan.mins(N.end);
@@ -857,7 +860,7 @@
   });
   function picksBlock(d, linkBase) {
     var body = Plan.picksHTML(d.date, function (id, t, cls) { return '<a' + (cls ? ' class="' + cls + '"' : "") + ' href="' + linkBase + '#' + id + '">' + t + '</a>'; });
-    return body ? '<div class="picks"><p class="picks-h">這天怎麼吃 <small>依 {party} 帶幼兒的條件挑的；藍色是建議、金色是已決定。備案是想吃好一點或現場排太久時換的。</small></p>'.replace("{party}", esc(Plan.fill("{party}", d.date))) + body + '</div>' : "";
+    return body ? '<div class="picks"><p class="picks-h">這天怎麼吃 <small>依 {party} 帶幼兒的條件挑的；藍色是建議、金色是已決定。備案是想吃好一點或現場排太久時換的。</small></p>'.replace("{party}", esc(d.date === (T.nanny || {}).lastDay ? "白天 " + Plan.fill("{party}", d.date) + "、晚餐起 " + Plan.partyOf("2099-01-01") : Plan.fill("{party}", d.date))) + body + '</div>' : "";
   }
   /* 可收合的長清單：標題列永遠看得到，內容預設收起；打開狀態在重新渲染後保留 */
   function fold(id, head, sub, body) {

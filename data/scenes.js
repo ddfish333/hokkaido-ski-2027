@@ -13,9 +13,9 @@ window.SCENES = {
       { type: "title", eyebrow: "DAY 01 · HOKKAIDO", h: "抵達北海道", s: "兩家人、兩台車、四個小孩。從今天開始。", imgs: ["scene/chitose-1.jpg", "scene/coast-1.jpg", "scene/villa-5.jpg"], amb: "snow", dur: 6000 },
       { stop: "cts", video: "airplane.mp4", img: "video/airplane.jpg", h: "落地的時候，窗外應該已經是白色的。", s: "天光只剩兩個小時。今天不趕，先把人和行李接好。", amb: "quiet", dur: 7000 },
       { stop: "cts", label: "下雪的新千歲", imgs: ["scene/chitose-1.jpg", "scene/chitose-2.jpg", "scene/chitose-3.jpg"], h: "入境、領行李、雪板袋。", s: "國際線 98 號站牌等接駁。", amb: "snow", dur: 7500 },
-      { stop: "rental", label: "兩台 DELICA 上路", imgs: ["scene/coast-1.jpg", "scene/coast-2.jpg", "scene/coast-3.jpg"], h: "沿著石狩灣往西，海在右手邊。", s: "銭函、春香，這一帶就是接下來四個晚上要住的地方。雪路第一天，慢慢開。", amb: "snow", dur: 8000 },
+      { stop: "rental", dep: true, label: "兩台 DELICA 上路", imgs: ["scene/coast-1.jpg", "scene/coast-2.jpg", "scene/coast-3.jpg"], h: "沿著石狩灣往西，海在右手邊。", s: "銭函、春香，這一帶就是接下來四個晚上要住的地方。雪路第一天，慢慢開。", amb: "snow", dur: 8000 },
       { stop: "aeon", imgs: ["scene/aeon-1.jpg", "scene/aeon-2.jpg"], h: "天黑了。先吃晚餐，再把明早的東西買齊。", s: "只買必需品。小孩的耐心是今天最稀缺的資源。", amb: "snow", dur: 6500 },
-      { type: "drive", video: "drive-night.mp4", img: "video/drive-night.jpg", t: "最後 40 分鐘", h: "往山裡開。", s: "後座大概已經睡著了。", amb: "drive", dur: 7000 },
+      { type: "drive", video: "drive-night.mp4", img: "video/drive-night.jpg", t: "最後 {leg:aeon|villa} 分鐘", h: "往山裡開。", s: "後座大概已經睡著了。", amb: "drive", dur: 7000 },
       { stop: "villa", imgs: ["scene/villa-1.jpg", "scene/villa-2.jpg", "scene/villa-3.jpg", "scene/villa-4.jpg"], h: "到家了。", s: "落地窗外是白樺林和雪。兩家人的四個晚上，就是這裡。", amb: "fire", warm: true, dur: 9000 },
       { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "壁爐點起來，小孩早點睡。<br>明天，Kiroro。", amb: "fire", warm: true, dur: 9000 }
     ]
@@ -48,7 +48,7 @@ window.SCENES = {
     scenes: [
       { type: "title", eyebrow: "DAY 04 · OTARU", h: "半天 Kiroro・小樽", s: "滑半天，下午把小樽走一遍。", imgs: ["scene/otaru-1.jpg", "scene/otaru-5.jpg", "scene/otaru-6.jpg"], amb: "snow", dur: 5500 },
       { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "滑半天就好。", s: "這是在山鄉的最後一次 Kiroro。", amb: "quiet", dur: 6000 },
-      { stop: "canal", imgs: ["scene/otaru-1.jpg", "scene/otaru-2.jpg", "scene/otaru-3.jpg", "scene/otaru-4.jpg"], h: "下午，堺町通和運河。", s: "LeTAO {close:canal} 關門，先去。小孩走不動就推車。", amb: "snow", dur: 9000 },
+      { stop: "canal", imgs: ["scene/otaru-1.jpg", "scene/otaru-2.jpg", "scene/otaru-3.jpg", "scene/otaru-4.jpg"], h: "下午，堺町通和運河。", s: "LeTAO {close:canal} 關門，先去。四個大人的下午，小孩在山鄉。", amb: "snow", dur: 9000 },
       { stop: "naruto", label: "運河的煤氣燈", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg", "scene/otaru-7.jpg"], h: "天黑了，煤氣燈亮起來。", s: "然後去吃若鶏時代なると。", amb: "snow", dur: 8000 },
       { type: "end", t: "今晚", img: "scene/villa-5.jpg", h: "山鄉的最後一晚。<br>明天搬家，往東。", amb: "fire", warm: true, dur: 7000 }
     ]
@@ -110,7 +110,7 @@ window.SCENES = {
     scenes: [
       { type: "title", eyebrow: "DAY 10 · FURANO → SAPPORO", h: "富良野・札幌", s: "離開山，回到城市。", imgs: ["scene/lodge-1.jpg", "scene/sapporo-1.jpg", "scene/sapporo-4.jpg"], amb: "snow", dur: 5500 },
       { stop: "lodge", imgs: ["scene/lodge-1.jpg", "scene/lodge-3.jpg", "scene/furano-4.jpg"], h: "退房。再見，富良野。", s: "五個晚上。雪板綁好，中途在砂川吃個泡芙。", amb: "quiet", dur: 7500 },
-      { stop: "tanuki", label: "回到城市", imgs: ["scene/sapporo-1.jpg", "scene/sapporo-2.jpg", "scene/sapporo-3.jpg"], h: "回到城市。", s: "車停好就三晚不動。拉麵、狸小路，{at:favlux#2} 入住。", amb: "quiet", dur: 7500 },
+      { stop: "favlux", label: "回到城市", imgs: ["scene/sapporo-1.jpg", "scene/sapporo-2.jpg", "scene/sapporo-3.jpg"], h: "回到城市。", s: "車停好就三晚不動。拉麵、狸小路，{at:favlux#2} 入住。", amb: "quiet", dur: 7500 },
       { stop: "tvtower", imgs: ["scene/sapporo-5.jpg", "scene/sapporo-6.jpg", "scene/sapporo-4.jpg"], h: "電視塔，看城市變藍。", s: "{sun:set} 日落。大通公園的雪地走一段。", amb: "snow", dur: 7000 },
       { type: "end", stop: "beer", imgs: ["scene/beer-1.jpg", "scene/susukino-1.jpg", "scene/sapporo-4.jpg"], h: "晚上，啤酒園的成吉思汗。<br>早點休息。", amb: "snow", warm: true, dur: 8000 }
     ]

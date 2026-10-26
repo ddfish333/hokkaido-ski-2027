@@ -29,8 +29,9 @@ TAB_ICON = {
     "ski": '<path d="M3 19l6.5-10 3.5 5 2.5-3.5L21 19z"/><path d="M8 12l1.5 1.5 1.5-1.5"/>',
     "food": '<path d="M4 12h16a8 8 0 0 1-16 0zM9 20h6M14.5 4l-3 6M18.5 5l-4 5"/>',
     "spots": '<path d="M12 21s6-5.6 6-11a6 6 0 0 0-12 0c0 5.4 6 11 6 11z"/><circle cx="12" cy="10" r="2.2"/>',
+    "prep": '<path d="M9 5h6l1 2h3v13H5V7h3z"/><path d="M9 12l2 2 4-4"/>',
 }
-TABS = [("home", "首頁", ""), ("day", "行程", "day/0107/"), ("ski", "滑雪", "ski/"), ("food", "美食", "food/"), ("spots", "景點", "spots/")]
+TABS = [("home", "首頁", ""), ("day", "行程", "day/0107/"), ("ski", "滑雪", "ski/"), ("food", "美食", "food/"), ("spots", "景點", "spots/"), ("prep", "準備", "#prep")]
 TABBAR = {"index.html": ("", "home"), "ski/index.html": ("../", "ski"), "food/index.html": ("../", "food"), "spots/index.html": ("../", "spots"), "tools/day.template.html": ("../../", "day")}
 def tabbar_html(root, active, is_day):
     out = []

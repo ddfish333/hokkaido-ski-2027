@@ -251,6 +251,16 @@ if os.path.isdir(photo_root):
 else:
     W(f"找不到照片資料夾 {photo_root}，略過照片檢查")
 
+# 景點的 day 欄位要和行程一致（同一個 stop id 在 plan.json 哪一天）
+stop_day = {}
+for d, v in PLAN["days"].items():
+    for s in v["stops"]: stop_day.setdefault(s["id"], d)
+for sp in load_js("data/spots.js", "SPOTS") or []:
+    if sp.get("stop") and sp.get("day") and stop_day.get(sp["stop"]) and stop_day[sp["stop"]] != sp["day"]:
+        E(f"spots.js：{sp['name']} 寫 day {sp['day']}，但行程裡 {sp['stop']} 是 {stop_day[sp['stop']]}（改 spots.js 的 day）")
+    if sp.get("stop") and not stop_day.get(sp["stop"]) and sp.get("status") == "plan":
+        W(f"spots.js：{sp['name']} 標 plan 但行程裡沒有站點 {sp['stop']}")
+
 # 餐廳資料（data/food.js）：有座標、地區對得上住宿、「預計」關鍵字真的對到某一天
 food = load_js("data/food.js", "FOOD") or []
 food_areas = load_js("data/food.js", "FOOD_AREAS") or {}

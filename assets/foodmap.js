@@ -49,7 +49,10 @@
   function isPlanned(f, c) { return !!(c.d && window.Plan && Plan.plannedIds(c.d.date).indexOf(f.id) >= 0); }
   function isMine(f, c) { return !!(c.d && window.Plan && Plan.mealIds(c.d.date).indexOf(f.id) >= 0); }
   function isClosed(f, c) { return !!(f.closed && c.wd >= 0 && f.closed.indexOf(c.wd) >= 0); }
-  function driveMin(f, c) { if (!c.b) return 0; return r5(hav(c.b, f) * 1.35 / 40 * 60); }
+  /* 札幌住宿那幾天車停著不動：近的算走路（4 km/h），遠的算計程車；其他住宿算開車 */
+  function carFree(c) { return !!(c.d && c.d.base === "sapporo" && c.d.date > c.b.from); }
+  function driveMin(f, c) { if (!c.b) return 0; var km = hav(c.b, f) * 1.35; if (carFree(c)) return r5(km < 2.5 ? km / 4 * 60 : km / 25 * 60 + 5); return r5(km / 40 * 60); }
+  function howLabel(f, c) { if (!c.b) return ""; var km = hav(c.b, f) * 1.35; return carFree(c) ? (km < 2.5 ? "走路約 " : "計程車約 ") : "開車約 "; }
   function nearby(c) { return c.d ? (FOOD_AREAS[c.d.base] || []) : []; }
 
   function visible() {
@@ -84,7 +87,7 @@
       (f.rec ? '<span class="badge rec">推薦 ' + f.rec + '</span>' : "") + (f.via ? '<span class="badge via">' + esc(f.via) + '</span>' : "") + (planned ? '<span class="badge gold">' + md(c.d.date) + ' 預計</span>' : "") + (closed ? '<span class="badge red">' + md(c.d.date) + ' 公休</span>' : "") + '</div>' +
       '<div class="fp-rating">' + stars + '</div>' +
       '<p class="fp-what">' + em(f.what) + '</p>' +
-      '<p class="fp-meta"><span class="area">' + esc(f.area) + '</span> · ' + em(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (c.b ? ' · 從' + esc(c.b.short.split("・").pop()) + '約 ' + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span>' + (f.approx ? ' · 位置約略' : "") + '</p>' +
+      '<p class="fp-meta"><span class="area">' + esc(f.area) + '</span> · ' + em(f.hours) + (f.closed && f.closed.length ? ' · 週' + f.closed.map(function (x) { return DOW[x]; }).join("、") + '休' : "") + (c.b ? ' · 從' + esc(c.b.short.split("・").pop()) + howLabel(f, c) + min + ' 分' : "") + ' · <span class="fit">' + fit[0] + '</span>' + (f.approx ? ' · 位置約略' : "") + '</p>' +
       '<div class="fp-act">' + (g ? '<button type="button" class="fp-more" data-q="' + esc(g.q) + '">照片與評論 ▾</button>' : "") + '<a href="' + mapsUrl + '" target="_blank" rel="noopener">在 Google Maps 開啟 →</a>' +
       '<a href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + f.lat + ',' + f.lon + (c.b ? '&origin=' + c.b.lat + ',' + c.b.lon : "") + '" target="_blank" rel="noopener">導航 →</a></div>' +
       '<div class="fp-embed" hidden></div></li>';
@@ -193,7 +196,7 @@
     var g = f.g;
     popup.setLngLat([f.lon, f.lat]).setHTML('<b>' + esc(f.name) + '</b><span>' + esc(f.kind) + ' · ' + esc(f.area) + (g ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
       (isPlanned(f, c) ? '<em class="gold">' + md(c.d.date) + ' 預計</em>' : "") + (isClosed(f, c) ? '<em class="red">' + md(c.d.date) + ' 公休</em>' : "") +
-      '<small>' + em(f.hours) + (c.b ? ' · 從' + esc(c.b.short.split("・").pop()) + '約 ' + driveMin(f, c) + ' 分' : "") + '</small>' +
+      '<small>' + em(f.hours) + (c.b ? ' · 從' + esc(c.b.short.split("・").pop()) + howLabel(f, c) + driveMin(f, c) + ' 分' : "") + '</small>' +
       '<a href="#' + f.id + '" data-go="' + f.id + '">看詳情 ↓</a> <a href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + f.lat + ',' + f.lon + (c.b ? '&origin=' + c.b.lat + ',' + c.b.lon : "") + '" target="_blank" rel="noopener">導航 ↗</a>').addTo(map);
   }
   function scrollToCard(id) {
