@@ -247,12 +247,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .drivelist .km { color: var(--muted); font: 400 12px/1.4 var(--f-mono); }
 .drivelist .t { text-align: right; font: 400 18px/1.2 var(--f-display); }
 .drivelist .t small { display: block; font-size: 12px; color: var(--warn); }
-.drive-cap { margin: 14px 0 4px; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
-.drivelist .nm .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--mc); margin: 0 7px 2px 0; vertical-align: middle; }
-.drivelist .lk { grid-column: 1 / -1; display: flex; gap: 14px; flex-wrap: wrap; }
-.drivelist a { font-size: 13px; color: var(--glacier); text-decoration: none; }
-.drivelist .more { display: block; padding: 10px 0 0; }
-.drivelist .more button { width: 100%; font: 400 13px/1.2 var(--f-body); padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.drivelist a { grid-column: 1 / -1; font-size: 13px; color: var(--glacier); text-decoration: none; }
 .marker { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--paper); box-shadow: 0 2px 6px rgba(0,0,0,.4); display: grid; place-items: center; color: #fff; font: 500 12px/1 var(--f-body); cursor: pointer; background: var(--mc); }
 .maplibregl-popup-content { background: var(--paper); color: var(--ink); border-radius: 12px; padding: 14px 16px; box-shadow: 0 8px 28px rgba(0,0,0,.45); font: 400 14px/1.55 var(--f-body); max-width: 280px; border: 1px solid var(--line); }
 .maplibregl-popup-tip { border-top-color: var(--paper) !important; border-bottom-color: var(--paper) !important; }

@@ -55,6 +55,23 @@ No freely licensed photos found on Wikimedia Commons for these hotels; no images
 - 序幕音樂：網頁以 Web Audio 即時生成，無外部音檔。
 - 首頁三章「山と雪」的滑鼠移入影片（assets/video/furano-hover*.mp4）：BEST DAY EVER FURANO LODGES 官方宣傳影片，Sean 於 2026-10-26 自官網螢幕錄影後剪成 30 秒無聲循環；僅供同行家人行前參考，不對外宣傳。
 - 首頁三章「海と雪」的滑鼠移入影片（assets/video/villa-hover*.mp4）：山郷 香 Villa -KAORU- 官網影片（秋季）＋ Snow Cruise Onze 官方／IG 的海景日滑、夜滑片段，Sean 於 2026-10-26 螢幕錄影，剪成 25 秒無聲循環；僅供同行家人行前參考。所有素材與剪輯檔存在 `hokkaido-videos/`。
+- 首頁三章「街と雪」的滑鼠移入影片（assets/video/sapporo-hover*.mp4，27 秒無聲）：全部來自 Wikimedia Commons 的自由授權素材，經裁切、Ken Burns 運鏡與淡接。因含 CC BY-SA 素材，這支剪輯整體以 **CC BY-SA 4.0** 釋出；逐項出處如下：
+
+| 片段順序 | 作者 | 授權 | 來源 |
+|---|---|---|---|
+| 009.jpg | ja:利用者:Haseyu- | Public domain | [File:View of Sapporo TV Tower from Odori Park(2011).JPG](https://commons.wikimedia.org/wiki/File:View_of_Sapporo_TV_Tower_from_Odori_Park(2011).JPG) |
+| snow-in-sapporo-20240222.webm | Fumikas Sagisavas | CC BY 4.0 | [File:Snow in Sapporo (20240222).webm](https://commons.wikimedia.org/wiki/File:Snow_in_Sapporo_(20240222).webm) |
+| 029.jpg | ノボホショコロトソ | CC BY 4.0 | [File:えぞっこバターコーンラーメン.jpg](https://commons.wikimedia.org/wiki/File:えぞっこバターコーンラーメン.jpg) |
+| 024.jpg | Sgroey | CC BY-SA 4.0 | [File:Ramen Alley Sapporo Japan.jpg](https://commons.wikimedia.org/wiki/File:Ramen_Alley_Sapporo_Japan.jpg) |
+| 104.jpg | ノボホショコロトソ | CC BY 4.0 | [File:Former Hokkaido Government Office in snow 01.jpg](https://commons.wikimedia.org/wiki/File:Former_Hokkaido_Government_Office_in_snow_01.jpg) |
+| 069.jpg | Syced | CC0 | [File:薬膳カレー、チキン.jpg](https://commons.wikimedia.org/wiki/File:薬膳カレー、チキン.jpg) |
+| beer-garden.jpg | MIKI Yoshihito from Sapporo City,Hokkaido., JAPAN | CC BY 2.0 | [File:The Sapporo Beer Garden. (5718150955).jpg](https://commons.wikimedia.org/wiki/File:The_Sapporo_Beer_Garden._(5718150955).jpg) |
+| 034.jpg | MIKI Yoshihito from Sapporo City,Hokkaido., JAPAN | CC BY 2.0 | [File:Quiet street. (49617784956).jpg](https://commons.wikimedia.org/wiki/File:Quiet_street._(49617784956).jpg) |
+| crab-legs.jpg | missbossy from Singapore, Singapore | CC BY 2.0 | [File:Alaskan King Crab Legs (3241225745).jpg](https://commons.wikimedia.org/wiki/File:Alaskan_King_Crab_Legs_(3241225745).jpg) |
+| 090.jpg | t-konno | CC BY-SA 3.0 | [File:The 66th Sapporo Snow Festival - panoramio.jpg](https://commons.wikimedia.org/wiki/File:The_66th_Sapporo_Snow_Festival_-_panoramio.jpg) |
+| 120.jpg | 妖精書士 | CC0 | [File:Sapporo Fuyu-monogatari (The Winter's Tale) Beer, 500ml can 2018 (01).jpg](https://commons.wikimedia.org/wiki/File:Sapporo_Fuyu-monogatari_(The_Winter's_Tale)_Beer,_500ml_can_2018_(01).jpg) |
+| night-in-sapporo-20240222.webm | Fumikas Sagisavas | CC BY 4.0 | [File:Night in Sapporo (20240222).webm](https://commons.wikimedia.org/wiki/File:Night_in_Sapporo_(20240222).webm) |
+
 
 ## 2026-10-25 第二批（家人依「照片清單」抓的，來源寫在各檔同名 .txt）
 

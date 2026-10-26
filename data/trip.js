@@ -26,6 +26,7 @@ window.TRIP = {
       from: "2027-01-16", to: "2027-01-19", nights: 3, checkin: "15:00", checkout: "10:00",
       notes: ["2025 年 7 月新開幕、84 間：**上下舖的 4–6 人家庭房**、房內洗衣機、兩個洗手台、小客廳、冰箱微波爐，小孩有自己的小桌子；住客專用大浴場＋三溫暖（Google 4.3，306 則）", "**在札幌盡量走路**：街很美、什麼都在 10 分鐘內，札幌站–大通–薄野一路地下街不用踩雪；市電「東本願寺前」走 3 分", "車子 1/16 停好就三晚不動——停哪裡、怎麼導航，看單日頁的「車停哪裡」", "退房 10:00，1/19 同時要還車：**08:45 前離開**"],
       facts: ["上下舖家庭房", "房內洗衣機", "大浴場・三溫暖", "走路逛札幌，車停好三晚不動"],
+      video: "sapporo-hover.mp4", videoSm: "sapporo-hover-sm.mp4",
       links: [["官網", "https://fav-hotels.com/hotels/lux/sapporosusukino/"], ["訂房", "https://www.jalan.net/yad333573/"]], g: { rating: 4.3, n: 306, pid: "ChIJDeSbhZMpC18RgWu851Dm37E" } }
   ],
 
