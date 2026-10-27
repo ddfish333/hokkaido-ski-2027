@@ -414,6 +414,16 @@ for _css in ("assets/style.css", "assets/foodmap.css", "assets/skimap.css", "ass
         _m = _BAD_CSS.search(_l)
         if _m: E(f"{_css}：寫死只適合深色底的顏色「{_m.group(0)}」——改用 rgba(var(--fg-rgb), α)／rgba(var(--bg-rgb), α) 或顏色 token，亮色主題才不會壞 →「{_l.strip()[:70]}」")
 
+# 0m. 教練課（trip.js coach 唯一來源）：上課那天要排到那座雪場、開課前 15 分到（換裝、買票）、下課後才離開
+_C = trip.get("coach") or {}
+for _d in (_C.get("full") or []) + (_C.get("half") or []):
+    _end = _C["end"] if _d in (_C.get("full") or []) else _C["halfEnd"]
+    _x = [x for x in schedule(_d, "normal") if x["id"] == _C.get("resort")] if _d in PLAN["days"] else []
+    if not _x: E(f"{_d}：有 {_C.get('name')} 教練課，但行程裡沒有 {_C.get('resort')}"); continue
+    _x = _x[0]
+    if _x["arr"] > mins(_C["start"]) - 15: E(f"{_d}：{_x['time']} 才到 {_C['resort']}，{_C['name']} 教練 {_C['start']} 開課，要提早 15 分到")
+    if _x["dep"] < mins(_end): E(f"{_d}：{_x['timeDep']} 就離開 {_C['resort']}，但 {_C['name']} 教練課到 {_end}")
+
 # 0j. 保姆最後一天：保姆和小孩在住宿，送她去搭車之前一定要先回住宿接人（10/26 第六輪：雪場直接開去車站，漏了接人）
 _N = trip.get("nanny") or {}
 if _N.get("lastDay") in PLAN["days"] and _N.get("busStop"):

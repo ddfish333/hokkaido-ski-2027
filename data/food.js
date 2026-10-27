@@ -120,7 +120,7 @@ window.FOOD_PICKS = [
   { date: "2027-01-07", slot: "dinner", pick: "aeonfood", stop: "aeon", backup: ["nagoyaka"], status: "proposed", why: "AEON 這站 {t:aeon} 到，同時要買**接下來四天的早餐**（麵包、牛奶、水果、優格）：先在美食街讓大人小孩各點各的，一位大人先去超市採買，最快。**航班準時、拿車順利、大家還有精神**就改 なごやか亭 発寒店：離 AEON 開車幾分鐘、北海道評價很高的回轉壽司，吃完再回 AEON 超市；晚餐尖峰可能要等，到 Villa 會晚半小時以上。" },
   /* 1/8 Kiroro */
   { date: "2027-01-08", slot: "breakfast", pick: null, what: "山鄉自己弄（AEON 買的麵包、牛奶、水果）", stop: "villa", status: "decided", why: "保姆 {T:nanny.start} 到；{dep:villa} 出門前在 Villa 吃完。" },
-  { date: "2027-01-08", slot: "lunch", pick: "brasserie", stop: "kiroro", backup: ["lumiere", "pizzeria"], status: "proposed", why: "四個大人滑到中午下山吃（小孩和保姆在山鄉）。Brasserie 在 Gondola 山麓站 1F，赤井川番茄擔擔麵、豬肉角煮拉麵；人多就去 Mountain Center 的 Cafeteria Lumière（自助、小孩自己挑）或 Pizzeria。" },
+  { date: "2027-01-08", slot: "lunch", pick: "brasserie", stop: "kiroro", backup: ["lumiere", "pizzeria"], status: "proposed", why: "教練課的午休（時間可以跟 Gacha 調）下山吃，小孩和保姆在山鄉。Brasserie 在 Gondola 山麓站 1F，赤井川番茄擔擔麵、豬肉角煮拉麵；人多就去 Mountain Center 的 Cafeteria Lumière（自助、小孩自己挑）或 Pizzeria。" },
   { date: "2027-01-08", slot: "dinner", pick: "masazushi", stop: "masazushi", backup: ["toppi", "waraku"], status: "proposed", why: "第一次在小樽吃壽司，選最有名的政寿司本店：個室放得下 {party}、有兒童餐和嬰兒車位、店旁只有 6 個車位，兩台車不一定停得進，滑完雪帶小孩不用找停車。價位高（大人約 ¥5,000–6,000）；想省就改 とっぴ～ 回轉（有停車場、不用訂、¥2,000–3,000）。", book: "0134-64-1101 訂 {t:masazushi} 個室 {party}，週三休；不泡湯就提早一小時" },
   /* 1/9 Kiroro（連假） */
   { date: "2027-01-09", slot: "breakfast", pick: null, what: "山鄉自己弄", stop: "villa", status: "decided", why: "連假第一天 Kiroro 人多，早點吃完 {dep:villa} 出門搶停車位。" },
@@ -128,7 +128,7 @@ window.FOOD_PICKS = [
   { date: "2027-01-09", slot: "dinner", pick: null, what: "湯の花 朝里殿 館內食堂", stop: "asari", backup: ["aozora", "toppi"], status: "proposed", why: "大人泡完湯直接在館內吃，不用再換地方；吃完回山鄉接手小孩。想吃點不一樣的：回 Villa 路上的餃子茶屋 あおぞら（看得到海、份量大，週一二休，晚上關得早，時間看卡片），或小樽運河邊的 とっぴ～ 回轉壽司。" },
   /* 1/10 半天 Kiroro＋小樽 */
   { date: "2027-01-10", slot: "breakfast", pick: null, what: "山鄉自己弄，剩的食材吃完", stop: "villa", status: "decided", why: "明天退房，冰箱今天清掉一半。" },
-  { date: "2027-01-10", slot: "lunch", pick: "lumiere", stop: "kiroro", backup: ["brasserie", "pizzeria"], status: "proposed", why: "只滑半天，{dep:kiroro} 要下山去小樽：自助式最快，大人各自拿、不用等點餐。" },
+  { date: "2027-01-10", slot: "lunch", pick: "lumiere", stop: "kiroro", backup: ["brasserie", "pizzeria"], status: "proposed", why: "上午 Gacha 半天課，{dep:kiroro} 要下山去小樽：自助式最快，大人各自拿、不用等點餐。" },
   { date: "2027-01-10", slot: "snack", pick: "rokkatei_otaru", stop: "rokkatei_otaru", backup: ["kamaei", "letao", "kitakaro_otaru"], status: "proposed", why: "逛堺町通的下午點心：六花亭小樽運河店 2F 喫茶可以坐下來休息；かま栄現炸魚板、LeTAO 起司蛋糕、北菓楼泡芙邊走邊吃。晚餐是炸雞，別吃太飽。" },
   { date: "2027-01-10", slot: "dinner", pick: "naruto", stop: "naruto", backup: ["toppi", "waraku"], status: "decided", why: "小樽半身炸雞的老店，大桌多；運河看完煤氣燈再開 {leg:canal|naruto} 分過來（有停車場）。大人吃完外帶幾份回山鄉給保姆和小孩。", book: "不用訂，{t:naruto} 前到" },
   /* 1/11 旭山動物園 → 富良野 */

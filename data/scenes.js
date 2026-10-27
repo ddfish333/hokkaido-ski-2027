@@ -25,9 +25,9 @@ window.SCENES = {
     scenes: [
       { type: "title", eyebrow: "DAY 02 · KIRORO", h: "Kiroro 滑雪", s: "第一次上山。先把節奏抓起來。", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], amb: "snow", dur: 5500 },
       { stop: "villa", label: "早上", imgs: ["scene/villa-6.jpg", "scene/villa-7.jpg", "scene/villa-2.jpg"], h: "{t} 出發。", s: "早餐在家吃，雪板前一晚就上車。", amb: "quiet", dur: 6000 },
-      { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "第一次上 Kiroro。", s: "上午跟教練認識雪場。小孩交給保姆，四個大人都在雪上。", amb: "quiet", dur: 7000 },
-      { t: "下午", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "自己的雪道，滑到纜車收。", s: "教練走了之後，才是真正開始滑的時候。", amb: "quiet", dur: 7000 },
-      { stop: "temiya", imgs: ["scene/asari-1.jpg", "scene/otaru-3.jpg"], h: "滑到纜車收，下山泡湯。", s: "小樽的手宮殿，離壽司店四分鐘。小孩這時候跟保姆在山鄉。", amb: "quiet", warm: true, dur: 6500 },
+      { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "第一次上 Kiroro。", s: "Gacha 教練帶一整天。小孩交給保姆，四個大人都在雪上。", amb: "quiet", dur: 7000 },
+      { t: "下午", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "午休之後繼續上課。", s: "滑到下課，教練還會給今天的影片。", amb: "quiet", dur: 7000 },
+      { stop: "temiya", imgs: ["scene/asari-1.jpg", "scene/otaru-3.jpg"], h: "下課收板，下山泡湯。", s: "小樽的手宮殿，離壽司店四分鐘。小孩這時候跟保姆在山鄉。", amb: "quiet", warm: true, dur: 6500 },
       { stop: "villa", label: "接小孩", imgs: ["scene/villa-5.jpg", "scene/villa-3.jpg"], h: "回山鄉接保姆和小孩。", s: "然後一起去小樽。", amb: "quiet", warm: true, dur: 5500 },
       { stop: "masazushi", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg"], h: "小樽，壽司。", s: "政寿司的個室，小孩有兒童餐。吃完，{leg:masazushi|villa} 分鐘就到家。", amb: "snow", warm: true, dur: 7000 },
       { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "想夜滑的大人走路去 Onze。<br>明天連假，早一點出門。", amb: "fire", warm: true, dur: 8000 }
@@ -38,7 +38,7 @@ window.SCENES = {
     scenes: [
       { type: "title", eyebrow: "DAY 03 · KIRORO", h: "Kiroro・朝里川溫泉", s: "開門就上山，收板就泡湯。", imgs: ["scene/kiroro-2.jpg", "scene/kiroro-1.jpg", "scene/asari-1.jpg"], amb: "snow", dur: 5500 },
       { stop: "kiroro", imgs: ["scene/kiroro-2.jpg", "scene/kiroro-1.jpg"], h: "連假第一天，開門就上山。", s: "人會多，但纜車早一班、晚一班，差很多。", amb: "snow", dur: 7000 },
-      { t: "整天", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "昨天教練教的，今天拿來用。", amb: "quiet", dur: 6000 },
+      { t: "整天", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "Gacha 第二天，昨天教的今天練熟。", amb: "quiet", dur: 6000 },
       { stop: "asari", imgs: ["scene/asari-1.jpg", "scene/coast-3.jpg"], h: "收板後，朝里殿。", s: "泡湯、館內吃完晚餐再回家。", amb: "quiet", warm: true, dur: 7000 },
       { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "明天滑半天就好。<br>下午去小樽。", amb: "fire", warm: true, dur: 8000 }
     ]
@@ -47,7 +47,7 @@ window.SCENES = {
     poster: { img: "poster/0110.jpg", line: "滑半天就下山。堺町通、LeTAO，等運河的煤氣燈亮起來。" },
     scenes: [
       { type: "title", eyebrow: "DAY 04 · OTARU", h: "半天 Kiroro・小樽", s: "滑半天，下午把小樽走一遍。", imgs: ["scene/otaru-1.jpg", "scene/otaru-5.jpg", "scene/otaru-6.jpg"], amb: "snow", dur: 5500 },
-      { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "滑半天就好。", s: "這是在山鄉的最後一次 Kiroro。", amb: "quiet", dur: 6000 },
+      { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "滑半天就好。", s: "上午再跟 Gacha 上半天，這是在山鄉的最後一次 Kiroro。", amb: "quiet", dur: 6000 },
       { stop: "canal", imgs: ["scene/otaru-1.jpg", "scene/otaru-2.jpg", "scene/otaru-3.jpg", "scene/otaru-4.jpg"], h: "下午，堺町通和運河。", s: "かま栄、北一硝子、LeTAO、六花亭、音樂盒堂，一路走到底再走回來。四個大人的下午，小孩在山鄉。", amb: "snow", dur: 9000 },
       { stop: "canal#2", label: "運河的煤氣燈", imgs: ["scene/otaru-5.jpg", "scene/otaru-6.jpg", "scene/otaru-7.jpg"], h: "天黑了，煤氣燈亮起來。", s: "然後去吃若鶏時代なると。", amb: "snow", dur: 8000 },
       { type: "end", t: "今晚", img: "scene/villa-5.jpg", h: "山鄉的最後一晚。<br>明天搬家，往東。", amb: "fire", warm: true, dur: 7000 }

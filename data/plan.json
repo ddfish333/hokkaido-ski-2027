@@ -36,7 +36,7 @@
       "lat": 43.0679153,
       "lon": 140.9893336,
       "open": "09:00",
-      "close": "15:30",
+      "close": "16:00",
       "ja": "キロロリゾート",
       "pid": "ChIJ0ZtUZSvbCl8Rp8sA7XPQCoE"
     },
@@ -579,15 +579,15 @@
       "stops": [
         {
           "id": "villa",
-          "at": "08:00",
+          "at": "07:50",
           "stay": 0,
-          "note": "{T:nanny.start} 保姆上工，小孩留在山鄉"
+          "note": "出發；保姆第一天，小孩交給她（{T:coach.name} 教練 {T:coach.start} 開課，要提早到換裝、買票）"
         },
         {
           "id": "kiroro",
-          "stay": 415,
-          "by": "09:00",
-          "note": "上午教練課、下午自由滑，滑到吊椅收（{close:kiroro}）；保姆 {T:nanny.start} 上工後才出門，冬天山路約 {leg:villa|kiroro} 分，吊椅開前到"
+          "stay": 460,
+          "by": "08:45",
+          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（午休時間可以跟教練調）；下課後收板下山"
         },
         {
           "id": "temiya",
@@ -617,13 +617,13 @@
           "id": "villa",
           "at": "07:50",
           "stay": 0,
-          "note": "出發"
+          "note": "出發（連假，早點到搶停車位）"
         },
         {
           "id": "kiroro",
-          "stay": 425,
+          "stay": 460,
           "by": "08:45",
-          "note": "滑雪（連假）"
+          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（連假人多）；下課後收板下山"
         },
         {
           "id": "asari",
@@ -649,7 +649,7 @@
           "id": "kiroro",
           "stay": 270,
           "by": "08:45",
-          "note": "滑半天；午餐在山上吃完再下山",
+          "note": "{T:coach.name} 教練半天課 {T:coach.start}–{T:coach.halfEnd}（先排半天，到時候看狀況）；午餐在山上吃完再下山",
           "alts": [
             "onze",
             "asari_ski"
