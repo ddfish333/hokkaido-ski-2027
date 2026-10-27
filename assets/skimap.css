@@ -132,15 +132,15 @@
 .sk-pin-d { width: 14px; height: 14px; border-radius: 50%; background: var(--ac); border: 2px solid rgba(var(--bg-rgb),.9); box-shadow: 0 0 0 2px rgba(var(--fg-rgb),.25), 0 4px 10px rgba(0,0,0,.45); transition: transform .2s; }
 .sk-pin:hover .sk-pin-d, .sk-pin.active .sk-pin-d { transform: scale(1.4); }
 .sk-pin.active .sk-pin-d { box-shadow: 0 0 0 3px rgba(var(--fg-rgb),.6), 0 0 0 9px rgba(232,179,106,.25), 0 4px 12px rgba(0,0,0,.5); }
-.sk-pin-l { display: grid; justify-items: center; gap: 1px; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; color: var(--ink); background: rgba(var(--bg-rgb),.84); padding: 4px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid rgba(var(--fg-rgb),.1); pointer-events: none; }
+.sk-pin-l { display: grid; justify-items: center; gap: 1px; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; color: var(--ink); background: var(--map-label-bg); text-shadow: var(--map-label-halo); padding: 4px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid rgba(var(--fg-rgb),.1); pointer-events: none; }
 .sk-pin-l b { font-weight: 500; }
 .sk-pin.otaru .sk-pin-l { opacity: .8; }
-.sk-pin.active .sk-pin-l { border-color: var(--ac); }
+.sk-pin.active .sk-pin-l, .sk-pin:hover .sk-pin-l { border-color: var(--ac); background: var(--map-label-bg-on); }
 .sk-pin-wx { font: 400 10px/1.2 var(--f-mono); color: var(--glacier); }
 .sk-pin-wx:empty { display: none; }
 .sk-gate { display: none; justify-items: center; gap: 2px; pointer-events: none; }
 .sk-gate.show, .sk-gate.active { display: grid; }
 .sk-gate-i { width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: var(--ink); border: 1.5px solid var(--bg); box-shadow: 0 0 0 1.5px rgba(var(--fg-rgb),.3); }
-.sk-gate-l { font: 400 10px/1.2 var(--f-body); color: var(--ink); background: rgba(var(--bg-rgb),.7); padding: 2px 6px; border-radius: 999px; white-space: nowrap; border: 1px solid rgba(var(--fg-rgb),.08); }
+.sk-gate-l { font: 400 10px/1.2 var(--f-body); color: var(--ink); background: var(--map-label-bg); text-shadow: var(--map-label-halo); padding: 2px 6px; border-radius: 999px; white-space: nowrap; border: 1px solid rgba(var(--fg-rgb),.08); }
 .sk-gate.active .sk-gate-l { color: var(--gold); border-color: rgba(232,179,106,.5); }
 .fm-legend i.route { width: 16px; height: 3px; border-radius: 2px; background: var(--gold); }

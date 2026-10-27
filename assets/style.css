@@ -22,6 +22,9 @@
   --r: 14px;
   --fg-rgb: 244,241,234;   /* 前景色的 RGB：半透明的線、底色都用 rgba(var(--fg-rgb), α)，換主題自動反過來 */
   --bg-rgb: 7,11,18;       /* 背景色的 RGB：半透明遮罩用 rgba(var(--bg-rgb), α) */
+  /* 地圖上的地點名字（景點、美食、雪場、入口共用）：底色半透明看得到底下的地圖和別的釘子，字靠一圈底色光暈撐住；滑過或選到才變實心 */
+  --map-label-bg: rgba(var(--bg-rgb),.5); --map-label-bg-on: rgba(var(--bg-rgb),.94);
+  --map-label-halo: 0 0 2px rgba(var(--bg-rgb),.95), 0 0 5px rgba(var(--bg-rgb),.8);
   --chrome-ink: #F4F1EA; --chrome-muted: rgba(244,241,234,.62); --chrome-bg: #070B12;   /* 上方列、底部列、日期切換 */
   --caution-ink: #F0C27B; --glacier-hi: #CFE0FF; --violet-ink: #CDB4FF; --on-gold: #1a1206;
   --c-drive: #6AA4FF; --c-shuttle: #3FC5CC; --c-walk: #45C08A; --c-taxi: #B48CFF;
