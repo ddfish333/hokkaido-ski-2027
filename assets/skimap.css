@@ -23,7 +23,7 @@
 .sk-hero-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
 .sk-hero-meta .r-rec { margin: 0; }
 .sk-sub { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
-.sk-note { margin: 0; font-size: 13.5px; line-height: 1.7; color: var(--ink); padding: 10px 12px; border-radius: 10px; background: rgba(7,11,18,.4); border-left: 2px solid var(--gold); }
+.sk-note { margin: 0; font-size: 13.5px; line-height: 1.7; color: var(--ink); padding: 10px 12px; border-radius: 10px; background: rgba(var(--bg-rgb),.4); border-left: 2px solid var(--gold); }
 .sk-note b { color: #FFE2B3; }
 .sk-planline { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 4px; }
 .sk-planline li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; font-size: 14px; align-items: baseline; }
@@ -68,7 +68,7 @@
 .sk-wxc .sn { font: 400 11px/1.2 var(--f-mono); color: var(--glacier); }
 .sk-wxc .gu { font: 400 10px/1.2 var(--f-mono); color: var(--muted); }
 .sk-hours { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(52px, 1fr); gap: 4px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
-.sk-h { display: grid; gap: 2px; justify-items: center; text-align: center; padding: 6px 2px; border-radius: 8px; background: rgba(7,11,18,.35); border: 1px solid var(--line); }
+.sk-h { display: grid; gap: 2px; justify-items: center; text-align: center; padding: 6px 2px; border-radius: 8px; background: rgba(var(--bg-rgb),.35); border: 1px solid var(--line); }
 .sk-h .t { font: 400 11px/1 var(--f-display); color: var(--muted); }
 .sk-h svg { width: 22px; height: 22px; color: var(--glacier); }
 .sk-h .tp { font: 400 13px/1 var(--f-display); }
@@ -106,7 +106,7 @@
 .sk-card { display: grid; gap: 12px; border-left: 3px solid var(--gc); scroll-margin-top: 84px; transition: box-shadow .25s; }
 .sk-card.active { box-shadow: 0 0 0 2px var(--gc), 0 12px 30px rgba(0,0,0,.35); }
 .sk-card.today { border-left-color: var(--gold); }
-.sk-media { position: relative; aspect-ratio: 16 / 10; margin: -18px -18px 0 -18px; overflow: hidden; background: #0B111B; border-radius: 0 var(--r) 0 0; }
+.sk-media { position: relative; aspect-ratio: 16 / 10; margin: -18px -18px 0 -18px; overflow: hidden; background: var(--soft); border-radius: 0 var(--r) 0 0; }
 .sk-media img, .sk-media .ch-vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .sk-media img { transition: transform 1.4s ease; }
 .sk-card:hover .sk-media img { transform: scale(1.03); }
@@ -115,7 +115,7 @@
 .sk-media .ch-play { position: absolute; left: 14px; bottom: 14px; width: 32px; height: 32px; }
 .sk-media.playing .ch-play { opacity: 0; }
 .sk-media-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; align-items: flex-start; }
-.sk-media-top .pill { background: rgba(7,11,18,.8); color: var(--ink); border-color: rgba(255,255,255,.14); white-space: normal; text-align: center; line-height: 1.3; max-width: 100%; }
+.sk-media-top .pill { background: rgba(var(--bg-rgb),.8); color: var(--ink); border-color: rgba(var(--fg-rgb),.14); white-space: normal; text-align: center; line-height: 1.3; max-width: 100%; }
 .sk-media-top .pill.open { color: var(--ok); } .sk-media-top .pill.soon { color: #A9C9FF; }
 .sk-media-top .pill.days { color: var(--gold); margin-left: auto; }
 .sk-card .r-name { font-size: 20px; }
@@ -129,10 +129,10 @@
 
 /* 地圖上的雪場點 */
 .sk-pin { background: none; border: 0; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 4px; transform: translateY(6px); }
-.sk-pin-d { width: 14px; height: 14px; border-radius: 50%; background: var(--ac); border: 2px solid rgba(7,11,18,.9); box-shadow: 0 0 0 2px rgba(255,255,255,.25), 0 4px 10px rgba(0,0,0,.45); transition: transform .2s; }
+.sk-pin-d { width: 14px; height: 14px; border-radius: 50%; background: var(--ac); border: 2px solid rgba(var(--bg-rgb),.9); box-shadow: 0 0 0 2px rgba(var(--fg-rgb),.25), 0 4px 10px rgba(0,0,0,.45); transition: transform .2s; }
 .sk-pin:hover .sk-pin-d, .sk-pin.active .sk-pin-d { transform: scale(1.4); }
-.sk-pin.active .sk-pin-d { box-shadow: 0 0 0 3px rgba(255,255,255,.6), 0 0 0 9px rgba(232,179,106,.25), 0 4px 12px rgba(0,0,0,.5); }
-.sk-pin-l { display: grid; justify-items: center; gap: 1px; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; color: var(--ink); background: rgba(7,11,18,.84); padding: 4px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid rgba(255,255,255,.1); pointer-events: none; }
+.sk-pin.active .sk-pin-d { box-shadow: 0 0 0 3px rgba(var(--fg-rgb),.6), 0 0 0 9px rgba(232,179,106,.25), 0 4px 12px rgba(0,0,0,.5); }
+.sk-pin-l { display: grid; justify-items: center; gap: 1px; font: 400 11px/1.2 var(--f-body); letter-spacing: .04em; color: var(--ink); background: rgba(var(--bg-rgb),.84); padding: 4px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid rgba(var(--fg-rgb),.1); pointer-events: none; }
 .sk-pin-l b { font-weight: 500; }
 .sk-pin.otaru .sk-pin-l { opacity: .8; }
 .sk-pin.active .sk-pin-l { border-color: var(--ac); }
@@ -140,7 +140,7 @@
 .sk-pin-wx:empty { display: none; }
 .sk-gate { display: none; justify-items: center; gap: 2px; pointer-events: none; }
 .sk-gate.show, .sk-gate.active { display: grid; }
-.sk-gate-i { width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: var(--ink); border: 1.5px solid var(--bg); box-shadow: 0 0 0 1.5px rgba(255,255,255,.3); }
-.sk-gate-l { font: 400 10px/1.2 var(--f-body); color: var(--ink); background: rgba(7,11,18,.7); padding: 2px 6px; border-radius: 999px; white-space: nowrap; border: 1px solid rgba(255,255,255,.08); }
+.sk-gate-i { width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: var(--ink); border: 1.5px solid var(--bg); box-shadow: 0 0 0 1.5px rgba(var(--fg-rgb),.3); }
+.sk-gate-l { font: 400 10px/1.2 var(--f-body); color: var(--ink); background: rgba(var(--bg-rgb),.7); padding: 2px 6px; border-radius: 999px; white-space: nowrap; border: 1px solid rgba(var(--fg-rgb),.08); }
 .sk-gate.active .sk-gate-l { color: var(--gold); border-color: rgba(232,179,106,.5); }
 .fm-legend i.route { width: 16px; height: 3px; border-radius: 2px; background: var(--gold); }

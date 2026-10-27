@@ -394,13 +394,13 @@
   function renderMap() {
     if (!window.maplibregl) return;
     if (!state.map) {
-      state.map = new maplibregl.Map({ container: "mapcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.75, 43.28], zoom: 7, cooperativeGestures: true, attributionControl: { compact: true } });
+      state.map = new maplibregl.Map({ container: "mapcanvas", style: P.mapStyle(), center: [141.75, 43.28], zoom: 7, cooperativeGestures: true, attributionControl: { compact: true } });
       state.map.on("load", function () {
         state.map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-        state.map.addLayer({ id: "route-casing", type: "line", source: "route", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#0F1520", "line-width": 8 } });
+        state.map.addLayer({ id: "route-casing", type: "line", source: "route", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": P.cssVar("--paper"), "line-width": 8 } });
         state.map.addLayer({ id: "route-line", type: "line", source: "route", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#FF5A4C", "line-width": 4, "line-dasharray": ["case", ["==", ["get", "mode"], "walk"], ["literal", [1, 2]], ["literal", [1, 0]]] } });
         state.map.addSource("stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-        state.map.addLayer({ id: "stop-dot", type: "circle", source: "stops", paint: { "circle-color": ["case", ["get", "late"], "#FF5A4C", "#EDEAE2"], "circle-radius": 12, "circle-stroke-width": 2, "circle-stroke-color": "#0F1520" } });
+        state.map.addLayer({ id: "stop-dot", type: "circle", source: "stops", paint: { "circle-color": ["case", ["get", "late"], P.cssVar("--accent"), P.cssVar("--ink")], "circle-radius": 12, "circle-stroke-width": 2, "circle-stroke-color": "#0F1520" } });
         state.map.addLayer({ id: "stop-num", type: "symbol", source: "stops", layout: { "text-field": ["get", "n"], "text-font": ["Noto Sans Bold"], "text-size": 11, "text-allow-overlap": true }, paint: { "text-color": "#0F1520" } });
         state.map.addLayer({ id: "stop-label", type: "symbol", source: "stops", layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Regular"], "text-size": 12, "text-variable-anchor": ["left", "right", "top", "bottom"], "text-radial-offset": 1.3, "text-justify": "auto" }, paint: { "text-color": "#EDEAE2", "text-halo-color": "#070B12", "text-halo-width": 1.6 } });
         state.mapReady = true; renderMap();

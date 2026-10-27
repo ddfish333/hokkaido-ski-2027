@@ -16,7 +16,7 @@
   function wday(s) { var p = s.split("-").map(Number); return new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay(); }
   function md(s) { var p = s.split("-").map(Number); return p[1] + "/" + p[2]; }
 
-  var AREA_COLOR = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
+  var AREA_COLOR = Plan.areaColor();  /* 地區顏色跟主題（plan.js 一份） */
   var AREA_ORDER = ["Kiroro", "銭函", "小樽", "札幌", "富良野", "美瑛・旭川"];
   var STATUS = { plan: ["正式行程", "gold"], saved: ["收藏", "blue"], check: ["待確認", "grey"] };
   var KIDS = { best: ["小孩會很喜歡", "best"], ok: ["可以帶小孩", "ok"], warn: ["小孩不太適合", "warn"] };
@@ -154,7 +154,7 @@
   function initMap() {
     if (!window.maplibregl) { $("#fmfallback").hidden = false; return; }
     try {
-      map = new maplibregl.Map({ container: "fmcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 7.2, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } });
+      map = new maplibregl.Map({ container: "fmcanvas", style: Plan.mapStyle(), center: [141.6, 43.2], zoom: 7.2, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } });
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "300px", className: "fm-pop" });
@@ -177,8 +177,8 @@
       var draw = function () {
         if (map.getSource("routes")) return;
         map.addSource("routes", { type: "geojson", data: routeGeo() });
-        map.addLayer({ id: "routes-line", type: "line", source: "routes", paint: { "line-color": "#E8B36A", "line-width": 2, "line-opacity": 0.45 } });
-        map.addLayer({ id: "routes-today", type: "line", source: "routes", filter: ["==", ["get", "date"], state.day || ""], paint: { "line-color": "#E8B36A", "line-width": 4, "line-opacity": 0.9 } });
+        map.addLayer({ id: "routes-line", type: "line", source: "routes", paint: { "line-color": Plan.cssVar("--gold"), "line-width": 2, "line-opacity": 0.45 } });
+        map.addLayer({ id: "routes-today", type: "line", source: "routes", filter: ["==", ["get", "date"], state.day || ""], paint: { "line-color": Plan.cssVar("--gold"), "line-width": 4, "line-opacity": 0.9 } });
       };
       if (window.Plan && Plan.ready) Plan.ready.then(draw); else draw();
       mapReady = true; render(true);

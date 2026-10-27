@@ -403,6 +403,17 @@ for _p in ("bases", "resorts", "places"):
                         try: fill(_s, trip["start"], None, strict=True)
                         except TokenError as ex: E(f"trip.js {_p}[{_i}].{_k}：{ex}")
 
+# 0l. 亮色主題（10/27）：樣式表不能再寫死「只適合深色底」的顏色——半透明白／深藍黑要用 rgba(var(--fg-rgb),α)／rgba(var(--bg-rgb),α)，
+#     文字色用 token（--ink、--muted、--glacier-hi…）；token 定義區（:root、data-theme、照片區）不算
+_BAD_CSS = re.compile(r"rgba\(\s*(?:255\s*,\s*255\s*,\s*255|244\s*,\s*241\s*,\s*234|7\s*,\s*11\s*,\s*18|5\s*,\s*8\s*,\s*15|15\s*,\s*21\s*,\s*32)\s*,|#(?:9CC6FF|CFE0FF|F0C27B|CDB4FF|0B111B)\b", re.I)
+for _css in ("assets/style.css", "assets/foodmap.css", "assets/skimap.css", "assets/editor.css"):
+    _src = open(os.path.join(ROOT, _css), encoding="utf-8").read()
+    _body = re.sub(r"(?ms)^:root(?:\[data-theme=\"light\"\][^{]*)?\s*\{.*?^\}", "", _src)  # token 定義區（:root、亮色主題、照片區）不檢查
+    for _n, _l in enumerate(_body.split("\n"), 1):
+        if re.match(r"\s*(\.film|\.hero|\.poster|\.band-dark|@keyframes)", _l): continue  # 照片區永遠深色
+        _m = _BAD_CSS.search(_l)
+        if _m: E(f"{_css}：寫死只適合深色底的顏色「{_m.group(0)}」——改用 rgba(var(--fg-rgb), α)／rgba(var(--bg-rgb), α) 或顏色 token，亮色主題才不會壞 →「{_l.strip()[:70]}」")
+
 # 0j. 保姆最後一天：保姆和小孩在住宿，送她去搭車之前一定要先回住宿接人（10/26 第六輪：雪場直接開去車站，漏了接人）
 _N = trip.get("nanny") or {}
 if _N.get("lastDay") in PLAN["days"] and _N.get("busStop"):

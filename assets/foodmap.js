@@ -15,7 +15,7 @@
   function md(s) { var p = s.split("-").map(Number); return p[1] + "/" + p[2]; }
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
-  var AREA_COLOR = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
+  var AREA_COLOR = Plan.areaColor();  /* 地區顏色跟主題（plan.js 一份） */
   var AREA_ORDER = ["Kiroro", "銭函", "小樽", "富良野", "美瑛・旭川", "札幌"];
   var KIND_GROUP = [
     ["壽司・海鮮", /壽司|海鮮|炸蝦|螃蟹/],
@@ -131,7 +131,7 @@
   function initMap() {
     if (!window.maplibregl) { $("#fmfallback").hidden = false; return; }
     try {
-      map = new maplibregl.Map({ container: "fmcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.5, 43.2], zoom: 7.3, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } });
+      map = new maplibregl.Map({ container: "fmcanvas", style: Plan.mapStyle(), center: [141.5, 43.2], zoom: 7.3, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } });
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "280px", className: "fm-pop" });

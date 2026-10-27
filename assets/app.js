@@ -401,7 +401,7 @@
   var map = null, gpsMarker = null, mapReady = false, KEYS = [], POIS = [], STOPS = [];
   if (PAGE === "day") AREAS = AREAS.slice(0, 1); else AREAS = AREAS.slice(1);
   state.area = PAGE === "day" ? "day" : "all";
-  var isDark = true;
+  var isDark = !window.Plan || Plan.theme() !== "light";
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#5A687A"; }
   function dayPlan() { return (window.Plan && Plan.plan) ? Plan.schedule(T.days[state.day].date, state.mode) : { stops: [], legs: [], total: { km: 0, min: 0 } }; }
   /* 固定時間的標籤：plan.json 站點可以給 atLabel（例如「訂位」），有的話顯示「17:30 訂位（早到 15 分）」，沒有就是「等 15 分（17:30 開始）」 */
@@ -769,7 +769,7 @@
   });
 
   /* ---------- 雪場：卡片搬到 ski/（滑雪地圖），首頁只留一塊縮圖 ---------- */
-  var SKI_GROUP_COLOR = { main: "#E8B36A", sapporo: "#6AA4FF", otaru: "#8E98A6" };
+  var SKI_GROUP_COLOR = Plan.groupColor();  /* 雪場分組顏色跟主題（plan.js） */
   function renderSkiStats() {
     if (!has("skistats")) return;
     var n = { main: 0, sapporo: 0, otaru: 0 }; T.resorts.forEach(function (r) { n[r.group || "main"]++; });
@@ -911,7 +911,7 @@
   }
   function renderFood() {
     if (!has("foodstats") || !FOOD.length) return;
-    var order = ["Kiroro", "銭函", "小樽", "富良野", "美瑛・旭川", "札幌"], col = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
+    var order = ["Kiroro", "銭函", "小樽", "富良野", "美瑛・旭川", "札幌"], col = Plan.areaColor();
     var n = {}; FOOD.forEach(function (f) { n[f.area] = (n[f.area] || 0) + 1; });
     var rated = FOOD.filter(function (f) { return f.g; }).length;
     $("#foodstats").innerHTML = '<span class="fs-total"><b>' + FOOD.length + '</b> 家 · ' + rated + ' 家有 Google 評價</span>' +
@@ -955,21 +955,21 @@
     var n = { plan: 0, saved: 0, check: 0 }; SPOTS.forEach(function (s) { n[s.status]++; });
     var areas = {}; SPOTS.forEach(function (s) { areas[s.area] = (areas[s.area] || 0) + 1; });
     $("#spotstats").innerHTML = '<span class="fs-total"><b>' + SPOTS.length + '</b> 個景點 · 正式行程 ' + n.plan + ' · 收藏 ' + n.saved + ' · 待確認 ' + n.check + '</span>' +
-      Object.keys(areas).map(function (a) { return '<span class="fs-area" style="--mc:' + ({ "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" }[a] || "#fff") + '"><i></i>' + esc(a) + ' <b>' + areas[a] + '</b></span>'; }).join("");
+      Object.keys(areas).map(function (a) { return '<span class="fs-area" style="--mc:' + (Plan.areaColor()[a] || "#fff") + '"><i></i>' + esc(a) + ' <b>' + areas[a] + '</b></span>'; }).join("");
   }
 
   /* 首頁：美食地圖縮圖（不可操作，點整塊進入 food/） */
   function initFoodTile() { initTile("foodtilemap", FOOD); initTile("spottilemap", SPOTS); initTile("skitilemap", T.resorts.map(function (r) { return { lat: r.lat, lon: r.lon, color: SKI_GROUP_COLOR[r.group || "main"] }; })); }
   function initTile(cid, pts) {
     if (!has(cid) || !window.maplibregl || !pts.length) return;
-    var col = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
+    var col = Plan.areaColor();
     var m;
-    try { m = new maplibregl.Map({ container: cid, style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 6.6, interactive: false, attributionControl: false }); } catch (e) { return; }
+    try { m = new maplibregl.Map({ container: cid, style: Plan.mapStyle(), center: [141.6, 43.2], zoom: 6.6, interactive: false, attributionControl: false }); } catch (e) { return; }
     m.on("load", function () {
       var feats = pts.map(function (f) { return { type: "Feature", properties: { c: f.color || col[f.area] || "#fff" }, geometry: { type: "Point", coordinates: [f.lon, f.lat] } }; });
       m.addSource("ft", { type: "geojson", data: { type: "FeatureCollection", features: feats } });
       m.addLayer({ id: "ft-glow", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 9, "circle-opacity": 0.25, "circle-blur": 0.8 } });
-      m.addLayer({ id: "ft-dot", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 4, "circle-stroke-width": 1.5, "circle-stroke-color": "#070B12" } });
+      m.addLayer({ id: "ft-dot", type: "circle", source: "ft", paint: { "circle-color": ["get", "c"], "circle-radius": 4, "circle-stroke-width": 1.5, "circle-stroke-color": cssVar("--paper") } });
       var bb = new maplibregl.LngLatBounds(); pts.forEach(function (f) { bb.extend([f.lon, f.lat]); }); T.bases.forEach(function (b) { bb.extend([b.lon, b.lat]); });
       m.fitBounds(bb, { padding: 36, duration: 0 });
     });

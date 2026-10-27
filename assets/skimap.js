@@ -80,7 +80,7 @@
     ["sapporo", "札幌近郊・不在行程裡", "1/16–1/18 想滑的話，看雪況和大人怎麼分組再挑一天。標 2025-26 的是上一季票價，出發前再查。"],
     ["otaru", "小樽近郊備案", "Kiroro 太擠或天氣差時的小雪場，回程順路泡湯。"]
   ];
-  var GROUP_COLOR = { main: "#E8B36A", sapporo: "#6AA4FF", otaru: "#8E98A6" };
+  var GROUP_COLOR = Plan.groupColor();  /* 雪場分組顏色跟主題（plan.js 一份） */
   var qs = new URLSearchParams(location.search), OPEN = {};
   var state = { day: null, mode: Plan ? Plan.mode() : "normal", focus: null, wxTab: "base", wx: {}, hourly: {}, wxFail: false };
 
@@ -349,7 +349,7 @@
   var map, markers = {}, gateMarkers = [], popup, mapReady = false, geo;
   function initMap() {
     if (!window.maplibregl) { $("#skfallback").hidden = false; return; }
-    try { map = new maplibregl.Map({ container: "skcanvas", style: "https://tiles.openfreemap.org/styles/dark", center: [141.6, 43.2], zoom: 7.4, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } }); }
+    try { map = new maplibregl.Map({ container: "skcanvas", style: Plan.mapStyle(), center: [141.6, 43.2], zoom: 7.4, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } }); }
     catch (e) { $("#skfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true, showUserHeading: true });
@@ -375,8 +375,8 @@
     });
     map.on("load", function () {
       map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-      map.addLayer({ id: "route-casing", type: "line", source: "route", paint: { "line-color": "#070B12", "line-width": 6, "line-opacity": .6 }, layout: { "line-cap": "round", "line-join": "round" } });
-      map.addLayer({ id: "route-line", type: "line", source: "route", paint: { "line-color": "#E8B36A", "line-width": 3, "line-opacity": ["case", ["get", "ski"], 1, .45] }, layout: { "line-cap": "round", "line-join": "round" } });
+      map.addLayer({ id: "route-casing", type: "line", source: "route", paint: { "line-color": Plan.cssVar("--paper"), "line-width": 6, "line-opacity": .6 }, layout: { "line-cap": "round", "line-join": "round" } });
+      map.addLayer({ id: "route-line", type: "line", source: "route", paint: { "line-color": Plan.cssVar("--gold"), "line-width": 3, "line-opacity": ["case", ["get", "ski"], 1, .45] }, layout: { "line-cap": "round", "line-join": "round" } });
       mapReady = true; syncMap(true);
     });
     map.on("zoom", function () { var z = map.getZoom(); document.querySelectorAll(".sk-gate").forEach(function (g) { g.classList.toggle("show", z >= 11.2); }); });

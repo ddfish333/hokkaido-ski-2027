@@ -21,7 +21,21 @@ def topbar_html(root, brand, links, curbtn, edit_href):
             '    <input type="checkbox" class="nav-tog" id="navtog" aria-label="打開選單"><label class="nav-lab" for="navtog">選單</label>\n'
             '    <nav class="nav" aria-label="主要區塊">\n' + nav + f'      <a href="{edit_href}" class="nav-edit">編輯</a>\n    </nav>\n' +
             f'    <a class="m-edit" href="{edit_href}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>編輯</a>\n' +
-            ('    <button type="button" class="curbtn" id="curbtn" aria-label="切換金額顯示">¥＋NT$</button>\n' if curbtn else "") + '  </div>\n</header>')
+            ('    <button type="button" class="curbtn" id="curbtn" aria-label="切換金額顯示">¥＋NT$</button>\n' if curbtn else "") +
+            THEMEBTN + '  </div>\n</header>')
+# 亮／暗切換鈕（10/27 Sylvia：車上戶外太亮，深底看不清楚）；行為在 plan.js themeInit
+THEMEBTN = ('    <button type="button" class="themebtn" id="themebtn" aria-label="切換亮色／深色"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">'
+            '<circle class="t-sun" cx="12" cy="12" r="4.2"/><path class="t-sun" d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/>'
+            '<path class="t-moon" d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></svg><span class="t-lab">自動</span></button>\n')
+# 每一頁 <head> 最前面先決定主題，畫面不會先閃一下深色再變亮（和 plan.js themeInit 同一套規則）
+THEME_BOOT = ('<script>/* theme-boot */(function(){try{var p=localStorage.getItem("snow13-theme")||"auto",'
+              'd=p==="auto"?(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):p;document.documentElement.setAttribute("data-theme",d);}catch(e){}})();</script>')
+def sync_theme_boot():
+    for f in ("index.html", "ski/index.html", "food/index.html", "spots/index.html", "plan/index.html", "tools/day.template.html"):
+        path = os.path.join(ROOT, f); html = open(path, encoding="utf-8").read()
+        if "/* theme-boot */" in html: new = re.sub(r"<script>/\* theme-boot \*/.*?</script>", lambda m: THEME_BOOT, html, count=1, flags=re.S)
+        else: new = re.sub(r'(<meta name="viewport"[^>]*>)', lambda m: m.group(1) + "\n" + THEME_BOOT, html, count=1)
+        if new != html: open(path, "w", encoding="utf-8").write(new); print("theme-boot:", f)
 # ---- 手機底部分頁列：首頁／行程／滑雪／美食／景點，五個入口一直看得到（不用先點「選單」）。也由這裡一份產生 ----
 TAB_ICON = {
     "home": '<path d="M4 11l8-6.5 8 6.5M6 9.5V19h4.5v-5h3v5H18V9.5"/>',
@@ -88,6 +102,7 @@ def sync_coords():
         if new != src: open(path, "w", encoding="utf-8").write(new); print("座標同步:", f)
 
 sync_coords()
+sync_theme_boot()
 sync_topbar()
 sync_tabbar()
 subprocess.run(["python3", os.path.join(ROOT, "tools/stamp.py")], check=True)

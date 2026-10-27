@@ -243,6 +243,41 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", navInit); else navInit();
 
+  /* ---------- 亮色／深色（10/27 Sylvia：車上戶外太亮，深底看不清楚） ----------
+     設定：自動（跟手機的亮／暗）→ 亮 → 暗，存在這支手機。<head> 的 theme-boot 先套上，這裡負責按鈕和之後的切換。
+     地圖底圖、地區顏色也跟著主題（P.mapStyle、P.areaColor）；切換時有地圖的頁面重新整理，地圖才會換底圖。 */
+  var THEME_KEY = "snow13-theme", mqLight = window.matchMedia ? matchMedia("(prefers-color-scheme: light)") : null;
+  function themePref() { try { return localStorage.getItem(THEME_KEY) || "auto"; } catch (e) { return "auto"; } }
+  function themeResolve(p) { return p === "auto" ? (mqLight && mqLight.matches ? "light" : "dark") : p; }
+  P.theme = function () { return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark"; };
+  P.mapStyle = function () { return "https://tiles.openfreemap.org/styles/" + (P.theme() === "light" ? "positron" : "dark"); };
+  /* 地區、雪場分組的顏色：深色底用亮色，亮色底用深一點的同色系（原本四支程式各抄一份，亮色底看不見淺藍、淺綠） */
+  var AREA_DARK = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
+  var AREA_LIGHT = { "小樽": "#1B58C9", "銭函": "#2F7FB8", "Kiroro": "#6B3FC4", "富良野": "#137A4B", "美瑛・旭川": "#2E8C6A", "札幌": "#D6362A" };
+  var GROUP_DARK = { main: "#E8B36A", sapporo: "#6AA4FF", otaru: "#8E98A6" }, GROUP_LIGHT = { main: "#8C5A0C", sapporo: "#1B58C9", otaru: "#4E5866" };
+  P.areaColor = function () { return P.theme() === "light" ? AREA_LIGHT : AREA_DARK; };
+  P.groupColor = function () { return P.theme() === "light" ? GROUP_LIGHT : GROUP_DARK; };
+  P.cssVar = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+  function themeApply(pref, fromUser) {
+    var t = themeResolve(pref), was = P.theme();
+    document.documentElement.setAttribute("data-theme", t);
+    var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", t === "light" ? "#F7F6F2" : "#070B12");
+    var b = document.getElementById("themebtn");
+    if (b) { b.querySelector(".t-lab").textContent = { auto: "自動", light: "亮", dark: "暗" }[pref]; b.setAttribute("aria-label", "畫面：" + { auto: "跟手機設定", light: "亮色", dark: "深色" }[pref] + "（點一下切換）"); b.dataset.pref = pref; }
+    if (fromUser && t !== was && document.querySelector(".maplibregl-map")) location.reload();
+  }
+  function themeInit() {
+    themeApply(themePref(), false);
+    var b = document.getElementById("themebtn");
+    if (b) b.addEventListener("click", function () {
+      var order = ["auto", "light", "dark"], next = order[(order.indexOf(themePref()) + 1) % 3];
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) { }
+      themeApply(next, true);
+    });
+    if (mqLight) { var on = function () { if (themePref() === "auto") themeApply("auto", true); }; if (mqLight.addEventListener) mqLight.addEventListener("change", on); else if (mqLight.addListener) mqLight.addListener(on); }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", themeInit); else themeInit();
+
   /* ---------- 雪場票：停多久就給對應的票（在雪場不到 4 小時才給 4 小時券；滿 4 小時就 1 日券），單日頁、雪場頁、替代方案共用 ---------- */
   P.ticketFor = function (rs, stay) {
     var t = (rs && rs.tickets) || []; if (!t.length) return null;
