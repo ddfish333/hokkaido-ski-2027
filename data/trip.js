@@ -47,10 +47,10 @@ window.TRIP = {
       hours: "吊椅大多 09:00–15:30（2/14 起到 16:00）；山腳的 Gateway Express 纜車 08:30–16:00、Family 吊椅到 16:30、Center Express 到 19:00；結束時間依日落調整——25-26 官網時刻表，26-27 待公告", scale: "23 條雪道、9 條纜車（含 2 條纜車廂）；山頂 1,180 m",
       tickets: [["1 日券", "¥9,200"], ["4 小時券", "¥7,800"], ["2 日券（可不連續）", "¥18,400"], ["3 日券（可不連續）", "¥27,600"], ["夜滑", "¥3,000"], ["6–12 歲 1 日", "¥5,500"]],
       kids: "5 歲以下免費（需大人陪同，KIROCA 卡押金 ¥500）",
-      lessons: "Kids Academy Pink 班 3–4 歲：半天 ¥8,000（本次小孩不上課）",
+      lessons: "大人：{T:coach.name} 教練（{T:coach.org}）1/8、1/9 全天、1/10 上午，4 人一組、課後免費給影片；Kids Academy Pink 班 3–4 歲：半天 ¥8,000（本次小孩不上課）",
       gear: "Mountain Shop Vainqueur：賣雪板、雪靴、固定器，打蠟 ¥3,500；雪具寄放櫃 2 天 ¥1,500，之後每天 +¥500",
       tips: ["官方 Webstore 預購最多 95 折", "停車免費約 2,000 台", "山上陣風常超過 50 km/h，纜車可能停駛"],
-      links: [["官網", "https://www.kiroro.co.jp/"], ["營業時間", "https://www.kiroro.co.jp/ja/operating_hours/"], ["票價", "https://www.kiroro.co.jp/lift_price/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31609/"]],
+      links: [["官網", "https://www.kiroro.co.jp/"], ["營業時間", "https://www.kiroro.co.jp/ja/operating_hours/"], ["票價", "https://www.kiroro.co.jp/lift_price/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31609/"], ["Gacha 教練預約", "https://snowsurfing-japan.stores.jp/reserve/snowsurfing_japan/1865332"]],
       status: "https://www.kiroro.co.jp/dashboard/", cams: "https://www.kiroro.co.jp/livecamera", trailmap: "https://www.kiroro.co.jp/guide_map/", webshop: "https://webstore.kiroro.co.jp/en/", access: "https://www.kiroro.co.jp/access-winter/",
       stops: ["kiroro"], video: "kiroro-hover.mp4", videoSm: "kiroro-hover-sm.mp4", img: "kiroro.jpg", top: [43.0790, 140.9670],
       gates: [
@@ -252,7 +252,7 @@ window.TRIP = {
   /* Kiroro 教練（10/27 Sean 定）：Gacha（Snow Surfing Japan）1/8、1/9 全天、1/10 上午半天（先排半天，到時候看狀況）
      時間表的到達／離開、說明文字、待辦都讀這裡；check.py 確認開課前 15 分到雪場、下課後才離開 */
   coach: { name: "Gacha", org: "Snow Surfing Japan", resort: "kiroro", start: "09:00", end: "16:00", halfEnd: "12:00",
-           full: ["2027-01-08", "2027-01-09"], half: ["2027-01-10"], lang: "簡單英文＋翻譯 App（不會中文）",
+           full: ["2027-01-08", "2027-01-09"], half: ["2027-01-10"], lang: "簡單英文＋翻譯 App（不會中文）", url: "https://snowsurfing-japan.stores.jp/reserve/snowsurfing_japan/1865332",
            /* 核准後把 status 改成 "已確定"；行程備註會跟著顯示 */
            status: "等 Kiroro 核准外部教練教學（Gacha 10/28 提交申請，可能要等一陣子）" },
   zooLastEntry: "15:00",
@@ -330,7 +330,8 @@ window.TRIP = {
     ["現在", "問富良野小木屋：兩台車位、雪具乾燥空間"],
     ["11 月", "每個小孩戴一顆 AirTag（4 顆，先綁好 Find My，放雪衣內袋）"],
     ["出發前", "札幌停車想保險就用 akippa／特P 預約 1/16–1/19 兩個平面車位；不然 1/16 13:00 前到パラカ（見單日頁）"],
-    ["11 月", "Kiroro 核准後預約 {T:coach.name}（{T:coach.org}）：1/8、1/9 全天 {T:coach.start}–{T:coach.end}、1/10 上午半天；北海道要 3 天起、開課前至少 1 個月預約（12/8 前），預約時刷訂金 ¥10,000"],
+    ["11 月", "Kiroro 核准後預約 {T:coach.name}（{T:coach.org} 官網，代表人一人預約）：1/8、1/9 全天 {T:coach.start}–{T:coach.end}、1/10 上午半天——半天也是選 {T:coach.start}–{T:coach.end} 的方案，預約後 email 說明；北海道要 3 天起、開課前至少 1 個月（12/8 前），刷訂金 ¥10,000"],
+    ["11 月", "{T:coach.name} 規定：不能改期；開課 24 天前起不能取消、訂金不退（天候或教練因素取消會退訂金）。1/10 要不要改全天，預約時就跟他講好"],
     ["11 月", "富良野教練（1/12、1/13）：照原計畫 1 對 4 團體課，預計每人 NT$5,000–6,000／天"],
     ["出發前", "準備日幣現金付 {T:coach.name}：4 人 2 全天＋1 上午，課程費＋北海道地區服務費 ¥50,000 約 ¥274,000，當天付現（教練不會中文，用簡單英文＋翻譯 App）"],
     ["現在", "訂位：1/18 氷雪の門 螃蟹會席（評論說要提前 1–2 個月）；11 月再訂 1/16 ビール園 GARDEN GRILL 包廂、1/17 KUJIRA"],
