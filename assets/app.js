@@ -942,7 +942,7 @@
     list.forEach(function (x) {
       var s = x.s, st = SPOT_STATUS[s.status] || SPOT_STATUS.saved, closed = s.closed && s.closed.indexOf(wd) >= 0, g = s.g;
       var km = x.near * 1.35, min = r5(km / 40 * 60);
-      body += '<li class="fp ' + (s.kids === "best" ? "best" : s.kids === "warn" ? "warn" : "ok") + (closed ? " closed" : "") + '">' +
+      body += '<li class="fp ' + (s.kids === "best" ? "best" : s.kids === "warn" ? "warn" : "ok") + (closed ? " closed" : "") + '">' + Plan.spotPhoto(s) +
         '<div class="fp-top"><b>' + esc(s.name) + '</b><span class="kind">' + esc(s.kind) + '</span><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (closed ? '<span class="badge red">今天公休</span>' : "") + '</div>' +
         (g && g.rating ? '<div class="fp-rating"><span class="stars"><i style="--r:' + (g.rating / 5 * 100) + '%"></i></span><b>' + g.rating.toFixed(1) + '</b><small>' + nf(g.n) + ' 則 · Google</small></div>' : "") +
         '<p class="fp-what">' + em(s.what) + '</p>' + (s.caution ? '<p class="fp-caution">⚠ ' + em(s.caution) + '</p>' : "") + (s.photo ? '<p class="fp-photo"><span class="lab">📷 最佳拍攝點</span>' + em(s.photo) + '</p>' : "") +

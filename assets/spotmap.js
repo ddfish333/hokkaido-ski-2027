@@ -70,6 +70,7 @@
     meta.push('<span class="fit">' + kids[0] + '</span>');
     if (s.approx) meta.push('位置約略');
     return '<li class="fp ' + kids[1] + (closed ? " closed" : "") + (today ? " planned" : "") + (state.active === s.id ? " active" : "") + '" id="' + s.id + '" data-fid="' + s.id + '" style="--ac:' + AREA_COLOR[s.area] + '">' +
+      Plan.spotPhoto(s) +
       '<div class="fp-top"><button type="button" class="fp-name" data-go="' + s.id + '"><i class="dot"></i>' + esc(s.name) + '</button><span class="kind">' + esc(s.kind) + '</span>' +
       '<span class="badge st-' + st[1] + '">' + st[0] + (s.day ? ' ' + md(s.day) : "") + '</span>' + (closed ? '<span class="badge red">' + md(c.d.date) + ' 公休</span>' : "") + '</div>' +
       (s.ja && s.ja !== s.name ? '<p class="fp-ja">' + esc(s.ja) + '</p>' : "") +
@@ -214,7 +215,7 @@
     if (fly) map.flyTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 13), duration: 800 });
     showPhotoPin(id, false);
     var g = s.g;
-    popup.setLngLat([s.lon, s.lat]).setHTML('<b>' + esc(s.name) + '</b><span>' + esc(s.kind) + ' · ' + esc(s.area) + (g && g.rating ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
+    popup.setLngLat([s.lon, s.lat]).setHTML(Plan.spotPhoto(s, true) + '<b>' + esc(s.name) + '</b><span>' + esc(s.kind) + ' · ' + esc(s.area) + (g && g.rating ? ' · ★ ' + g.rating.toFixed(1) : "") + '</span>' +
       '<em class="' + (s.status === "plan" ? "gold" : "blue") + '">' + st[0] + (s.day ? " " + md(s.day) : "") + '</em>' +
       '<small>' + em(txt(s.what, s, c).replace(/\*\*/g, "")).slice(0, 70) + (s.what.length > 70 ? "…" : "") + '</small>' +
       (s.photoAt ? '<small class="cam">📷 拍攝點：' + esc(s.photoName) + '（地圖上的相機）</small>' : "") +

@@ -36,7 +36,6 @@
 .fm-legend { position: absolute; left: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 8px 12px; border-radius: 12px; background: rgba(var(--bg-rgb),.8); border: 1px solid rgba(var(--fg-rgb),.08); font: 400 11px var(--f-body); color: var(--ink); letter-spacing: .04em; max-width: calc(100% - 24px); }
 .fm-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .fm-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-.fm-legend i.home { border-radius: 2px; background: var(--ink); }
 @media (max-width: 900px) { .fm-legend { display: none; } }
 
 /* 地圖上的點 */

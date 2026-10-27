@@ -628,6 +628,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .fp.best { border-color: rgba(69,192,138,.45); }
 .fp.planned { border-color: var(--gold); box-shadow: inset 3px 0 0 var(--gold); }
 .fp.closed { opacity: .55; }
+/* 景點照片（Plan.spotPhoto）：照片上的字固定白字黑漸層，亮暗主題都一樣 */
+.sp-img { position: relative; margin: 0 0 4px; border-radius: 9px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--soft); }
+.sp-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.sp-img figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 10px 6px; font-size: 11px; line-height: 1.4; color: #fff; text-align: right; background: linear-gradient(transparent, rgba(0,0,0,.62)); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.sp-img figcaption a { color: inherit; text-decoration: none; }
+.sp-img figcaption a:hover { text-decoration: underline; }
+.sp-img-at, .sp-img-off { position: absolute; top: 8px; font-size: 11px; line-height: 1; padding: 5px 9px; border-radius: 999px; color: #fff; background: rgba(0,0,0,.62); }
+.sp-img-at { left: 8px; }
+.sp-img-off { right: 8px; background: rgba(140,90,12,.82); }
+.pop-img { display: block; margin: -2px 0 4px; width: 220px; max-width: 100%; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: var(--soft); }
+.pop-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .fp-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .fp-top b { font-size: 16px; font-weight: 500; letter-spacing: .03em; }
 .fp-top .kind { font: 400 11px/1 var(--f-display); letter-spacing: .12em; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; }
@@ -786,3 +797,6 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .base-pin-d { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 6px rgba(0,0,0,.45); }
 .base-pin.on .base-pin-l { font-size: 13px; padding: 6px 11px; }
 .base-pin.on .base-pin-d { width: 18px; height: 18px; }
+/* 圖例的「住宿」跟地圖上的紅點同一個樣子；地圖彈窗要蓋在所有釘子（住宿 5–6）上面 */
+.fm-legend i.home { border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(0,0,0,.25); }
+.maplibregl-popup { z-index: 8; }

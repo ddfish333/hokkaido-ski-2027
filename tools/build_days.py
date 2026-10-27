@@ -101,6 +101,28 @@ def sync_coords():
         new = "\n".join(re.sub(r",\s*approx: true", "", l) if (re.search(pat, l) and (lambda m: m and P.get(next(g for g in m.groups() if g), {}).get("pid"))(re.search(pat, l))) else l for l in new.split("\n"))
         if new != src: open(path, "w", encoding="utf-8").write(new); print("座標同步:", f)
 
+# ---- CREDITS.md 的「景點照片」段：由 data/spotphotos.js 產生（作者、授權只寫在那一份），不要手改這段 ----
+LICURL = {"CC BY 2.0": "https://creativecommons.org/licenses/by/2.0", "CC BY 2.5": "https://creativecommons.org/licenses/by/2.5", "CC BY 3.0": "https://creativecommons.org/licenses/by/3.0",
+          "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0", "CC BY-SA 2.0": "https://creativecommons.org/licenses/by-sa/2.0", "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0",
+          "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0", "CC0": "https://creativecommons.org/publicdomain/zero/1.0/", "Public domain": ""}
+def sync_spot_credits():
+    from plan_lib import load_js
+    PH = load_js("data/spotphotos.js", "SPOT_PHOTOS"); SP = {x["id"]: x for x in load_js("data/spots.js", "SPOTS")}
+    rows = []
+    for sid, p in PH.items():
+        if p.get("none"): continue
+        lic = f"[{p['lic']}]({LICURL[p['lic']]})" if LICURL.get(p["lic"]) else p["lic"]
+        fname = __import__("urllib.parse").parse.unquote(p["src"].split("File:", 1)[-1]).replace("_", " ")
+        rows.append(f"| {SP.get(sid, {}).get('name', sid)} | {p['f']} | {p['by']} | {lic} | [File:{fname}]({p['src']}) |")
+    miss = [f"{SP.get(k, {}).get('name', k)}（{p['none']}）" for k, p in PH.items() if p.get("none")]
+    sec = ("## 景點照片（spots/ 與單日頁「附近還可以去」，2026-10-27）\n\n由 `data/spotphotos.js` 產生，不要手改。原檔（寬 1280）與 Commons 核對紀錄在 `hokkaido-photos-web/spots/credits.json`，網站用寬 800 的縮圖；雪場類景點沿用滑雪地圖卡片的同一張（見上一段）。\n\n"
+           "| 景點 | 檔案（assets/img/） | 作者 | 授權 | 來源 |\n|---|---|---|---|---|\n" + "\n".join(rows) + "\n\n還沒有照片：" + "；".join(miss) + "。\n")
+    path = os.path.join(ROOT, "CREDITS.md"); src = open(path, encoding="utf-8").read()
+    new = re.sub(r"## 景點照片（.*?(?=\n## |\Z)", lambda m: sec.rstrip("\n") + "\n", src, count=1, flags=re.S) if "## 景點照片（" in src else src.rstrip("\n") + "\n\n" + sec
+    if new != src:
+        os.chmod(path, 0o644); open(path, "w", encoding="utf-8").write(new); os.chmod(path, 0o444); print("CREDITS.md 景點照片段已更新")
+
+sync_spot_credits()
 sync_coords()
 sync_theme_boot()
 sync_topbar()

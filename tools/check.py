@@ -426,6 +426,23 @@ for _css in ("assets/style.css", "assets/foodmap.css", "assets/skimap.css", "ass
         _m = _BAD_CSS.search(_l)
         if _m: E(f"{_css}：寫死只適合深色底的顏色「{_m.group(0)}」——改用 rgba(var(--fg-rgb), α)／rgba(var(--bg-rgb), α) 或顏色 token，亮色主題才不會壞 →「{_l.strip()[:70]}」")
 
+# 0l2. 景點照片（data/spotphotos.js 一份）：每個景點（停車場除外）都要有一張照片＋作者＋授權，或寫明為什麼沒有；檔案要在
+#      10/27 Sean：「景點地圖旁邊沒有照片真的太糟，而且你有最佳拍攝點，照片就應該取最佳拍攝點拍到的照片」
+_PH = load_js("data/spotphotos.js", "SPOT_PHOTOS")
+_OKLIC = {"CC BY 2.0", "CC BY 2.5", "CC BY 3.0", "CC BY 4.0", "CC BY-SA 2.0", "CC BY-SA 3.0", "CC BY-SA 4.0", "CC0", "Public domain"}
+for _s in spots:
+    if _s.get("kind") == "停車": continue
+    _p = _PH.get(_s["id"])
+    if not _p: E(f"spots.js「{_s['name']}」沒有照片：在 data/spotphotos.js 加一張（Commons 可用授權），真的找不到就寫 none: \"原因\""); continue
+    if _p.get("none"): W(f"景點「{_s['name']}」還沒有照片：{_p['none']}"); continue
+    for _k in ("f", "by", "lic", "src"):
+        if not _p.get(_k): E(f"data/spotphotos.js {_s['id']}：缺 {_k}（作者、授權、來源都要有）")
+    if _p.get("lic") not in _OKLIC: E(f"data/spotphotos.js {_s['id']}：授權「{_p.get('lic')}」不在允許清單（CC BY／BY-SA／CC0／公有領域）")
+    if _p.get("f") and not os.path.exists(os.path.join(ROOT, "assets/img", _p["f"])): E(f"data/spotphotos.js {_s['id']}：找不到 assets/img/{_p['f']}")
+    if _p.get("at") and not _s.get("photo"): E(f"data/spotphotos.js {_s['id']}：標了 at（最佳拍攝點的角度），但 spots.js 沒寫拍攝點")
+for _k in _PH:
+    if _k not in {x["id"] for x in spots}: E(f"data/spotphotos.js 有 {_k}，但 spots.js 沒有這個景點")
+
 # 0m. 教練課（trip.js coach 唯一來源）：上課那天要排到那座雪場、開課前 15 分到（換裝、買票）、下課後才離開
 _C = trip.get("coach") or {}
 for _d in (_C.get("full") or []) + (_C.get("half") or []):

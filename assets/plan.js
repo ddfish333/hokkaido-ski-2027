@@ -262,6 +262,17 @@
       var m = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([b.lon, b.lat]).addTo(map); m.baseId = b.id; return m;
     });
   };
+  /* 景點照片（data/spotphotos.js 一份）：景點地圖卡片、地圖彈窗、單日頁「附近還可以去」共用。
+     左上「最佳拍攝點的角度」＝照片就是 spots.js 寫的那個拍攝點；右上「非冬季照片」免得以為 1 月看得到花田；下面是作者、授權（連到 Commons 原檔頁） */
+  P.spotPhoto = function (s, small) {
+    var p = (window.SPOT_PHOTOS || {})[s && s.id]; if (!p || p.none) return "";
+    var w = p.when ? (/^\d+ 月$/.test(p.when) ? p.when + "拍" : /^[春夏秋冬]$/.test(p.when) ? p.when + "天拍" : p.when) : "";
+    var img = '<img src="' + BASE + "assets/img/" + P.esc(p.f) + '" alt="' + P.esc(s.name) + '" loading="lazy" decoding="async"' + (p.pos ? ' style="object-position:' + P.esc(p.pos) + '"' : "") + ">";
+    if (small) return '<span class="pop-img">' + img + "</span>";
+    return '<figure class="sp-img">' + img +
+      (p.at && s.photo ? '<span class="sp-img-at">📷 最佳拍攝點的角度</span>' : "") + (p.winter === false ? '<span class="sp-img-off">非冬季照片</span>' : "") +
+      '<figcaption>' + (w ? P.esc(w) + " · " : "") + '<a href="' + P.esc(p.src) + '" target="_blank" rel="noopener">' + P.esc(p.by) + " · " + P.esc(p.lic) + "</a></figcaption></figure>";
+  };
   /* 換日期時：當晚住的那間放大、疊最上面 */
   P.setActiveBase = function (markers, activeId) {
     (markers || []).forEach(function (m) { var el = m.getElement(), on = m.baseId === activeId; el.classList.toggle("on", on); el.style.zIndex = on ? "6" : "5"; });
