@@ -50,9 +50,6 @@
 .fm-pin.labeled .fm-pin-l, .fm-pin:hover .fm-pin-l, .fm-pin.active .fm-pin-l { display: block; }
 .fm-pin.planned .fm-pin-l { border-color: var(--gold); color: var(--gold); }
 .fm-pin.closed .fm-pin-l { opacity: .5; text-decoration: line-through; }
-.fm-home { display: grid; justify-items: center; gap: 2px; pointer-events: none; }
-.fm-home-i { width: 14px; height: 14px; background: var(--ink); border-radius: 3px; transform: rotate(45deg); border: 2px solid var(--bg); box-shadow: 0 0 0 2px rgba(var(--fg-rgb),.25); }
-.fm-home-l { order: -1; font: 500 11px var(--f-display); letter-spacing: .14em; color: var(--ink); text-shadow: 0 1px 4px rgba(0,0,0,.9); }
 
 /* 浮出小卡 */
 .fm-pop .maplibregl-popup-content { background: rgba(var(--bg-rgb),.92); color: var(--ink); border: 1px solid rgba(var(--fg-rgb),.1); border-radius: 12px; padding: 12px 14px; font: 400 13px/1.5 var(--f-body); display: grid; gap: 3px; }

@@ -778,3 +778,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .alt-facts { margin: 0; font-size: 12px; line-height: 1.7; color: var(--muted); }
 .alt-facts a { color: var(--glacier); text-decoration: none; }
 
+
+/* 地圖上的三間住宿（Plan.addBaseMarkers）：紅點＋紅底白字，景點／美食／滑雪地圖共用 */
+.base-pin { display: grid; justify-items: center; gap: 3px; pointer-events: none; }
+.base-pin-l { display: inline-flex; align-items: baseline; gap: 6px; font: 500 12px/1 var(--f-body); letter-spacing: .06em; color: #fff; background: var(--accent); padding: 5px 9px; border-radius: 999px; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.base-pin-l small { font: 400 10.5px/1 var(--f-mono); opacity: .85; }
+.base-pin-d { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 6px rgba(0,0,0,.45); }
+.base-pin.on .base-pin-l { font-size: 13px; padding: 6px 11px; }
+.base-pin.on .base-pin-d { width: 18px; height: 18px; }

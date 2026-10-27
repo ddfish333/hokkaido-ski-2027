@@ -127,7 +127,7 @@
   }
 
   /* ---------- 地圖 ---------- */
-  var map, markers = {}, popup, mapReady = false;
+  var map, baseMarkers = [], markers = {}, popup, mapReady = false;
   function initMap() {
     if (!window.maplibregl) { $("#fmfallback").hidden = false; return; }
     try {
@@ -135,11 +135,7 @@
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "280px", className: "fm-pop" });
-    T.bases.forEach(function (b) {
-      var el = document.createElement("div"); el.className = "fm-home"; el.title = b.name;
-      el.innerHTML = '<span class="fm-home-i"></span><span class="fm-home-l">' + esc(b.short.split("・").pop()) + '</span>';
-      new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([b.lon, b.lat]).addTo(map);
-    });
+    baseMarkers = Plan.addBaseMarkers(map, (ctx().b || {}).id);  /* 三間住宿：紅點，疊在最上層（plan.js 共用） */
     var seen = {};
     FOOD.forEach(function (f) {
       var k = f.lat.toFixed(4) + "," + f.lon.toFixed(4), n = seen[k] = (seen[k] || 0) + 1;
@@ -206,6 +202,7 @@
 
   /* ---------- 全部重畫 ---------- */
   function render(refit) {
+    if (baseMarkers.length) Plan.setActiveBase(baseMarkers, (ctx().b || {}).id);
     var c = ctx(), list = visible();
     renderTools();
     $("#fmlist").innerHTML = picksHTML(c) + (list.map(function (f) { return card(f, c); }).join("") || '<li class="fm-empty">這個組合沒有店。把類型或「只看適合帶小孩」放寬一點。</li>');

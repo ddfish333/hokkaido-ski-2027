@@ -75,11 +75,8 @@
   var resortById = {}; T.resorts.forEach(function (r) { resortById[r.id] = r; });
   var dayById = {}; T.days.forEach(function (d) { dayById[d.date] = d; });
   var STOP2RESORT = {}; T.resorts.forEach(function (r) { (r.stops || []).forEach(function (s) { STOP2RESORT[s] = r.id; }); });
-  var GROUPS = [
-    ["main", "正式行程的三座", "Onze 走路到、Kiroro 三天、富良野三天。"],
-    ["sapporo", "札幌近郊・不在行程裡", "1/16–1/18 想滑的話，看雪況和大人怎麼分組再挑一天。標 2025-26 的是上一季票價，出發前再查。"],
-    ["otaru", "小樽近郊備案", "Kiroro 太擠或天氣差時的小雪場，回程順路泡湯。"]
-  ];
+  var GROUPS = (T.resortGroups || []).map(function (g) { return [g.id, g.title, g.desc]; });  /* 分組在 trip.js resortGroups 一份 */
+  var GROUP_BY = {}; (T.resortGroups || []).forEach(function (g) { GROUP_BY[g.id] = g; });
   var GROUP_COLOR = Plan.groupColor();  /* 雪場分組顏色跟主題（plan.js 一份） */
   var qs = new URLSearchParams(location.search), OPEN = {};
   var state = { day: null, mode: Plan ? Plan.mode() : "normal", focus: null, wxTab: "base", wx: {}, hourly: {}, wxFail: false };
@@ -153,7 +150,7 @@
       '<span class="g ' + gc + '">陣風 ' + Math.round(w.gust) + ' km/h' + (gc ? '・' + gustNote(w.gust) : "") + '</span></div>';
   }
   function climateLine(r) {
-    var c = T.climate[r.id === "kiroro" ? "kiroro" : (r.group === "main" && r.id === "furano_kita") ? "furano" : r.group === "sapporo" ? "sapporo" : "villa"];
+    var c = T.climate[r.id === "kiroro" ? "kiroro" : r.id === "furano_kita" ? "furano" : (GROUP_BY[r.group || "main"] || {}).clim || "villa"];
     return c ? '1 月歷年平均（' + esc(c.label) + '）：高 ' + c.tmax + '° / 低 ' + c.tmin + '°、每日新雪約 ' + c.snow + ' cm' : "";
   }
   /* 16 天預報條（山腳／山頂切換），旅程日期紅框 */
@@ -346,7 +343,7 @@
   }
 
   /* ---------- 地圖 ---------- */
-  var map, markers = {}, gateMarkers = [], popup, mapReady = false, geo;
+  var map, baseMarkers = [], markers = {}, gateMarkers = [], popup, mapReady = false, geo;
   function initMap() {
     if (!window.maplibregl) { $("#skfallback").hidden = false; return; }
     try { map = new maplibregl.Map({ container: "skcanvas", style: Plan.mapStyle(), center: [141.6, 43.2], zoom: 7.4, cooperativeGestures: !Plan.touch, locale: Plan.mapOpts().locale, attributionControl: { compact: true } }); }
@@ -355,11 +352,7 @@
     geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true, showUserHeading: true });
     map.addControl(geo, "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 16, maxWidth: "300px", className: "fm-pop" });
-    T.bases.forEach(function (b) {
-      var el = document.createElement("div"); el.className = "fm-home"; el.title = b.name;
-      el.innerHTML = '<span class="fm-home-i"></span><span class="fm-home-l">' + esc(b.short.split("・").pop()) + '</span>';
-      new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([b.lon, b.lat]).addTo(map);
-    });
+    baseMarkers = Plan.addBaseMarkers(map, (dayById[state.day] || {}).base);  /* 三間住宿：紅點，疊在最上層（plan.js 共用） */
     T.resorts.forEach(function (r) {
       var el = document.createElement("button"); el.type = "button"; el.className = "sk-pin " + (r.group || "main"); el.style.setProperty("--ac", GROUP_COLOR[r.group || "main"]);
       el.setAttribute("aria-label", r.name);
@@ -399,7 +392,7 @@
     if (fit) {
       var bb = new maplibregl.LngLatBounds(); bb.extend([b.lon, b.lat]);
       if (r) { bb.extend([r.lon, r.lat]); (r.gates || []).forEach(function (g) { bb.extend([g.lon, g.lat]); }); }
-      else T.resorts.filter(function (x) { return x.group === (d.base === "furano" ? "main" : d.base === "sapporo" ? "sapporo" : "main"); }).forEach(function (x) { bb.extend([x.lon, x.lat]); });
+      else T.resorts.filter(function (x) { var o = driveFrom(d.base, x); return o && o.normal <= 90; }).forEach(function (x) { bb.extend([x.lon, x.lat]); });  /* 沒選雪場：框住當晚住宿開車 90 分內的雪場 */
       var side = innerWidth > 900 ? 80 : 44;
       map.fitBounds(bb, { padding: { top: side + 30, bottom: side + 40, left: side + 30, right: side + 30 }, maxZoom: 12.5, duration: 800 });
     }
@@ -427,6 +420,7 @@
 
   /* ---------- 全部重畫 ---------- */
   function render(fit) {
+    if (baseMarkers.length) Plan.setActiveBase(baseMarkers, (dayById[state.day] || {}).base);
     document.querySelectorAll("details[id]").forEach(function (d) { OPEN[d.id] = d.open; });
     renderTools();
     $("#sktoday").innerHTML = heroHTML();

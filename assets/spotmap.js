@@ -133,7 +133,7 @@
   }
 
   /* ---------- 地圖 ---------- */
-  var map, markers = {}, popup, mapReady = false, photoPin = null;
+  var map, baseMarkers = [], markers = {}, popup, mapReady = false, photoPin = null;
   function showPhotoPin(id, fly) {
     var s = SPOTS.filter(function (x) { return x.id === id; })[0];
     if (photoPin) { photoPin.remove(); photoPin = null; }
@@ -158,11 +158,7 @@
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "300px", className: "fm-pop" });
-    T.bases.forEach(function (b) {
-      var el = document.createElement("div"); el.className = "fm-home"; el.title = b.name;
-      el.innerHTML = '<span class="fm-home-i"></span><span class="fm-home-l">' + esc(b.short.split("・").pop()) + '</span>';
-      new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([b.lon, b.lat]).addTo(map);
-    });
+    baseMarkers = Plan.addBaseMarkers(map, (ctx().b || {}).id);  /* 三間住宿：紅點，疊在最上層（plan.js 共用） */
     var seen = {};
     SPOTS.forEach(function (s) {
       var k = s.lat.toFixed(4) + "," + s.lon.toFixed(4), n = seen[k] = (seen[k] || 0) + 1;
@@ -227,6 +223,7 @@
   function scrollToCard(id) { var li = document.getElementById(id); if (!li) return; li.scrollIntoView({ behavior: "smooth", block: window.innerWidth > 900 ? "center" : "start" }); }
 
   function render(refit) {
+    if (baseMarkers.length) Plan.setActiveBase(baseMarkers, (ctx().b || {}).id);
     var c = ctx(), list = visible();
     renderTools();
     $("#fmlist").innerHTML = list.map(function (s) { return card(s, c); }).join("") || '<li class="fm-empty">這個組合沒有景點。把狀態或類型放寬一點。</li>';

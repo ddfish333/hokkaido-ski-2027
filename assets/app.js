@@ -772,11 +772,11 @@
   var SKI_GROUP_COLOR = Plan.groupColor();  /* 雪場分組顏色跟主題（plan.js） */
   function renderSkiStats() {
     if (!has("skistats")) return;
-    var n = { main: 0, sapporo: 0, otaru: 0 }; T.resorts.forEach(function (r) { n[r.group || "main"]++; });
+    var n = {}; T.resorts.forEach(function (r) { n[r.group || "main"] = (n[r.group || "main"] || 0) + 1; });
     var open = T.resorts.filter(function (r) { return r.season && TODAY >= r.season[0] && TODAY <= r.season[1]; }).length;
     var next = T.resorts.filter(function (r) { return r.season && TODAY < r.season[0]; }).sort(function (a, b) { return a.season[0] < b.season[0] ? -1 : 1; })[0];
-    $("#skistats").innerHTML = '<span class="fs-total"><b>' + T.resorts.length + '</b> 座雪場 · 正式行程 ' + n.main + ' · 札幌近郊 ' + n.sapporo + ' · 備案 ' + n.otaru + (open ? ' · 營業中 ' + open : next ? ' · 最早 ' + md(next.season[0]) + ' 開季（' + esc(next.name.replace(/（.*?）/g, "")) + '）' : "") + '</span>' +
-      '<span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.main + '"><i></i>Kiroro 1/8–1/10</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.main + '"><i></i>富良野 1/12–1/14</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.sapporo + '"><i></i>Teine 想滑再去</span>';
+    $("#skistats").innerHTML = '<span class="fs-total"><b>' + T.resorts.length + '</b> 座雪場' + (T.resortGroups || []).map(function (g) { return n[g.id] ? ' · ' + esc(g.short) + ' ' + n[g.id] : ""; }).join("") + (open ? ' · 營業中 ' + open : next ? ' · 最早 ' + md(next.season[0]) + ' 開季（' + esc(next.name.replace(/（.*?）/g, "")) + '）' : "") + '</span>' +
+      '<span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.main + '"><i></i>Kiroro 1/8–1/10</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.main + '"><i></i>富良野 1/12–1/14</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.sapporo + '"><i></i>Teine 想滑再去</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.asahikawa + '"><i></i>旭川 等 Gacha 確認</span>';
   }
 
   /* ---------- 天氣 ---------- */
@@ -931,9 +931,13 @@
       return { s: s, near: near };
     }).filter(function (x) { return x.near < 30; }).sort(function (x, y) { return x.near - y.near; }).slice(0, 8);
     if (!list.length) return "";
-    var skiNear = d.base === "sapporo" ? T.resorts.filter(function (r) { return r.group === "sapporo"; }) : [];
+    /* 沒排滑雪的日子（頭尾兩天除外）：列出當晚住宿開車 90 分內、不在正式行程的雪場，依 trip.js resortGroups 分組 */
+    var skiToday = T.resorts.some(function (r) { return (r.stops || []).some(function (s) { return todayIds.indexOf(s) >= 0; }); });
+    var dr = T.drive[d.base] || {};
+    var skiNear = skiToday || d.date === T.start || d.date === T.end ? [] : T.resorts.filter(function (r) { return (r.group || "main") !== "main" && dr[r.id] && dr[r.id][1] <= 90; });
+    var skiGroups = (T.resortGroups || []).filter(function (g) { return skiNear.some(function (r) { return r.group === g.id; }); });
     var html = '<div class="sec-head"><h2>附近還可以去</h2><p class="sec-note">還沒排進今天、但離今天路線 30 公里內的收藏景點：天氣不好、小孩狀況不對、或提早結束時的備案。點「加入行程」會帶進編輯器。</p></div>';
-    if (skiNear.length) html += '<p class="ski-hint">大人想滑雪？札幌近郊 ' + skiNear.length + ' 座雪場（' + skiNear.map(function (r) { return esc(r.name.replace(/（.*?）|滑雪場|雪場/g, "")) + ' ' + fmtMin(T.drive.sapporo[r.id][1]); }).join("、") + '）的票價、入口、天氣和建議在 <a href="' + BASE + 'ski/?day=' + d.date + '#g-sapporo">滑雪地圖 →</a></p>';
+    if (skiNear.length) html += '<p class="ski-hint">大人想滑雪？' + skiGroups.map(function (g) { var rs = skiNear.filter(function (r) { return r.group === g.id; }); return esc(g.short) + ' ' + rs.length + ' 座（' + rs.map(function (r) { return esc(r.name.replace(/（.*?）|滑雪場|雪場/g, "")) + ' ' + fmtMin(dr[r.id][1]); }).join("、") + '）'; }).join("；") + '：票價、入口、天氣和建議在 <a href="' + BASE + 'ski/?day=' + d.date + '#g-' + skiGroups[0].id + '">滑雪地圖 →</a></p>';
     var body = '<a class="btn btn-ghost fm-link" href="' + BASE + 'spots/?day=' + d.date + '">在景點地圖上看 →</a><ul class="foodpick">';
     list.forEach(function (x) {
       var s = x.s, st = SPOT_STATUS[s.status] || SPOT_STATUS.saved, closed = s.closed && s.closed.indexOf(wd) >= 0, g = s.g;

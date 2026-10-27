@@ -249,12 +249,29 @@
   var THEME_KEY = "snow13-theme", mqLight = window.matchMedia ? matchMedia("(prefers-color-scheme: light)") : null;
   function themePref() { try { return localStorage.getItem(THEME_KEY) || "auto"; } catch (e) { return "auto"; } }
   function themeResolve(p) { return p === "auto" ? (mqLight && mqLight.matches ? "light" : "dark") : p; }
+  /* ---------- 地圖上的三間住宿（景點、美食、滑雪三張地圖共用一份） ----------
+     10/27 Sean：景點地圖要有三間旅館的紅點才好定位。以前是白色小菱形、被景點的點蓋住，看不到。
+     現在：紅點＋紅底白字標籤（住哪、幾號到幾號），永遠疊在最上層；activeId＝這天住的那間，放大一點。 */
+  P.addBaseMarkers = function (map, activeId) {
+    var T0 = window.TRIP; if (!map || !T0 || !window.maplibregl) return [];
+    function md(x) { var q = x.split("-"); return (+q[1]) + "/" + (+q[2]); }
+    return T0.bases.map(function (b) {
+      var el = document.createElement("div"); el.className = "base-pin" + (b.id === activeId ? " on" : ""); el.title = b.name + "（" + md(b.from) + "–" + md(b.to) + "）";
+      el.innerHTML = '<span class="base-pin-l">住 ' + P.esc(b.short.split("・").pop()) + '<small>' + md(b.from) + "–" + md(b.to) + '</small></span><span class="base-pin-d"></span>';
+      el.style.zIndex = b.id === activeId ? "6" : "5";
+      var m = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([b.lon, b.lat]).addTo(map); m.baseId = b.id; return m;
+    });
+  };
+  /* 換日期時：當晚住的那間放大、疊最上面 */
+  P.setActiveBase = function (markers, activeId) {
+    (markers || []).forEach(function (m) { var el = m.getElement(), on = m.baseId === activeId; el.classList.toggle("on", on); el.style.zIndex = on ? "6" : "5"; });
+  };
   P.theme = function () { return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark"; };
   P.mapStyle = function () { return "https://tiles.openfreemap.org/styles/" + (P.theme() === "light" ? "positron" : "dark"); };
   /* 地區、雪場分組的顏色：深色底用亮色，亮色底用深一點的同色系（原本四支程式各抄一份，亮色底看不見淺藍、淺綠） */
-  var AREA_DARK = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#FF5A4C" };
-  var AREA_LIGHT = { "小樽": "#1B58C9", "銭函": "#2F7FB8", "Kiroro": "#6B3FC4", "富良野": "#137A4B", "美瑛・旭川": "#2E8C6A", "札幌": "#D6362A" };
-  var GROUP_DARK = { main: "#E8B36A", sapporo: "#6AA4FF", otaru: "#8E98A6" }, GROUP_LIGHT = { main: "#8C5A0C", sapporo: "#1B58C9", otaru: "#4E5866" };
+  var AREA_DARK = { "小樽": "#6AA4FF", "銭函": "#9CC6FF", "Kiroro": "#B48CFF", "富良野": "#45C08A", "美瑛・旭川": "#8FDDB8", "札幌": "#F0A43A" };  /* 紅色留給住宿和今天的路線 */
+  var AREA_LIGHT = { "小樽": "#1B58C9", "銭函": "#2F7FB8", "Kiroro": "#6B3FC4", "富良野": "#137A4B", "美瑛・旭川": "#2E8C6A", "札幌": "#B86E00" };
+  var GROUP_DARK = { main: "#E8B36A", sapporo: "#6AA4FF", asahikawa: "#5CC9A7", otaru: "#8E98A6" }, GROUP_LIGHT = { main: "#8C5A0C", sapporo: "#1B58C9", asahikawa: "#16775A", otaru: "#4E5866" };
   P.areaColor = function () { return P.theme() === "light" ? AREA_LIGHT : AREA_DARK; };
   P.groupColor = function () { return P.theme() === "light" ? GROUP_LIGHT : GROUP_DARK; };
   P.cssVar = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };

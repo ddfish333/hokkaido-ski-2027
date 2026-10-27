@@ -1,5 +1,5 @@
 /* 北海道・雪上的大小腳印 — 行程資料（由 hokkaido-knowledge-base 整理，2026-10-25）
-   車程：normal = 一般路況、snow = 下雪結冰（OSRM 路網 ×1.15 / ×1.5，概估）
+   車程：normal = 一般路況、snow = 下雪結冰（OSRM 路網；冬季山路另計，算法在 tools/refresh_legs.py）
    不放任何個資（訂位號碼、身分證、電話號碼以外的個人資料）。 */
 window.TRIP = {
   title: "北海道・雪上的大小腳印",
@@ -153,15 +153,47 @@ window.TRIP = {
       tips: ["往年 12 月中開季到 4 月初，2026-27 日期待官網公告（11 月）", "山鄉開車約 {T:drive.villa.asari.1} 分（最後一段是山路）；1/9 Kiroro 太擠或天氣差時的備案", "回程接湯の花 朝里殿泡湯"],
       links: [["官網", "https://asari-ski.com/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31502/"]],
       status: "https://weathernews.jp/ski/spot/31502/",
-      summit: 660, base: 140, est: true }
+      summit: 660, base: 140, est: true },
+    { id: "kamui", group: "asahikawa", rec: "旭川最大・雪道長・票價便宜", name: "Kamui Ski Links（神居）", ja: "カムイスキーリンクス", tier: "旭川近郊・大雪場", lat: 43.704967, lon: 142.187102, pid: "ChIJXRr60nvrDF8RSuMZmPzKooE",
+      season: null, seasonNote: "2026-27 開季日待公告（上一季 12/13–3/31）",
+      hours: "09:00–17:00（官網）",
+      scale: "26 條雪道（最長 4,000 m）、5 座雙人吊椅＋1 條纜車廂；山頂 751 m、山腳 150 m；免費停車約 2,000 台",
+      tixSeason: "2026-27 官網公告",
+      tickets: [["大人 1 日", "¥5,300"], ["大人 4 小時", "¥4,600"], ["小學生 1 日", "¥1,800"], ["65 歲以上 1 日", "¥4,500"]],
+      kids: "學齡前免費（IC 卡押金 ¥500，還卡退回）；官網有 Kids Garden 小孩雪上區——開放時間、幾歲可以玩🔎",
+      lessons: "官網有 KAMUI INTERNATIONAL SCHOOL（內容、價格出發前再查🔎）；Gacha 說旭川的雪場有申請到教學，是不是這座待問 Gacha",
+      gear: "現場租借",
+      tips: ["大人 1 日券比 Kiroro、富良野便宜約四成", "富良野小木屋開車約 {T:drive.furano.kamui.1} 分：住富良野那幾晚（1/11–1/16）才順路", "旭川市區、旭川機場、富良野都有雪場接駁巴士（要預約，看北海道觀光機構頁）"],
+      links: [["官網", "https://www.kamui-skilinks.com/"], ["營業時間・票價", "https://www.kamui-skilinks.com/guide/"], ["交通", "https://www.kamui-skilinks.com/accsess/"], ["國際滑雪學校", "https://www.kamui-skilinks.com/international-school/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31203/"], ["北海道觀光機構", "https://www.visit-hokkaido.jp/spot/detail_13195.html"]],
+      status: "https://www.kamui-skilinks.com/today/", trailmap: "https://www.kamui-skilinks.com/today/#coursemap", access: "https://www.kamui-skilinks.com/accsess/",
+      summit: 751, base: 150 },
+    { id: "santa", group: "asahikawa", rec: "旭川市區旁・小雪場・夜滑到 21:00", name: "旭川 Santa Present Park", ja: "旭川サンタプレゼントパーク", tier: "旭川市區旁・小雪場", lat: 43.7609373, lon: 142.3025948, pid: "ChIJx56pD0rvDF8RM-s8QZXYZv4",
+      season: null, seasonNote: "2026-27 待公告（往年 12 月–3 月）",
+      hours: "中央吊椅 09:00–21:00、其他吊椅到 20:45；16:00 起是夜滑",
+      scale: "6 條雪道、4 座吊椅；山頂 330 m、山腳 170 m；免費停車約 1,500 台；辦過兩次單板世界盃",
+      tixSeason: "2025-26 參考價（2026-27 待公告，出發前再查）",
+      tickets: [["大人 白天（到 16:00）", "¥4,200"], ["大人 5 小時", "¥3,600"], ["大人 夜滑（16:00–21:00）", "¥1,800"], ["小孩 白天", "¥3,300"], ["小孩 5 小時", "¥3,000"], ["小孩 夜滑", "¥1,100"], ["親子 白天套票", "¥6,000"], ["雪地手扶梯（10:00–15:00）", "¥1,500"]],
+      kids: "小孩白天 ¥3,300、親子套票 ¥6,000；有雪地手扶梯（10:00–15:00）的初學坡；學齡前要不要票🔎",
+      lessons: "Gacha 說旭川的雪場有申請到教學，是不是這座待問 Gacha",
+      gear: "現場租借",
+      tips: ["富良野小木屋開車約 {T:drive.furano.santa.1} 分；白天券 16:00 截止，之後是夜滑", "坡短、雪場小：大人練基本動作、小孩玩雪，半天剛好", "2026-27 票價待公告，出發前再查"],
+      links: [["官網", "https://www.asahikawasantapresentpark.com/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31204/"], ["北海道觀光機構", "https://www.visit-hokkaido.jp/en/spot/detail_13199.html"]],
+      status: "https://weathernews.jp/ski/spot/31204/",
+      summit: 330, base: 170 }
+  ],
+  /* 雪場分組：雪場頁的分組標題、圖例、首頁統計都讀這裡（顏色在 plan.js groupColor） */
+  resortGroups: [
+    { id: "main", short: "正式行程", title: "正式行程的三座", desc: "Onze 走路到、Kiroro 三天、富良野三天。" },
+    { id: "sapporo", short: "札幌近郊", title: "札幌近郊・不在行程裡", desc: "1/16–1/18 想滑的話，看雪況和大人怎麼分組再挑一天。標 2025-26 的是上一季票價，出發前再查。", clim: "sapporo" },
+    { id: "asahikawa", short: "旭川", title: "旭川・不在行程裡", desc: "Gacha 教練說旭川的雪場有申請到教學。住富良野那幾晚可以考慮：Kamui 大、票價便宜；Santa 小、離市區近、能夜滑。哪一座有許可待問 Gacha。", clim: "asahikawa" },
+    { id: "otaru", short: "小樽備案", title: "小樽近郊備案", desc: "Kiroro 太擠或天氣差時的小雪場，回程順路泡湯。", clim: "villa" }
   ],
 
-  /* 住宿 → 雪場 車程 [km, 一般分鐘, 下雪分鐘] */
   /* 住宿 → 雪場車程 [公里, 一般分鐘, 下雪分鐘]：tools/refresh_legs.py 產生（和 legs.json 同一套算法：冬季山路另計），不要手改 */
   drive: {
-    villa: { onze: [1.3, 5, 5], kiroro: [34.5, 50, 65], furano_kita: [135.7, 130, 170], teine: [17.0, 30, 35], kokusai: [27.0, 40, 50], bankei: [24.5, 30, 35], moiwa: [29.4, 35, 45], fus: [38.5, 40, 55], asari: [22.8, 40, 45] },
-    furano: { onze: [136.5, 135, 180], kiroro: [169.7, 170, 220], furano_kita: [1.9, 5, 5], teine: [131.3, 135, 175], kokusai: [158.4, 160, 210], bankei: [123.0, 130, 170], moiwa: [120.2, 125, 160], fus: [129.3, 130, 170], asari: [158.0, 160, 210] },
-    sapporo: { onze: [23.4, 30, 40], kiroro: [56.5, 85, 105], furano_kita: [113.4, 110, 145], teine: [18.3, 25, 35], kokusai: [44.6, 65, 80], bankei: [8.6, 15, 20], moiwa: [6.4, 10, 10], fus: [15.5, 15, 20], asari: [44.9, 70, 90] }
+    villa: { onze: [1.3, 5, 5], kiroro: [34.5, 50, 65], furano_kita: [135.7, 130, 170], teine: [17.0, 30, 35], kokusai: [27.0, 40, 50], bankei: [24.5, 30, 35], moiwa: [29.4, 35, 45], fus: [38.5, 40, 55], asari: [22.8, 40, 45], kamui: [130.8, 120, 155], santa: [141.8, 135, 175] },
+    furano: { onze: [136.5, 135, 180], kiroro: [169.7, 170, 220], furano_kita: [1.9, 5, 5], teine: [131.3, 135, 175], kokusai: [158.4, 160, 210], bankei: [123.0, 130, 170], moiwa: [120.2, 125, 160], fus: [129.3, 130, 170], asari: [158.0, 160, 210], kamui: [56.8, 65, 90], santa: [62.6, 80, 100] },
+    sapporo: { onze: [23.4, 30, 40], kiroro: [56.5, 85, 105], furano_kita: [113.4, 110, 145], teine: [18.3, 25, 35], kokusai: [44.6, 65, 80], bankei: [8.6, 15, 20], moiwa: [6.4, 10, 10], fus: [15.5, 15, 20], asari: [44.9, 70, 90], kamui: [116.9, 110, 145], santa: [128.0, 125, 160] }
   },
 
   /* 地圖上的地點：type = stay | ski | sight | food | onsen | shop | grocery | hospital | transport */

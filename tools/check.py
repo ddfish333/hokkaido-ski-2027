@@ -380,6 +380,18 @@ if _unchecked: W(f"開車到的站點還沒核對 Google 地點（plan.json plac
 _stale = [k for k, L in LEGS.items() if leg_stale(k, L)]
 if _stale: E(f"這些路段的起訖和現在的導航點對不上（地點或停車場改過）：{_stale}——跑 python3 tools/refresh_legs.py")
 
+# 0g1. 雪場分組只有一份：trip.js resortGroups（標題、說明、統計）＋ plan.js GROUP_DARK／GROUP_LIGHT（顏色）。
+#      10/27 加旭川兩座時，雪場頁、首頁統計、地圖圖例原本各寫一份分組，漏一個就少一組
+_gids = [g["id"] for g in trip.get("resortGroups", [])]
+_plan_js = open(os.path.join(ROOT, "assets/plan.js"), encoding="utf-8").read()
+for _r in trip.get("resorts", []):
+    if (_r.get("group") or "main") not in _gids: E(f"trip.js 雪場 {_r['name']} 的分組 {_r.get('group')} 不在 resortGroups 裡")
+for _g in _gids:
+    for _pal in ("GROUP_DARK", "GROUP_LIGHT"):
+        _m = re.search(_pal + r" = \{([^}]*)\}", _plan_js)
+        if not _m or not re.search(r"\b" + _g + r":", _m.group(1)): E(f"plan.js {_pal} 沒有雪場分組 {_g} 的顏色")
+    if not any(r.get("group") == _g or (_g == "main" and not r.get("group")) for r in trip.get("resorts", [])): W(f"resortGroups 有 {_g}，但沒有雪場在這組")
+
 # 0g2. trip.js 的住宿、雪場、地點說明也不能手寫車程／走路時間：用 {leg:a|b}（行程路段）或 {T:drive.住宿.雪場.1}（雪場車程表，tools/refresh_legs.py 產生）
 #      10/26 第六輪：冬季山路改算之後，「開車 35 分上 Kiroro」「FAV LUX 出發約 60 分」這些手寫數字全部跟表不一致
 _TRIP_MIN = re.compile(r"(?:開車|走路|步行|出發|車程|過去|下來)[^。；，、（）]{0,8}?\d+\s?(?:–\d+\s?)?(?:分鐘|分)(?!券)")
