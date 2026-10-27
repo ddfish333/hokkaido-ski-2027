@@ -587,7 +587,7 @@
           "id": "kiroro",
           "stay": 460,
           "by": "08:45",
-          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（午休時間可以跟教練調）；下課後收板下山"
+          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（{T:coach.status}；午休時間可以跟教練調）；下課後收板下山"
         },
         {
           "id": "temiya",
