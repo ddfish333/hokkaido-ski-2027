@@ -156,8 +156,7 @@
     var b = new maplibregl.LngLatBounds();
     list.forEach(function (f) { b.extend([f.lon, f.lat]); });
     var c = ctx(); if (c.b && state.area === "附近") b.extend([c.b.lon, c.b.lat]);
-    var side = window.innerWidth > 900 ? 60 : 40;
-    map.fitBounds(b, { padding: { top: side + 36, bottom: side + 30, left: side + 20, right: side + 20 }, maxZoom: 14.5, duration: 700 });
+    map.fitBounds(b, { padding: Plan.fitPad(map), maxZoom: 14.5, duration: 700 });
   }
   function syncPins(list) {
     var c = ctx(), vis = {}; list.forEach(function (f) { vis[f.id] = true; });

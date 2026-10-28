@@ -1,6 +1,6 @@
 /* 滑雪地圖頁（ski/）：版型沿用 foodmap.css 的左地圖右清單；這裡只放雪場專用的卡片、天氣條、地圖點。 */
 .skipage .fm { grid-template-columns: minmax(0, 1fr) 520px; }
-@media (max-width: 900px) { .skipage .fm { grid-template-columns: minmax(0, 1fr); } .skipage .fm-map { height: 40vh; } }
+@media (max-width: 900px) { .skipage .fm { grid-template-columns: minmax(0, 1fr); } }  /* 手機地圖高度跟美食、景點地圖同一個（foodmap.css） */
 .sk .lnk { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
 .sk .lnk:hover { text-decoration: underline; text-underline-offset: 3px; }
 .sk .muted { color: var(--muted); }

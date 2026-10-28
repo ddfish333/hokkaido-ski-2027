@@ -142,7 +142,7 @@
     var el = document.createElement("div"); el.className = "fm-cam";
     el.innerHTML = '<span class="fm-cam-i">📷</span><span class="fm-cam-l">' + esc(s.photoName || "拍攝點") + '</span>';
     photoPin = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([s.photoAt[1], s.photoAt[0]]).addTo(map);
-    if (fly) { var b = new maplibregl.LngLatBounds([s.lon, s.lat], [s.lon, s.lat]); b.extend([s.photoAt[1], s.photoAt[0]]); map.fitBounds(b, { padding: 120, maxZoom: 16.5, duration: 700 }); }
+    if (fly) { var b = new maplibregl.LngLatBounds([s.lon, s.lat], [s.lon, s.lat]); b.extend([s.photoAt[1], s.photoAt[0]]); map.fitBounds(b, { padding: Plan.fitPad(map), maxZoom: 16.5, duration: 700 }); }
   }
   function routeGeo() {
     var feats = [];
@@ -188,8 +188,7 @@
     var b = new maplibregl.LngLatBounds();
     list.forEach(function (s) { b.extend([s.lon, s.lat]); });
     var c = ctx(); if (c.b && state.area === "附近") b.extend([c.b.lon, c.b.lat]);
-    var side = window.innerWidth > 900 ? 60 : 40;
-    map.fitBounds(b, { padding: { top: side + 36, bottom: side + 30, left: side + 20, right: side + 20 }, maxZoom: 14, duration: 700 });
+    map.fitBounds(b, { padding: Plan.fitPad(map), maxZoom: 14, duration: 700 });
   }
   function syncPins(list) {
     var c = ctx(), vis = {}; list.forEach(function (s) { vis[s.id] = true; });

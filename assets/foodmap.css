@@ -7,7 +7,9 @@
 .fm-side { padding: 28px 28px 60px; border-left: 1px solid var(--line); background: var(--bg); }
 @media (max-width: 900px) {
   .fm { grid-template-columns: minmax(0, 1fr); }
-  .fm-map { position: sticky; top: 56px; height: 46vh; z-index: 5; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+  /* 手機：地圖固定在上面、清單在下面捲。地圖約佔可見高度 38%（svh＝瀏覽器工具列展開時的高度，iOS 才不會算太大），
+     最矮 230px 還看得出位置、最高 360px 留給清單；美食、景點、滑雪三張地圖同一個高度（10/28 Sean：地圖太大下面字太少，但太小不好看） */
+  .fm-map { position: sticky; top: 56px; height: 38vh; height: clamp(230px, 38svh, 360px); z-index: 5; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
   .fm-side { border-left: 0; padding: 20px 16px 60px; }
 }
 .fm-head h1 { margin: 2px 0 10px; font: 300 34px/1.15 var(--f-body); letter-spacing: .06em; }

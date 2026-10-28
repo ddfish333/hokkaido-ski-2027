@@ -393,8 +393,7 @@
       var bb = new maplibregl.LngLatBounds(); bb.extend([b.lon, b.lat]);
       if (r) { bb.extend([r.lon, r.lat]); (r.gates || []).forEach(function (g) { bb.extend([g.lon, g.lat]); }); }
       else T.resorts.filter(function (x) { var o = driveFrom(d.base, x); return o && o.normal <= 90; }).forEach(function (x) { bb.extend([x.lon, x.lat]); });  /* 沒選雪場：框住當晚住宿開車 90 分內的雪場 */
-      var side = innerWidth > 900 ? 80 : 44;
-      map.fitBounds(bb, { padding: { top: side + 30, bottom: side + 40, left: side + 30, right: side + 30 }, maxZoom: 12.5, duration: 800 });
+      map.fitBounds(bb, { padding: Plan.fitPad(map), maxZoom: 12.5, duration: 800 });
     }
   }
   function focusOn(rid, scroll, pop) {

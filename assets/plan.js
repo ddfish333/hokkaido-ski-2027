@@ -273,6 +273,13 @@
       (p.at && s.photo ? '<span class="sp-img-at">📷 最佳拍攝點的角度</span>' : "") + (p.winter === false ? '<span class="sp-img-off">非冬季照片</span>' : "") +
       '<figcaption>' + (w ? P.esc(w) + " · " : "") + '<a href="' + P.esc(p.src) + '" target="_blank" rel="noopener">' + P.esc(p.by) + " · " + P.esc(p.lic) + "</a></figcaption></figure>";
   };
+  /* 地圖框住一群點時的留白：照地圖實際大小算（手機地圖矮，固定 120px 會把內容擠成一條）。上面留多一點給點上方的名字和「住」紅點 */
+  P.fitPad = function (map) {
+    var el = map.getContainer(), h = el.clientHeight || 400, w = el.clientWidth || 400;
+    function cl(a, x, b) { return Math.round(Math.max(a, Math.min(x, b))); }
+    var side = cl(24, w * 0.07, 90);
+    return { top: cl(48, h * 0.16 + 24, 110), bottom: cl(24, h * 0.10, 80), left: side, right: side };
+  };
   /* 換日期時：當晚住的那間放大、疊最上面 */
   P.setActiveBase = function (markers, activeId) {
     (markers || []).forEach(function (m) { var el = m.getElement(), on = m.baseId === activeId; el.classList.toggle("on", on); el.style.zIndex = on ? "6" : "5"; });
