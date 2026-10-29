@@ -25,7 +25,7 @@
     ["雪場裡", /自助午餐|輕食|山屋|付費包廂|北海道料理|鬆餅|未確認/],
     ["甜點・咖啡", /甜點|咖啡|下午茶|美食街/]
   ];
-  function groupOf(f) { if (f.area === "Kiroro") return "雪場裡"; for (var i = 0; i < KIND_GROUP.length; i++) if (KIND_GROUP[i][1].test(f.kind)) return KIND_GROUP[i][0]; return "其他"; }
+  function groupOf(f) { if (f.area === "Kiroro" || /雪場/.test(f.kind)) return "雪場裡";  /* Onze、朝里川的センターハウス食堂也算 */ for (var i = 0; i < KIND_GROUP.length; i++) if (KIND_GROUP[i][1].test(f.kind)) return KIND_GROUP[i][0]; return "其他"; }
   var FIT = { best: ["很適合我們這團帶小孩", "best"], ok: ["可以", "ok"], warn: ["不太適合帶幼兒", "warn"], unknown: ["待確認", "unknown"] };
   var baseById = {}; T.bases.forEach(function (b) { baseById[b.id] = b; });
 

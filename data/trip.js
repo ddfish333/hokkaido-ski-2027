@@ -31,23 +31,23 @@ window.TRIP = {
   ],
 
   resorts: [
-    { id: "onze", group: "main", name: "Snow Cruise Onze", ja: "スノークルーズオーンズ", tier: "家庭小雪場", lat: 43.1439, lon: 141.1278,
+    { id: "onze", group: "main", short: "Onze", name: "Snow Cruise Onze", ja: "スノークルーズオーンズ", tier: "家庭小雪場", lat: 43.1462547, lon: 141.133201,
       season: ["2026-12-15", "2027-03-28"], seasonNote: "12 月中旬開季（預定）", openLabel: "12 月中旬開季",
       hours: "日間＋夜滑至約 22:45", scale: "四人吊椅 1、雙人吊椅 1；有初學區",
       tickets: [["1 日券", "¥5,600"], ["4 小時券", "¥4,500"], ["家庭套票（大人＋小孩 4h＋餐券 2）", "¥7,500"], ["國高中生・長者 1 日", "¥4,700"], ["小孩 1 日", "¥3,700"]],
-      kids: "官網寫未就學兒童免費（出發前再確認一次）", lessons: "—",
+      kids: "官網寫未就學兒童免費（出發前再確認一次）", lessons: "大人：{T:coach.name} 教練（{T:coach.org}）1/8–1/10 三天全天 {T:coach.start}–{T:coach.end}，4 人一組、課後免費給影片（教學許可申請中，也可能改朝里川）",
       gear: "現場租借、不可預約：大人一組 ¥7,500、小孩 ¥5,200",
-      tips: ["山鄉步行 {leg:villa|onze|walk} 分，小樽 4 晚大人輪流夜滑", "規模小、雪不如 Kiroro 粉，滑 1–2 小時剛好", "**1/9–1/11 三連休會擠**：全場只靠一條四人吊椅上山、雪道短，評論說週末假日相當多人（2026-27 查到的資料沒有比賽；Onze 的滑雪板學校週六、週日有團體班）", "外部教練要在第一次教學 **14 天前**向 Onze 申請登記（附保險、教練資格證影本），當天到櫃台領臂章——{T:coach.name} 1/8 上課的話 12/25 前要送件"],
-      links: [["官網", "https://onze.jp/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31616/"]],
+      tips: ["山鄉步行 {leg:villa|onze|walk} 分，小樽 4 晚大人輪流夜滑", "規模小、雪不如 Kiroro 粉；上課用得到的寬、壓雪中級坡有パノラマ、サンシャイン（24°）和ツインズ，上級的ダウンヒル 30°", "**1/9–1/11 三連休會擠**：全場只靠一條四人吊椅上山、雪道短，評論說週末假日相當多人（2026-27 查到的資料沒有比賽；Onze 的滑雪板學校週六、週日有團體班）", "外部教練要在第一次教學 **14 天前**向 Onze 申請登記（附保險、教練資格證影本），當天到櫃台領臂章——{T:coach.name} 1/8 上課的話 12/25 前要送件"],
+      links: [["官網", "https://onze.jp/"], ["雪道", "https://onze.jp/course/"], ["外部教練登記", "https://onze.jp/dantai/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31616/"], ["Gacha 教練預約", "https://snowsurfing-japan.stores.jp/reserve/snowsurfing_japan/1865332"]],
       status: "https://weathernews.jp/ski/spot/31616/", stops: ["onze"], video: "onze-hover.mp4", videoSm: "onze-hover-sm.mp4", img: "onze.jpg",
       entry: "停車場就在山腳（免費）；從山鄉走路 {leg:villa|onze|walk} 分，不用開車",
       summit: null, base: 200 },
-    { id: "kiroro", group: "main", name: "Kiroro", ja: "キロロ", tier: "粉雪大雪場", lat: 43.0679153, lon: 140.9893336,
+    { id: "kiroro", group: "otaru", name: "Kiroro", ja: "キロロ", tier: "粉雪大雪場", lat: 43.0679153, lon: 140.9893336,
       season: ["2026-11-28", "2027-05-05"], seasonNote: "旺季 12/12–4/11",
       hours: "吊椅大多 09:00–15:30（2/14 起到 16:00）；山腳的 Gateway Express 纜車 08:30–16:00、Family 吊椅到 16:30、Center Express 到 19:00；結束時間依日落調整——25-26 官網時刻表，26-27 待公告", scale: "23 條雪道、9 條纜車（含 2 條纜車廂）；山頂 1,180 m",
       tickets: [["1 日券", "¥9,200"], ["4 小時券", "¥7,800"], ["2 日券（可不連續）", "¥18,400"], ["3 日券（可不連續）", "¥27,600"], ["夜滑", "¥3,000"], ["6–12 歲 1 日", "¥5,500"]],
       kids: "5 歲以下免費（需大人陪同，KIROCA 卡押金 ¥500）",
-      lessons: "大人：{T:coach.name} 教練（{T:coach.org}）1/8、1/9 全天、1/10 上午，4 人一組、課後免費給影片；Kids Academy Pink 班 3–4 歲：半天 ¥8,000（本次小孩不上課）",
+      lessons: "Kids Academy Pink 班 3–4 歲：半天 ¥8,000（本次小孩不上課）；{T:coach.name} 教練原本排這裡，現在改申請 Onze／朝里川",
       gear: "Mountain Shop Vainqueur：賣雪板、雪靴、固定器，打蠟 ¥3,500；雪具寄放櫃 2 天 ¥1,500，之後每天 +¥500",
       tips: ["官方 Webstore 預購最多 95 折", "停車免費約 2,000 台", "山上陣風常超過 50 km/h，纜車可能停駛"],
       links: [["官網", "https://www.kiroro.co.jp/"], ["營業時間", "https://www.kiroro.co.jp/ja/operating_hours/"], ["票價", "https://www.kiroro.co.jp/lift_price/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31609/"], ["Gacha 教練預約", "https://snowsurfing-japan.stores.jp/reserve/snowsurfing_japan/1865332"]],
@@ -57,7 +57,7 @@ window.TRIP = {
         { name: "Mountain Center", sub: "日歸的人都停這裡：售票、租借、Kids Academy、餐廳都在館內", ja: "キロロリゾート マウンテンセンター", lat: 43.0679153, lon: 140.9893336, pid: "ChIJ0ZtUZSvbCl8Rp8sA7XPQCoE", stop: "kiroro", note: "免費停車約 2,000 台；旺季 08:00–20:00。從山鄉走朝里 → 道道 1 號上山，最後一段是山路，下雪慢慢開。" }
       ],
       summit: 1180, base: 570 },
-    { id: "furano_kita", group: "main", name: "富良野滑雪場", ja: "富良野スキー場", tier: "大雪場・兩區", lat: 43.3438912, lon: 142.3602434,
+    { id: "furano_kita", group: "main", short: "富良野", name: "富良野滑雪場", ja: "富良野スキー場", tier: "大雪場・兩區", lat: 43.3438912, lon: 142.3602434,
       season: ["2026-11-28", "2027-05-05"], seasonNote: "一般期 12/5–3/22",
       hours: "08:30–日落；夜滑平日 16:00–18:00、週末假日至 19:30", scale: "北之峰區＋富良野區（新富良野王子）",
       tickets: [["1 日券", "¥9,000"], ["1 日券（SEIBU PRINCE CLUB 會員）", "¥7,500"], ["4 小時券", "¥8,200"], ["夜滑 平日", "¥3,100"], ["夜滑 週末假日", "¥3,900"], ["60 歲以上 1 日", "¥8,500"]],
@@ -145,12 +145,12 @@ window.TRIP = {
       links: [["官網", "https://www.fujino-yagai-sports.jp/winter"], ["票價（中文）", "https://www.fujino-yagai-sports.jp/zh-hant/winter/fee"]],
       status: "https://www.fujino-yagai-sports.jp/winter", cams: "https://www.fujino-yagai-sports.jp/winter/live", access: "https://www.fujino-yagai-sports.jp/winter/access",
       summit: null, base: 200, est: true },
-    { id: "asari", group: "otaru", stops: ["asari_ski"], name: "朝里川溫泉滑雪場", ja: "朝里川温泉スキー場", tier: "小樽近郊・中小型", lat: 43.1385, lon: 141.0293,
+    { id: "asari", group: "main", short: "朝里川", stops: ["asari_ski"], name: "朝里川溫泉滑雪場", ja: "朝里川温泉スキー場", tier: "小樽近郊・中小型", lat: 43.1435073, lon: 141.0367359,
       season: null, seasonNote: "2026-27 待公告", hours: "09:00–16:00（12/20–3/1 到 17:00）；沒有夜滑（2025-26）", scale: "9 條雪道、5 吊椅；山頂 660 m、山腳 140 m；停車 800 台免費",
       tixSeason: "2025-26 參考價（2026-27 待公告，11 月再查）",
       tickets: [["1 日券", "¥5,500"], ["4 小時券", "¥4,900"], ["アフター14（14:00 起）", "¥3,500"], ["小孩 1 日", "¥3,300"], ["小孩 4 小時", "¥3,000"]],
-      kids: "小孩票 ¥3,300；學齡前是否免費🔎", lessons: "—", gear: "現場租借",
-      tips: ["往年 12 月中開季到 4 月初，2026-27 日期待官網公告（11 月）", "山鄉開車約 {T:drive.villa.asari.1} 分（最後一段是山路）；1/9 Kiroro 太擠或天氣差時的備案", "回程接湯の花 朝里殿泡湯", "**1/8–1/10 有團體活動**：1/8 是冬季兒童滑雪學校最後一天（每期最多 100 人）；1/9–1/10 北海道スキー・スノーボード連盟的單板強化合宿（9:30–14:30，在レッド吊椅集合，可能佔用レッド一帶）。1/13 起高校錦標賽，レッド是 FIS 公認賽道，平常也常有滑雪隊練習", "**帶小孩注意**：2025/12/28 停車場上センターハウス的輸送帶電扶梯發生 5 歲男童被捲入死亡的事故；2026-27 有沒有恢復運轉待查，小孩一律大人牽著走"],
+      kids: "小孩票 ¥3,300；學齡前是否免費🔎", lessons: "{T:coach.name} 教練也在申請這裡的教學許可（Onze 沒過就在這裡上 1/8–1/10）", gear: "現場租借",
+      tips: ["往年 12 月中開季到 4 月初，2026-27 日期待官網公告（11 月）", "山鄉開車約 {T:drive.villa.asari.1} 分；週末 08:30 就開，平日 09:00", "回程接湯の花 朝里殿泡湯", "**1/8–1/10 有團體活動**：1/8 是冬季兒童滑雪學校最後一天（每期最多 100 人）；1/9–1/10 北海道スキー・スノーボード連盟的單板強化合宿（9:30–14:30，在レッド吊椅集合，可能佔用レッド一帶）。1/13 起高校錦標賽，レッド是 FIS 公認賽道，平常也常有滑雪隊練習", "**帶小孩注意**：2025/12/28 停車場上センターハウス的輸送帶電扶梯發生 5 歲男童被捲入死亡的事故；2026-27 有沒有恢復運轉待查，小孩一律大人牽著走"],
       links: [["官網", "https://asari-ski.com/"], ["雪況（Weathernews）", "https://weathernews.jp/ski/spot/31502/"]],
       status: "https://weathernews.jp/ski/spot/31502/",
       summit: 660, base: 140, est: true },
@@ -182,18 +182,19 @@ window.TRIP = {
       summit: 330, base: 170 }
   ],
   /* 雪場分組：雪場頁的分組標題、圖例、首頁統計都讀這裡（顏色在 plan.js groupColor） */
+  /* chip：首頁雪場縮圖上「沒排進行程」的那一顆標籤（有排進行程的雪場由 plan.json 自動算日期） */
   resortGroups: [
-    { id: "main", short: "正式行程", title: "正式行程的三座", desc: "Onze 走路到、Kiroro 三天、富良野三天。" },
-    { id: "sapporo", short: "札幌近郊", title: "札幌近郊・不在行程裡", desc: "1/16–1/18 想滑的話，看雪況和大人怎麼分組再挑一天。標 2025-26 的是上一季票價，出發前再查。", clim: "sapporo" },
-    { id: "asahikawa", short: "旭川", title: "旭川・不在行程裡", desc: "Gacha 教練說旭川的雪場有申請到教學。住富良野那幾晚可以考慮：Kamui 大、票價便宜；Santa 小、離市區近、能夜滑。哪一座有許可待問 Gacha。", clim: "asahikawa" },
-    { id: "otaru", short: "小樽備案", title: "小樽近郊備案", desc: "Kiroro 太擠或天氣差時的小雪場，回程順路泡湯。", clim: "villa" }
+    { id: "main", short: "正式行程", title: "正式行程的雪場", desc: "1/8–1/10 Gacha 教練課在 Onze 或朝里川（等教學許可，行程先排 Onze：山鄉走路就到）；1/12–1/14 富良野。" },
+    { id: "sapporo", short: "札幌近郊", chip: "Teine 想滑再去", title: "札幌近郊・不在行程裡", desc: "1/16–1/18 想滑的話，看雪況和大人怎麼分組再挑一天。標 2025-26 的是上一季票價，出發前再查。", clim: "sapporo" },
+    { id: "asahikawa", short: "旭川", chip: "旭川 等 Gacha 確認", title: "旭川・不在行程裡", desc: "Gacha 教練說旭川的雪場有申請到教學。住富良野那幾晚可以考慮：Kamui 大、票價便宜；Santa 小、離市區近、能夜滑。哪一座有許可待問 Gacha。", clim: "asahikawa" },
+    { id: "otaru", short: "小樽近郊", chip: "Kiroro 備案", title: "小樽近郊・不在行程裡", desc: "Kiroro 雪最好、雪道最多，三連休雪道上反而最不擠；這次教練課沒排在這裡，Gacha 的許可都下不來時是第一個備案。", clim: "villa" }
   ],
 
   /* 住宿 → 雪場車程 [公里, 一般分鐘, 下雪分鐘]：tools/refresh_legs.py 產生（和 legs.json 同一套算法：冬季山路另計），不要手改 */
   drive: {
-    villa: { onze: [1.3, 5, 5], kiroro: [34.5, 50, 65], furano_kita: [135.7, 130, 170], teine: [17.0, 30, 35], kokusai: [27.0, 40, 50], bankei: [24.5, 30, 35], moiwa: [29.4, 35, 45], fus: [38.5, 40, 55], asari: [22.8, 40, 45], kamui: [130.8, 120, 155], santa: [141.8, 135, 175] },
-    furano: { onze: [136.5, 135, 180], kiroro: [169.7, 170, 220], furano_kita: [1.9, 5, 5], teine: [131.3, 135, 175], kokusai: [158.4, 160, 210], bankei: [123.0, 130, 170], moiwa: [120.2, 125, 160], fus: [129.3, 130, 170], asari: [158.0, 160, 210], kamui: [56.8, 65, 90], santa: [62.6, 80, 100] },
-    sapporo: { onze: [23.4, 30, 40], kiroro: [56.5, 85, 105], furano_kita: [113.4, 110, 145], teine: [18.3, 25, 35], kokusai: [44.6, 65, 80], bankei: [8.6, 15, 20], moiwa: [6.4, 10, 10], fus: [15.5, 15, 20], asari: [44.9, 70, 90], kamui: [116.9, 110, 145], santa: [128.0, 125, 160] }
+    villa: { onze: [0.8, 5, 5], kiroro: [34.5, 50, 65], furano_kita: [135.7, 130, 170], teine: [17.0, 30, 35], kokusai: [27.0, 40, 50], bankei: [24.5, 30, 35], moiwa: [29.4, 35, 45], fus: [38.5, 40, 55], asari: [13.1, 15, 20], kamui: [130.8, 120, 155], santa: [141.8, 135, 175] },
+    furano: { onze: [136.0, 135, 175], kiroro: [169.7, 170, 220], furano_kita: [1.9, 5, 5], teine: [131.3, 135, 175], kokusai: [158.4, 160, 210], bankei: [123.0, 130, 170], moiwa: [120.2, 125, 160], fus: [129.3, 130, 170], asari: [148.3, 145, 190], kamui: [56.8, 65, 90], santa: [62.6, 80, 100] },
+    sapporo: { onze: [22.9, 25, 35], kiroro: [56.5, 85, 105], furano_kita: [113.4, 110, 145], teine: [18.3, 25, 35], kokusai: [44.6, 65, 80], bankei: [8.6, 15, 20], moiwa: [6.4, 10, 10], fus: [15.5, 15, 20], asari: [35.1, 40, 50], kamui: [116.9, 110, 145], santa: [128.0, 125, 160] }
   },
 
   /* 地圖上的地點：type = stay | ski | sight | food | onsen | shop | grocery | hospital | transport */
@@ -230,8 +231,8 @@ window.TRIP = {
     { type: "food", name: "湯咖哩 SOUL STORE", stop: "soul", ja: "スープカレー SOUL STORE", area: "札幌", lat: 43.0557, lon: 141.3477, approx: true, note: "FAV LUX 走路可到；¥1,300–1,850", tags: ["步行可到"] },
     { type: "food", name: "湯咖哩 MATALE 円山店", ja: "スープカレー MATALE 円山店", area: "札幌", lat: 43.0557, lon: 141.3225, approx: true, note: "有兒童餐；可配圓山動物園", tags: ["兒童餐"] },
     { type: "food", name: "二条市場", area: "札幌", lat: 43.0582, lon: 141.3585, note: "海鮮丼早餐（ながもり 07:00 起）", tags: ["早餐"] },
-    { type: "onsen", name: "湯の花 朝里殿", stop: "asari", lat: 43.1573, lon: 141.0442, note: "09:00–23:00；大人 ¥980、小學生 ¥400、1–5 歲 ¥200；Kiroro 回程順路（1/9）" },
-    { type: "onsen", name: "湯の花 手宮殿", lat: 43.2122, lon: 141.0086, note: "09:00–23:00；大人 ¥980、1–5 歲 ¥200；小樽市區、壽司屋通り附近，有停車場（1/8 大人泡）" },
+    { type: "onsen", name: "湯の花 朝里殿", stop: "asari", lat: 43.1573, lon: 141.0442, note: "09:00–23:00；大人 ¥980、小學生 ¥400、1–5 歲 ¥200；1/10 教練課最後一天下課來泡、館內吃晚餐" },
+    { type: "onsen", name: "湯の花 手宮殿", lat: 43.2122, lon: 141.0086, note: "09:00–23:00；大人 ¥980、1–5 歲 ¥200；小樽市區、壽司屋通り附近，有停車場（備案：在小樽市區想泡湯時）" },
     { type: "onsen", name: "小樽温泉 オスパ", lat: 43.1878, lon: 141.0163, note: "24 小時；小樽築港，回銭函順路的備案" },
     { type: "shop", name: "Mountain Shop Vainqueur（Kiroro）", lat: 43.0670, lon: 140.9910, approx: true, note: "雪板、雪靴、固定器；打蠟 ¥3,500" },
     { type: "shop", name: "ICI 石井スポーツ 札幌店", lat: 43.0711, lon: 141.3321, approx: true, note: "雪具專門店；10:00–20:00" },
@@ -249,9 +250,9 @@ window.TRIP = {
 
   days: [
     { date: "2027-01-07", base: "villa", title: "抵達北海道", sub: "取車、逛 TNOC、採買、入住山鄉", sun: ["07:07", "16:15", "16:48"], alert: "第一天就在天黑的雪路開車，不熟車的人先別開" },
-    { date: "2027-01-08", base: "villa", title: "Kiroro 滑雪", sub: "Gacha 教練全天課；滑完大人泡湯、小樽吃壽司", sun: ["07:07", "16:16", "16:49"], alert: "Kiroro 森林の湯 現在只給房客用，不開放日歸——改去小樽的湯の花 手宮殿（離壽司店 4 分）。不泡湯的話晚餐可以提早約一小時" },
-    { date: "2027-01-09", base: "villa", title: "Kiroro 滑雪", sub: "連假第一天；Gacha 教練全天課，回程泡湯", sun: ["07:07", "16:17", "16:50"], alert: "成人之日三連休，雪場與餐廳較擠" },
-    { date: "2027-01-10", base: "villa", title: "半天 Kiroro＋小樽", sub: "上午 Gacha 教練半天課；下午四個大人走堺町通，等運河的煤氣燈亮起來", sun: ["07:06", "16:18", "16:51"], },
+    { date: "2027-01-08", base: "villa", title: "Onze 教練課・第一天", sub: "Gacha 教練全天課；晚上全家去小樽：音樂盒堂、運河夜景、政寿司", sun: ["07:07", "16:16", "16:49"], alert: "教練課在 Onze 還是朝里川要等 Gacha 的教學許可，行程先排 Onze（山鄉走路就到）" },
+    { date: "2027-01-09", base: "villa", title: "Onze 教練課・第二天", sub: "連假第一天；下課後四個大人去小樽：堺町通、運河煤氣燈、なると炸雞", sun: ["07:07", "16:17", "16:50"], alert: "成人之日三連休：Onze 只有一條四人吊椅上山，一開門就上；小樽的店傍晚就關，照時間表走" },
+    { date: "2027-01-10", base: "villa", title: "Onze 教練課・第三天", sub: "Gacha 教練最後一天；下課泡朝里殿，早點回山鄉收行李", sun: ["07:06", "16:18", "16:51"], alert: "明天一早退房、開最長的一段車，今晚別太晚" },
     { date: "2027-01-11", base: "furano", title: "旭山動物園 → 富良野", sub: "成人之日：假日拿來移動和看動物", sun: ["07:03", "16:12", "16:45"], alert: "全天車程是 13 天最長的一天（上面「今天開車」有一般／下雪兩個數字）。這天是成人之日三連休的最後一天：從小樽往旭川跟札幌出遊的車流同方向，動物園開門（{open:zoo}）前後停車場就會滿，{t:villa} 準時出發、別在路上多停；下午從旭川往富良野是反方向，不會卡到回札幌的車流。上面的車程已經是保守算法（平均 60 km/h），連假再多抓 20–30 分當緩衝。" },
     { date: "2027-01-12", base: "furano", title: "富良野滑雪", sub: "上午教練課，平日練 carving", sun: ["07:01", "16:15", "16:48"], },
     { date: "2027-01-13", base: "furano", title: "富良野滑雪", sub: "可再請一次教練", sun: ["07:01", "16:16", "16:49"], },
@@ -282,12 +283,12 @@ window.TRIP = {
     out: { date: "2027-01-07", no: "BR116", from: "桃園 T2", dep: "09:30", to: "新千歲", arr: "14:05" },
     back: { date: "2027-01-19", no: "BR165", from: "新千歲", dep: "12:10", to: "桃園 T2", arr: "16:05" }
   },
-  /* Kiroro 教練（10/27 Sean 定）：Gacha（Snow Surfing Japan）1/8、1/9 全天、1/10 上午半天（先排半天，到時候看狀況）
+  /* 教練（10/29 Sean 定）：Gacha（Snow Surfing Japan）1/8、1/9、1/10 三天全天 09:00–16:00，在 Onze 或朝里川（看哪邊的教學許可先下來；行程先排 Onze）
      時間表的到達／離開、說明文字、待辦都讀這裡；check.py 確認開課前 15 分到雪場、下課後才離開 */
-  coach: { name: "Gacha", org: "Snow Surfing Japan", resort: "kiroro", start: "09:00", end: "16:00", halfEnd: "12:00",
-           full: ["2027-01-08", "2027-01-09"], half: ["2027-01-10"], lang: "簡單英文＋翻譯 App（不會中文）", url: "https://snowsurfing-japan.stores.jp/reserve/snowsurfing_japan/1865332",
+  coach: { name: "Gacha", org: "Snow Surfing Japan", resort: "onze", start: "09:00", end: "16:00", halfEnd: "12:00",
+           full: ["2027-01-08", "2027-01-09", "2027-01-10"], half: [], lang: "簡單英文＋翻譯 App（不會中文）", url: "https://snowsurfing-japan.stores.jp/reserve/snowsurfing_japan/1865332",
            /* 核准後把 status 改成 "已確定"；行程備註會跟著顯示 */
-           status: "上課日 1/8–1/10 已確定；Gacha 正在申請 Onze 和朝里川溫泉的教學許可，核准後才知道在哪一座上課" },
+           status: "三天全天已確定；Gacha 正在申請 Onze 和朝里川的教學許可，行程先排 Onze" },
   zooLastEntry: "15:00",
 
   rental: {
@@ -356,7 +357,7 @@ window.TRIP = {
   },
 
   todo: [
-    ["現在", "等 {T:coach.name} 的教學許可：上課日 1/8–1/10 已確定，他正在申請 Onze 和朝里川溫泉，核准後才知道在哪一座上課；核准前先不刷訂金。兩座在這幾天有沒有比賽、會佔哪些雪道，見滑雪地圖的雪場卡"],
+    ["現在", "等 {T:coach.name} 的教學許可：1/8–1/10 三天全天已確定，他正在申請 Onze 和朝里川，行程先排 Onze（山鄉走路就到）。拿到的是朝里川的話：早上改開車 {leg:villa|asari_ski} 分過去、提早出門，1/8 晚上全家去小樽要先回山鄉接小孩，會晚一點；1/9 下課直接去小樽反而比較近。兩座這幾天的活動、會佔哪些雪道，見滑雪地圖的雪場卡"],
     ["現在", "Cardo 對講機：4 個大人各一台已租好。問 {T:coach.name} 有沒有自己的 Cardo——要是 Cardo 的 DMC 機種（Packtalk Outdoor／Edge／Neo 這一代）才能跟我們連成同一組；沒有就跟同一家多租第 5 台（同型號最好配）。上課前一晚在山鄉先把 5 台配成一組、充飽電"],
     ["現在", "問 {T:coach.name}：旭川是哪一座雪場有申請到教學（Kamui Ski Links 或 Santa Present Park）、住富良野那幾天要不要排一天給他教——兩座的票價、車程在滑雪地圖「旭川」那組"],
     ["現在", "4 位駕駛（Sean、Lo、Ethan、阿茹）到監理所辦駕照日文譯本"],
@@ -365,10 +366,10 @@ window.TRIP = {
     ["現在", "問富良野小木屋：兩台車位、雪具乾燥空間"],
     ["11 月", "每個小孩戴一顆 AirTag（4 顆，先綁好 Find My，放雪衣內袋）"],
     ["出發前", "札幌停車想保險就用 akippa／特P 預約 1/16–1/19 兩個平面車位；不然 1/16 13:00 前到パラカ（見單日頁）"],
-    ["11 月", "許可下來後預約 {T:coach.name}（{T:coach.org} 官網，代表人一人預約）：1/8、1/9 全天 {T:coach.start}–{T:coach.end}、1/10 上午半天——半天也是選 {T:coach.start}–{T:coach.end} 的方案，預約後 email 說明；北海道要 3 天起、開課前至少 1 個月（12/8 前），刷訂金 ¥10,000"],
-    ["11 月", "{T:coach.name} 規定：不能改期；開課 24 天前起不能取消、訂金不退（天候或教練因素取消會退訂金）。1/10 要不要改全天，預約時就跟他講好"],
+    ["11 月", "許可下來後預約 {T:coach.name}（{T:coach.org} 官網，代表人一人預約）：1/8、1/9、1/10 三天全天 {T:coach.start}–{T:coach.end}；北海道要 3 天起、開課前至少 1 個月（12/8 前），刷訂金 ¥10,000。順便問：教練自己的吊椅票誰付、午休大概幾點、有沒有自己的 Cardo"],
+    ["11 月", "{T:coach.name} 規定：不能改期；開課 24 天前起不能取消、訂金不退（天候或教練因素取消會退訂金）"],
     ["11 月", "富良野教練（1/12、1/13）：照原計畫 1 對 4 團體課，預計每人 NT$5,000–6,000／天"],
-    ["出發前", "準備日幣現金付 {T:coach.name}：4 人 2 全天＋1 上午，課程費＋北海道地區服務費 ¥50,000 約 ¥274,000，當天付現（教練不會中文，用簡單英文＋翻譯 App）"],
+    ["出發前", "準備日幣現金付 {T:coach.name}：4 人全天 ¥78,000 × 3 天＋北海道地區服務費 ¥50,000 ＝ ¥284,000（不含刷卡訂金），當天付現（教練不會中文，用簡單英文＋翻譯 App）"],
     ["現在", "訂位：1/18 氷雪の門 螃蟹會席（評論說要提前 1–2 個月）；11 月再訂 1/16 ビール園 GARDEN GRILL 包廂、1/17 KUJIRA"],
     ["11 月", "保險：把兩家現有保單的保障明細給我比對（見下方「保險」）；旅平險＋不便險出發前兩週就要買好，等大雪警報出來就買不到"],
     ["11 月", "保姆：幫她買旅平險＋海外醫療險；確認每段住宿有獨立房間與回程航班"],

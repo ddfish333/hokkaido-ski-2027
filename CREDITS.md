@@ -51,6 +51,8 @@ No freely licensed photos found on Wikimedia Commons for these hotels; no images
 - 1/7 序幕第 3 幕：T DMY〈Direction of Zenibako from ONZE ski resort〉（CC BY 3.0），經調色。
 - 海報與章節：上表所列 Commons 照片，經裁切壓縮。
 - 海報 1/18（2026-10-26 起）：改用 1/16、1/18 序幕同一張札幌大通俯瞰（assets/img/scene/sapporo-3.jpg 的來源），裁成 3:4；原本的手稻山照片不再使用，因為 1/18 已不是滑雪日。
+- 海報 1/8–1/10（2026-10-30 起，三天改成 Onze 教練課）：1/8 用 Wakimasa〈スノークルーズ・オーンズ（遠望）〉（CC BY-SA 3.0，即 assets/img/scene/onze-1.jpg 的來源）裁成 3:4；1/9 沿用原本 1/10 的小樽運河夜景海報；1/10 用山郷 春 Villa 官網的暖爐照片（scene/villa-5.jpg，版權屬原業者，僅供同行家人行前參考）裁成 3:4。原本的 Kiroro 海報不再使用。
+- 1/8、1/9 序幕的音樂盒堂、北一ホール、LeTAO、運河幾幕：沿用下方「景點照片」表裡的同一批 Commons 照片（spots/orgel.jpg、spots/kitaichi.jpg、spots/letao.jpg、spots/sakaimachi.jpg、spots/canal.jpg），授權與作者見該表。
 - 住宿照片（山郷 春 Villa -SHUN-、BEST DAY EVER FURANO LODGES、FAV LUX 札幌薄野）：各住宿官方網站／訂房頁，僅供同行家人行前參考，版權屬原業者。
 - 序幕音樂：網頁以 Web Audio 即時生成，無外部音檔。
 - 首頁三章「山と雪」的滑鼠移入影片（assets/video/furano-hover*.mp4）：BEST DAY EVER FURANO LODGES 官方宣傳影片，Sean 於 2026-10-26 自官網螢幕錄影後剪成 30 秒無聲循環；僅供同行家人行前參考，不對外宣傳。

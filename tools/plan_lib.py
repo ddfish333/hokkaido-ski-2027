@@ -47,6 +47,14 @@ def leg_of(a, b, via):
     if L and via == "taxi": L = dict(L, mode="taxi", normal=taxi_min(L["normal"]), snow=taxi_min(L["snow"]))
     return L
 
+def wd_of(date):
+    """0=日…6=六，和 plan.json places 的 closed 同一套"""
+    import datetime as _d
+    y, m, dd = map(int, date.split("-")); return (_d.date(y, m, dd).weekday() + 1) % 7
+def close_on(pl, date):
+    """這一天的關門時間：places 的 closeWd（{"6": "19:00"}＝週六開到 19:00）蓋過 close"""
+    if not pl: return None
+    return (pl.get("closeWd") or {}).get(str(wd_of(date))) or pl.get("close")
 def schedule(date, mode="normal"):
     """前一站離開＋移動＝抵達；at 早到就等、晚到算遲；by 超過算遲。沒有路段快取的當 0 分（check.py 會另外警告）。"""
     out, t = [], None
@@ -115,7 +123,8 @@ def fill(text, date, ctx_id=None, mode="normal", strict=False):
         dd = date[:5] + md if md else date
         if kind in ("open", "close"):
             pl = PLAN["places"].get(id_ or "")
-            if pl and pl.get(kind): return pl[kind]
+            v = close_on(pl, dd) if kind == "close" else (pl or {}).get("open")
+            if v: return v
             if strict: raise TokenError(f"{m.group(0)}：plan.json places 的 {id_} 沒有 {kind}")
             return m.group(0)
         if kind in ("at", "by"):

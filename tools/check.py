@@ -8,7 +8,7 @@
 import json, os, re, subprocess, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
-from plan_lib import TRIP as trip, PLAN, LEGS, load_js, mins, hm, leg_of, schedule, fill, hardcoded_times, TokenError, TOKEN
+from plan_lib import TRIP as trip, PLAN, LEGS, load_js, mins, hm, leg_of, schedule, fill, hardcoded_times, TokenError, TOKEN, close_on
 scenes = load_js("data/scenes.js", "SCENES")
 # 相容舊的變數名：dayplan[date]["stops"] 需要 id/time/name
 dayplan = {d: {"stops": [dict(id=s["id"], time=hm(x["arr"]), name=PLAN["places"].get(s["id"], {}).get("name", s["id"])) for s, x in zip(v["stops"], schedule(d, "normal"))]} for d, v in PLAN["days"].items()}
@@ -107,8 +107,9 @@ for d, v in PLAN["days"].items():
             if pl.get("open") and not s.get("at") and not is_resort_or_base(s["id"]) and x["arr"] + 5 < mins(pl["open"]):
                 W(f"{d}：{lab}路況 {hm(x['arr'])} 到「{nm}」，但 {pl['open']} 才開，要等 {mins(pl['open']) - x['arr']} 分（給這站加 at 或調前面的停留）")
             # 雪場的 close＝吊椅收；收板、換鞋、還雪具要時間，離開雪場晚 30 分內是正常的
-            if pl.get("close") and x["stay"] and x["dep"] > mins(pl["close"]) + (30 if "滑雪場" in nm else 0):
-                (E if mode == "normal" else W)(f"{d}：{lab}路況在「{nm}」待到 {hm(x['dep'])}，但 {pl['close']} 關門")
+            _cl = close_on(pl, d)
+            if _cl and x["stay"] and x["dep"] > mins(_cl) + (30 if "滑雪場" in nm else 0):
+                (E if mode == "normal" else W)(f"{d}：{lab}路況在「{nm}」待到 {hm(x['dep'])}，但那天 {_cl} 關門")
     # 公休日：plan.json places 的 closed（0=日…6=六），排到那天就是錯（10/29 加 TNOC：週三休）
     import datetime as _dt0
     _wd = (_dt0.date(*map(int, d.split("-"))).weekday() + 1) % 7
@@ -262,14 +263,14 @@ if os.path.isdir(photo_root):
 else:
     W(f"找不到照片資料夾 {photo_root}，略過照片檢查")
 
-# 景點的 day 欄位要和行程一致（同一個 stop id 在 plan.json 哪一天）
-stop_day = {}
+# 景點的 day 欄位要是行程裡真的有去那一站的某一天（同一站可能排好幾天，例如運河 1/8 全家、1/9 大人）
+stop_days = {}
 for d, v in PLAN["days"].items():
-    for s in v["stops"]: stop_day.setdefault(s["id"], d)
+    for s in v["stops"]: stop_days.setdefault(s["id"], []).append(d)
 for sp in load_js("data/spots.js", "SPOTS") or []:
-    if sp.get("stop") and sp.get("day") and stop_day.get(sp["stop"]) and stop_day[sp["stop"]] != sp["day"]:
-        E(f"spots.js：{sp['name']} 寫 day {sp['day']}，但行程裡 {sp['stop']} 是 {stop_day[sp['stop']]}（改 spots.js 的 day）")
-    if sp.get("stop") and not stop_day.get(sp["stop"]) and sp.get("status") == "plan":
+    if sp.get("stop") and sp.get("day") and stop_days.get(sp["stop"]) and sp["day"] not in stop_days[sp["stop"]]:
+        E(f"spots.js：{sp['name']} 寫 day {sp['day']}，但行程裡 {sp['stop']} 是 {'、'.join(sorted(set(stop_days[sp['stop']])))}（改 spots.js 的 day）")
+    if sp.get("stop") and not stop_days.get(sp["stop"]) and sp.get("status") == "plan":
         W(f"spots.js：{sp['name']} 標 plan 但行程裡沒有站點 {sp['stop']}")
 
 # 餐廳資料（data/food.js）：有座標、地區對得上住宿、「預計」關鍵字真的對到某一天
@@ -486,8 +487,7 @@ for lst in (food, spots):
         _items[x["id"]] = (x, ref)
         if ref and ref in PLAN["places"]:
             pl = PLAN["places"][ref]
-            for k in ("open", "close"):
-                hv = pl.get(k)
+            for k, hv in [("open", pl.get("open")), ("close", pl.get("close"))] + [(f"closeWd 週{_DOW[int(w)]}", v) for w, v in (pl.get("closeWd") or {}).items()]:
                 if hv and x.get("hours") and not ({hv, hv.lstrip("0")} & set(re.findall(r"\d{1,2}:\d\d", x["hours"]))):
                     E(f"plan.json {ref} 的 {k} {hv} 不在 {x['name']} 的營業時間「{x['hours']}」裡——兩邊說法要一致")
 def _chk_closed(where, text, item):

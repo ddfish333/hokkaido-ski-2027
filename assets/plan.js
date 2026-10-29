@@ -124,6 +124,12 @@
     }
     var L = leg(a, b, via); return L ? (snow ? L.snow : L.normal) : null;
   }
+  /* 這一天的關門時間：places 的 closeWd（0=日…6=六，和 closed 同一套）蓋過 close——和 plan_lib.close_on 同 */
+  function closeOn(pl, date) {
+    var p = String(date).split("-"), wd = new Date(+p[0], +p[1] - 1, +p[2]).getDay();
+    return (pl.closeWd && pl.closeWd[String(wd)]) || pl.close;
+  }
+  P.closeOn = closeOn;
   var TOKEN = /\{(t|dep|at|by|open|close)(?::([\w-]+?))?(?:#(\d))?(?:@(\d\d-\d\d))?\}|\{sun:(rise|set|dark)\}|\{T:([\w.]+)\}|\{leg:([\w-]+)\|([\w-]+)(?:\|(walk|shuttle|taxi))?\}|\{(party)\}/g;
   var schedCache = {};
   function fill(text, date, ctx) {
@@ -136,7 +142,7 @@
       if (sun) { var d = (T.days || []).filter(function (x) { return x.date === date; })[0]; return d && d.sun ? d.sun[{ rise: 0, set: 1, dark: 2 }[sun]] : m; }
       if (tpath) { var v = T; tpath.split(".").forEach(function (k) { v = v == null ? v : v[k]; }); return v == null ? m : String(v); }
       var dd = md ? date.slice(0, 5) + md : date;
-      if (kind === "open" || kind === "close") { var pl = P.plan && P.plan.places[id]; return pl && pl[kind] ? pl[kind] : m; }
+      if (kind === "open" || kind === "close") { var pl = P.plan && P.plan.places[id], v = pl && (kind === "close" ? closeOn(pl, dd) : pl.open); return v || m; } /* closeWd：{"6":"19:00"}＝週六晚關 */
       if (kind === "at" || kind === "by") { var day = P.plan && P.plan.days[dd], sts = day ? day.stops.filter(function (s) { return s.id === id; }) : [], st = nth ? sts[(+nth) - 1] : sts.filter(function (s) { return s[kind]; })[0]; return st && st[kind] ? st[kind] : m; }
       var key = dd + "|" + P.mode(), sch = schedCache[key] || (schedCache[key] = schedule(dd, P.mode()));
       var hits = sch.stops.filter(function (s) { return s.id === (id || (ctx && ctx.id)); });

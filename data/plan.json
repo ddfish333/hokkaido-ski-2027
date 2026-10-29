@@ -42,10 +42,11 @@
     },
     "onze": {
       "name": "Onze 雪場",
-      "lat": 43.1439,
-      "lon": 141.1278,
+      "lat": 43.1462547,
+      "lon": 141.133201,
       "close": "22:45",
-      "ja": "スノークルーズオーンズ"
+      "ja": "スノークルーズオーンズ（春香町 357，センターハウス・Onze 單板學校）",
+      "pid": "ChIJpyyE1V3fCl8RYn5Z49R4Xl8"
     },
     "asari": {
       "name": "湯の花 朝里殿",
@@ -470,12 +471,13 @@
     },
     "asari_ski": {
       "name": "朝里川溫泉滑雪場",
-      "lat": 43.1385,
-      "lon": 141.0293,
+      "lat": 43.1435073,
+      "lon": 141.0367359,
       "open": "09:00",
       "close": "17:00",
       "closeNote": "12/20–3/1 到 17:00，其他期間 16:00（2025-26）",
-      "ja": "朝里川温泉スキー場"
+      "ja": "朝里川温泉スキー場（朝里川温泉 1-394）",
+      "pid": "ChIJT6GUDkPeCl8R-1OeGk3SGdM"
     },
     "sunagawa_sa": {
       "name": "砂川 SA（往旭川方向）",
@@ -499,7 +501,10 @@
       "open": "09:00",
       "close": "18:00",
       "ja": "かま栄 工場直売店",
-      "pid": "ChIJQTIcG07gCl8RMM5h8GKfzuo"
+      "pid": "ChIJQTIcG07gCl8RMM5h8GKfzuo",
+      "closeWd": {
+        "6": "19:00"
+      }
     },
     "kitaichi": {
       "name": "北一硝子三号館",
@@ -527,7 +532,16 @@
       "open": "09:00",
       "close": "18:00",
       "ja": "小樽オルゴール堂 本館",
-      "pid": "ChIJB2IMXFrgCl8Rx-WS9YJOmbQ"
+      "pid": "ChIJB2IMXFrgCl8Rx-WS9YJOmbQ",
+      "park": {
+        "name": "Otaru Parking（入船 1-2-28，音樂盒堂對面）",
+        "short": "音樂盒堂對面停車場",
+        "ja": "小樽パーキング 入船1丁目",
+        "lat": 43.189827,
+        "lon": 141.0069908,
+        "pid": "ChIJ_RYPTFrgCl8Rv-v-2M2r6hA",
+        "note": "24 小時、每小時約 ¥300；滿了改旁邊的パーキング光陽園（LeTAO 買滿 ¥2,000 可折 1 小時）或昭和パーク（音樂盒堂旁）"
+      }
     },
     "xawf36c": {
       "name": "南小樽站",
@@ -605,25 +619,32 @@
       "stops": [
         {
           "id": "villa",
-          "at": "07:50",
+          "at": "08:30",
           "stay": 0,
-          "note": "出發；保姆第一天，小孩交給她（{T:coach.name} 教練 {T:coach.start} 開課，要提早到換裝、買票）"
+          "note": "走路 {leg:villa|onze|walk} 分到 Onze 山腳（センターハウス、Onze 單板學校都在那裡），雪板自己背；保姆第一天，小孩交給她（{T:coach.name} 教練 {T:coach.start} 開課，要提早到買票、換裝）"
         },
         {
-          "id": "kiroro",
-          "stay": 460,
+          "id": "onze",
+          "via": "walk",
+          "stay": 455,
           "by": "08:45",
-          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（{T:coach.status}；午休時間可以跟教練調）；下課後收板下山"
-        },
-        {
-          "id": "temiya",
-          "stay": 50,
-          "note": "大人泡湯：湯の花 手宮殿（價格、時間、停車看地圖上的地點卡）。Kiroro 森林の湯 已改成房客限定，不開放日歸。不想泡就跳過，直接回山鄉，晚餐提早約一小時"
+          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（{T:coach.status}）。午休在センターハウス吃，或走回山鄉跟小孩一起吃；下課收板走回去"
         },
         {
           "id": "villa",
+          "via": "walk",
+          "stay": 35,
+          "note": "換掉雪衣、接保姆和小孩，全家一起去小樽（保姆 {T:nanny.end} 下班，之後算加班）"
+        },
+        {
+          "id": "orgel",
+          "stay": 35,
+          "note": "全家第一站：音樂盒堂本館，小孩看一整屋子的音樂盒；{close:orgel} 關門。門口蒸氣時鐘每 15 分噴一次、整點最久"
+        },
+        {
+          "id": "canal",
           "stay": 15,
-          "note": "回山鄉接保姆和小孩一起去吃飯（保姆 {T:nanny.end} 下班，之後算加班，或讓她休息）"
+          "note": "開到運河停車場，走到浅草橋看煤氣燈和倉庫倒影就好，雪地裡小孩走慢一點"
         },
         {
           "id": "masazushi",
@@ -633,7 +654,7 @@
         {
           "id": "villa",
           "stay": 0,
-          "note": "想夜滑的大人走路去 Onze（夜滑到 {close:onze}），option"
+          "note": "回山鄉，小孩洗澡睡覺"
         }
       ]
     },
@@ -641,20 +662,56 @@
       "stops": [
         {
           "id": "villa",
-          "at": "07:50",
+          "at": "08:30",
           "stay": 0,
-          "note": "出發（連假，早點到搶停車位）"
+          "note": "走路 {leg:villa|onze|walk} 分到 Onze；連假第一天，{T:coach.start} 一開吊椅就上山"
         },
         {
-          "id": "kiroro",
-          "stay": 460,
+          "id": "onze",
+          "via": "walk",
+          "stay": 455,
           "by": "08:45",
-          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（連假人多）；下課後收板下山"
+          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（連假人多：Onze 只有一條四人吊椅上山，午休錯開正中午）；下課收板走回山鄉"
         },
         {
-          "id": "asari",
-          "stay": 135,
-          "note": "泡湯、館內晚餐"
+          "id": "villa",
+          "via": "walk",
+          "stay": 15,
+          "note": "雪板放下、換掉雪衣，小孩留給保姆（她幫小孩煮晚餐，加班到大人回來）；四個大人開一台車就好，開車的人不喝酒"
+        },
+        {
+          "id": "canal",
+          "stay": 5,
+          "note": "四個大人：停運河旁的觀光停車場（回程也從這裡開走）。{sun:set} 日落，到的時候天剛黑、煤氣燈剛亮——先在浅草橋拍一張藍調的運河，再往堺町通走"
+        },
+        {
+          "id": "kitaichi",
+          "via": "walk",
+          "stay": 15,
+          "note": "先去最早關的：北一硝子三号館的北一ホール，167 盞煤油燈點著，{close:kitaichi} 關門（咖啡廳也是），看一圈、拍照就走"
+        },
+        {
+          "id": "letao",
+          "via": "walk",
+          "stay": 20,
+          "note": "LeTAO 本店：1F 買雙層起司蛋糕（回去配保姆的炸雞當甜點），{close:letao} 關門；對面六花亭、北菓楼也是 {close:rokkatei_otaru} 關，想買伴手禮一起買"
+        },
+        {
+          "id": "kamaei",
+          "via": "walk",
+          "stay": 10,
+          "note": "沿堺町通往回走到かま栄：週六開到 {close:kamaei}，現炸パンロール一人一條墊肚子（晚餐是炸雞，別吃太多）"
+        },
+        {
+          "id": "canal",
+          "via": "walk",
+          "stay": 5,
+          "note": "走回停車場路上再經過浅草橋：天全黑了，整排煤氣燈和倉庫倒影"
+        },
+        {
+          "id": "naruto",
+          "stay": 75,
+          "note": "晚餐：若鶏時代なると（有停車場，櫃台點餐先付錢）；外帶一份半身炸雞回去給保姆。開車的人不喝酒"
         },
         {
           "id": "villa",
@@ -667,75 +724,32 @@
       "stops": [
         {
           "id": "villa",
-          "at": "07:50",
+          "at": "08:30",
           "stay": 0,
-          "note": "出發"
+          "note": "走路 {leg:villa|onze|walk} 分到 Onze；教練課最後一天"
         },
         {
-          "id": "kiroro",
-          "stay": 270,
+          "id": "onze",
+          "via": "walk",
+          "stay": 455,
           "by": "08:45",
-          "note": "{T:coach.name} 教練半天課 {T:coach.start}–{T:coach.halfEnd}（先排半天，到時候看狀況）；午餐在山上吃完再下山",
-          "alts": [
-            "onze",
-            "asari_ski"
-          ],
-          "altNotes": {
-            "kiroro": "粉雪最好、雪道最多（1/8、1/9 都滑過）；但來回都是山路，半天扣掉上下山，實際滑大約四小時。",
-            "onze": "就在 Villa 旁邊（走路也到），不用一早上山，可以多睡一點；雪場小（兩條吊椅、有初學區），滑兩三個小時剛好，雪不如 Kiroro 粉。滑完先回 Villa 換衣服再去小樽也來得及。",
-            "asari_ski": "小樽近郊的中型雪場（9 條雪道、5 條吊椅、山頂 660 m），朝里 IC 下來就到，下山去運河最近；沒有夜滑。1/9 泡過的湯の花 朝里殿就在附近。"
-          }
+          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（連假人多，午休錯開正中午）；記得跟 Gacha 要三天的影片"
         },
         {
-          "id": "canal",
-          "stay": 5,
-          "note": "停車（導航直接帶到停車場），接下來三小時都走路；小孩在山鄉，四個大人慢慢逛"
-        },
-        {
-          "id": "kamaei",
+          "id": "villa",
           "via": "walk",
-          "stay": 20,
-          "note": "かま栄：隔著玻璃看魚板生產線，現炸パンロール一人一條當午後第一口"
+          "stay": 15,
+          "note": "雪板放下、拿換洗衣服，小孩留給保姆（幫小孩煮晚餐，加班到大人回來）"
         },
         {
-          "id": "kitaichi",
-          "via": "walk",
-          "stay": 35,
-          "note": "北一硝子三号館：167 盞煤油燈的北一ホール，坐下來喝杯咖啡；旁邊就是堺町通的玻璃和甜點店"
-        },
-        {
-          "id": "letao",
-          "via": "walk",
-          "stay": 20,
-          "note": "LeTAO 本店：3F 免費展望塔看堺町通和港口，1F 買雙層起司蛋糕帶回去"
-        },
-        {
-          "id": "rokkatei_otaru",
-          "via": "walk",
-          "stay": 25,
-          "note": "對面的六花亭 小樽運河店：2F 喫茶坐下來吃點心、喝杯咖啡"
-        },
-        {
-          "id": "orgel",
-          "via": "walk",
-          "stay": 25,
-          "note": "音樂盒堂本館；門口蒸氣時鐘每 15 分噴一次、整點最久"
-        },
-        {
-          "id": "canal",
-          "via": "walk",
-          "stay": 45,
-          "note": "沿堺町通走回運河，{sun:set} 日落：浅草橋拍倉庫倒影，{sun:dark} 天黑前後煤氣燈全亮是最好看的半小時"
-        },
-        {
-          "id": "naruto",
-          "stay": 90,
-          "note": "晚餐：若鶏時代なると（有停車場）；吃完外帶幾份半身炸雞回山鄉給保姆和小孩"
+          "id": "asari",
+          "stay": 120,
+          "note": "大人泡湯、館內吃晚餐，三天的腿痠在這裡放掉"
         },
         {
           "id": "villa",
           "stay": 0,
-          "note": "回山鄉"
+          "note": "回山鄉收行李：明天 {t:villa@01-11} 退房出發，雪板今晚就裝上車"
         }
       ]
     },

@@ -159,7 +159,7 @@
   /* 三章：海之雪、山之雪、街之雪——照片、主題小標、地名大標、日文短句、一段話 */
   /* 三層：主題小標（海之雪）／地名大標（小樽 OTARU）／細明朝日文短句；文案 2026-10-26 由 Sean 定稿 */
   var CHAPTER = {
-    villa: { en: "CHAPTER 01 · 4 NIGHTS", theme: "海之雪", place: "小樽", en2: "OTARU", jp: "雪国のはじまり", line: "第一站，住進小樽近郊的山鄉。白天往 Kiroro 滑雪，留一個下午給小樽運河與堺町通。雪山、海岸、溫泉與壽司，構成最初的四晚。" },
+    villa: { en: "CHAPTER 01 · 4 NIGHTS", theme: "海之雪", place: "小樽", en2: "OTARU", jp: "雪国のはじまり", line: "第一站，住進小樽近郊的山鄉。白天在山鄉旁的 Onze 跟教練上課，傍晚留給小樽運河與堺町通。雪山、海岸、溫泉與壽司，構成最初的四晚。" },
     furano: { en: "CHAPTER 02 · 5 NIGHTS", theme: "山之雪", place: "富良野", en2: "FURANO", jp: "雪山で過ごす日々", line: "五晚住在北之峰，這裡是旅程的滑雪重心。從小木屋出發，探索富良野的兩個滑雪區；也安排旭山動物園、美瑛雪原與青池點燈。" },
     sapporo: { en: "CHAPTER 03 · 3 NIGHTS", theme: "街之雪", place: "札幌", en2: "SAPPORO", jp: "街を楽しむ", line: "最後三晚回到札幌。把車停好，走進城市裡的餐廳、商店與冬日街景。想滑雪還能再上山，其餘時間就留給美食與自由探索。" }
   };
@@ -775,32 +775,54 @@
 
   /* ---------- 雪場：卡片搬到 ski/（滑雪地圖），首頁只留一塊縮圖 ---------- */
   var SKI_GROUP_COLOR = Plan.groupColor();  /* 雪場分組顏色跟主題（plan.js） */
+  /* 雪場排在哪幾天：plan.json 那天的站點有這座雪場的 stops 就算（不在文字裡寫死「Kiroro 1/8–1/10」，行程改了自己跟著變） */
+  function resortDates(r) {
+    if (!r.stops || !Plan.plan) return [];
+    return Object.keys(Plan.plan.days).sort().filter(function (d) { return Plan.plan.days[d].stops.some(function (s) { return r.stops.indexOf(s.id) >= 0; }); });
+  }
+  function dateRuns(ds) { /* ["2027-01-08","2027-01-09","2027-01-10","2027-01-12"] → "1/8–1/10、1/12" */
+    var out = [], a = null, b = null, day = function (x) { return Math.round(new Date(x + "T00:00:00").getTime() / 864e5); };
+    ds.forEach(function (d) { if (b && day(d) === day(b) + 1) b = d; else { if (a) out.push(a === b ? md(a) : md(a) + "–" + md(b)); a = b = d; } });
+    if (a) out.push(a === b ? md(a) : md(a) + "–" + md(b));
+    return out.join("、");
+  }
+  function skiChips() { /* 有排進行程的雪場各一個；沒排進行程的分組一個（resortGroups 的 chip，例如「Teine 想滑再去」） */
+    var chips = [], used = {};
+    T.resorts.forEach(function (r) { var ds = resortDates(r); if (ds.length) { chips.push({ group: r.group || "main", label: (r.short || r.name.replace(/（.*?）/g, "")) + " " + dateRuns(ds), first: ds[0] }); used[r.group || "main"] = 1; } });
+    chips.sort(function (a, b) { return a.first < b.first ? -1 : 1; });
+    (T.resortGroups || []).forEach(function (g) { if (!used[g.id] && g.chip) chips.push({ group: g.id, label: g.chip }); });
+    return chips;
+  }
   function renderSkiStats() {
     if (!has("skistats")) return;
     var n = {}; T.resorts.forEach(function (r) { n[r.group || "main"] = (n[r.group || "main"] || 0) + 1; });
     var open = T.resorts.filter(function (r) { return r.season && TODAY >= r.season[0] && TODAY <= r.season[1]; }).length;
     var next = T.resorts.filter(function (r) { return r.season && TODAY < r.season[0]; }).sort(function (a, b) { return a.season[0] < b.season[0] ? -1 : 1; })[0];
     $("#skistats").innerHTML = '<span class="fs-total"><b>' + T.resorts.length + '</b> 座雪場' + (T.resortGroups || []).map(function (g) { return n[g.id] ? ' · ' + esc(g.short) + ' ' + n[g.id] : ""; }).join("") + (open ? ' · 營業中 ' + open : next ? ' · 最早 ' + md(next.season[0]) + ' 開季（' + esc(next.name.replace(/（.*?）/g, "")) + '）' : "") + '</span>' +
-      '<span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.main + '"><i></i>Kiroro 1/8–1/10</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.main + '"><i></i>富良野 1/12–1/14</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.sapporo + '"><i></i>Teine 想滑再去</span><span class="fs-area" style="--mc:' + SKI_GROUP_COLOR.asahikawa + '"><i></i>旭川 等 Gacha 確認</span>';
+      skiChips().map(function (c) { return '<span class="fs-area" style="--mc:' + (SKI_GROUP_COLOR[c.group] || SKI_GROUP_COLOR.main) + '"><i></i>' + esc(c.label) + '</span>'; }).join("");
   }
 
   /* ---------- 天氣 ---------- */
-  var WX_TABS = [
-    { id: "villa", label: "小樽・山鄉" }, { id: "t_kiroro", label: "Kiroro 山頂" }, { id: "furano", label: "富良野" },
-    { id: "t_furano_kita", label: "富良野山頂" }, { id: "sapporo", label: "札幌" }, { id: "r_teine", label: "Teine" }
-  ];
+  /* 天氣分頁：每個住宿一個；那幾晚有排進行程、又有山頂座標的雪場加一個山頂（山腳和住宿很近的就不重複，例如 Onze 走路 5 分）——都從 trip.js／plan.json 算 */
+  var WX_TABS = [], WX_A = [], WX_B = [];
+  function buildWxTabs() {
+    WX_TABS = []; WX_A = []; WX_B = [];
+    T.bases.forEach(function (b) {
+      WX_TABS.push({ id: b.id, label: b.short || b.area }); WX_A.push([b.id, b.lat, b.lon]);
+      T.resorts.forEach(function (r) {
+        var ds = resortDates(r).filter(function (d) { var x = T.days.filter(function (y) { return y.date === d; })[0]; return x && x.base === b.id; });
+        if (!ds.length) return;
+        var nm = r.short || r.name.replace(/（.*?）/g, "");
+        if (r.top) { WX_TABS.push({ id: "t_" + r.id, label: nm + " 山頂" }); WX_B.push(["t_" + r.id, r.top[0], r.top[1], r.summit]); }
+        else if (haversine(b, r) > 3) { WX_TABS.push({ id: "b_" + r.id, label: nm }); WX_A.push(["b_" + r.id, r.lat, r.lon]); }
+      });
+    });
+    if (!WX_TABS.some(function (t) { return t.id === state.wxTab; })) state.wxTab = WX_TABS[0] && WX_TABS[0].id;
+  }
   function loadWeather() {
     var daily = "weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum,precipitation_probability_max,wind_gusts_10m_max";
-    var A = [
-      ["villa", 43.1468, 141.1355], ["furano", 43.3325, 142.3632], ["sapporo", 43.0524, 141.3486],
-      ["r_onze", 43.1439, 141.1278], ["r_teine", 43.0944, 141.2112], ["r_asari", 43.1385, 141.0293],
-      ["r_kokusai", 43.0722, 141.0828], ["r_bankei", 43.0305, 141.2781], ["r_moiwa", 43.0110, 141.3346], ["r_fus", 42.9542, 141.2794]
-    ];
-    var B = [
-      ["r_kiroro", 43.0674, 140.9904, 570], ["t_kiroro", 43.0790, 140.9670, 1180],
-      ["r_furano_kita", 43.3404, 142.3433, 250], ["t_furano_kita", 43.3280, 142.3150, 900],
-      ["t_teine", 43.0800, 141.1994, 1023], ["t_kokusai", 43.0640, 141.0700, 1100]
-    ];
+    if (!WX_TABS.length) buildWxTabs();
+    var A = WX_A, B = WX_B;
     function url(list, elev) {
       var u = "https://api.open-meteo.com/v1/forecast?latitude=" + list.map(function (x) { return x[1]; }).join(",") +
         "&longitude=" + list.map(function (x) { return x[2]; }).join(",") + "&daily=" + daily + "&timezone=Asia%2FTokyo&forecast_days=16";
@@ -822,6 +844,7 @@
   }
   function renderWxTabs() {
     if (!has("wxtabs")) return;
+    if (!WX_TABS.length) buildWxTabs();
     $("#wxtabs").innerHTML = WX_TABS.map(function (t) {
       return '<button type="button" role="tab" aria-selected="' + (state.wxTab === t.id) + '" data-t="' + t.id + '">' + esc(t.label) + '</button>';
     }).join("");
