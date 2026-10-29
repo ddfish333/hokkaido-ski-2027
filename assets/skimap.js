@@ -256,7 +256,7 @@
       '<li><b>纜車有沒有開</b>' + (r.status ? '<a href="' + esc(r.status) + '" target="_blank" rel="noopener">' + esc(r.name) + ' 雪況・纜車運行 ↗</a>' : "") + (r.cams ? '<a href="' + esc(r.cams) + '" target="_blank" rel="noopener">即時影像 ↗</a>' : "") + '<span>山頂陣風超過 50 km/h 常停上段纜車；上面天氣卡會標紅。</span></li>',
       '<li><b>警報・路況</b><a href="' + jma[1] + '" target="_blank" rel="noopener">氣象廳 ' + jma[0] + ' 警報 ↗</a>' + T.links.slice(0, 3).map(function (l) { return '<a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a>'; }).join("") + '<span>暴風雪警報或道央道封路就改室內行程，不要硬開山路。</span></li>',
       '<li><b>票</b>' + (r.webshop ? '<a href="' + esc(r.webshop) + '" target="_blank" rel="noopener">網路購票 ↗</a>' : "") + '<span>' + esc(r.tickets.slice(0, 2).map(function (t) { return t[0] + " " + t[1] + (t[2] ? "（" + t[2] + "）" : ""); }).join("、")) + '；' + em(r.kids.replace(/\*\*/g, "")) + '</span></li>',
-      '<li><b>帶出門</b><span>IC 卡（回程記得退押金）、護目鏡、手套、暖暖包、保溫瓶、小孩的 AirTag 放雪衣內袋、一點現金（租借與寄物有時只收現金）。</span></li>'
+      '<li><b>帶出門</b><span>IC 卡（回程記得退押金）、護目鏡、手套、暖暖包、保溫瓶、Cardo 對講機（前一晚充飽、出門前先配好同一組）、小孩的 AirTag 放雪衣內袋、一點現金（租借與寄物有時只收現金）。</span></li>'
     ];
     if (after.length) items.push('<li><b>滑完之後</b><span>' + after.map(function (s) { return s.time + " " + s.name; }).join(" → ") + '</span></li>');
     return '<details class="sk-check card" id="skcheck"><summary>出門前 5 分鐘<small>纜車・警報・票・帶的東西・滑完之後</small></summary><ul>' + items.join("") + '</ul></details>';
