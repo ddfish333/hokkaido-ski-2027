@@ -543,6 +543,27 @@
       "close": "18:00",
       "pid": "ChIJb54BmlrgCl8RBAlguOE736A",
       "addr": "小樽市堺町7-22（LeTAO 本店對面）"
+    },
+    "tnoc": {
+      "name": "TNOC THE STORE SAPPORO（狸小路）",
+      "lat": 43.0573421,
+      "lon": 141.3521718,
+      "ja": "TNOC THE STORE SAPPORO T4（狸上るビル 1F）",
+      "pid": "ChIJEfgvDVApC18RWwV2g5SIeOQ",
+      "open": "10:00",
+      "close": "21:00",
+      "closed": [
+        3
+      ],
+      "park": {
+        "name": "Urban Parking（南3西4，MEGA 唐吉訶德對面）",
+        "short": "Urban Parking",
+        "ja": "アーバンパーキング 札幌市南3条西4丁目",
+        "lat": 43.0564762,
+        "lon": 141.3521432,
+        "pid": "ChIJnSM28-YpC18RCD2kbPJJD8k",
+        "note": "地下機械式，08:00–22:00，只收現金；評論說 2025 年 Delica D:5 八人座停得進去，兩台輪流進出會等一下。滿了改三井リパーク 南3西5（24 小時）"
+      }
     }
   },
   "days": {
@@ -562,8 +583,13 @@
           "by": "17:30"
         },
         {
+          "id": "tnoc",
+          "stay": 45,
+          "note": "北海道在地戶外品牌 TNOC 的旗艦店（狸小路 4 丁目，拱廊裡）：招牌是襪子，也有保暖外套、帽子、手套；挑這趟用得到的保暖小物。週三公休、週六提早關門；1/16、1/18 逛狸小路時也會經過，今天沒逛完那兩天再補"
+        },
+        {
           "id": "aeon",
-          "stay": 90,
+          "stay": 60,
           "note": "AEON有商店街，也可以看美食地圖推薦，但注意入住時間",
           "by": "19:30"
         },

@@ -299,8 +299,13 @@
       if (fd.g && fd.g.rating) parts.push("Google " + fd.g.rating.toFixed(1));
       href = BASE + "food/?day=" + d.date + "#" + fd.id;
     } else {
-      var pl = T.places.filter(function (p) { return Math.abs(p.lat - s.lat) < 0.0015 && Math.abs(p.lon - s.lon) < 0.002; })[0];
+      /* trip.js 地點卡：先找 stop 指到這一站的；沒有才找附近（約 150 m 內）、而且沒有綁別的站的，取最近的一張
+         （10/29：TNOC 抓到 120 m 外 AOAO 的「從 FAV LUX 走路可到」） */
+      var pl = T.places.filter(function (p) { return p.stop === s.id; })[0] ||
+        T.places.filter(function (p) { return !p.stop && Math.abs(p.lat - s.lat) < 0.0015 && Math.abs(p.lon - s.lon) < 0.002; })
+          .sort(function (a, b) { return haversine(a, s) - haversine(b, s); })[0];
       if (pl && pl.note) parts.push(pl.note);
+      var ppl = Plan.plan.places[s.id]; if (ppl && (ppl.closed || []).indexOf(wd) >= 0) parts.push("**今天公休**");
     }
     /* 開車到、而且導航設的是停車場：先寫停哪裡（導航按鈕就是開到這裡） */
     var pk = s.i > 0 && s.via !== "walk" && s.via !== "shuttle" && s.via !== "taxi" && Plan.plan.places[s.id] && Plan.plan.places[s.id].park;

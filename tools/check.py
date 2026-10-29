@@ -109,6 +109,12 @@ for d, v in PLAN["days"].items():
             # 雪場的 close＝吊椅收；收板、換鞋、還雪具要時間，離開雪場晚 30 分內是正常的
             if pl.get("close") and x["stay"] and x["dep"] > mins(pl["close"]) + (30 if "滑雪場" in nm else 0):
                 (E if mode == "normal" else W)(f"{d}：{lab}路況在「{nm}」待到 {hm(x['dep'])}，但 {pl['close']} 關門")
+    # 公休日：plan.json places 的 closed（0=日…6=六），排到那天就是錯（10/29 加 TNOC：週三休）
+    import datetime as _dt0
+    _wd = (_dt0.date(*map(int, d.split("-"))).weekday() + 1) % 7
+    for s in v["stops"]:
+        _pl = PLAN["places"].get(s["id"], {})
+        if _wd in (_pl.get("closed") or []): E(f"{d}：排了「{_pl.get('name', s['id'])}」，但那天公休（plan.json closed）")
     for i, s in enumerate(v["stops"], 1):
         if int(s.get("stay") or 0) >= 180 and not (s.get("at") or s.get("by")) and not is_resort_or_base(s["id"]) and not PLAN["places"].get(s["id"], {}).get("open"):
             W(f"{d}：第 {i} 站「{PLAN['places'].get(s['id'], {}).get('name', s['id'])}」停 {s['stay']} 分又沒有固定時間——是不是把別的事塞在同一站？拆成兩站比較清楚")

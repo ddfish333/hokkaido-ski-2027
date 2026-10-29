@@ -124,7 +124,7 @@ window.FOOD_PICKS = [
   { date: "2027-01-07", slot: "breakfast", pick: null, what: "出門前或桃園機場吃", status: "decided", why: "{T:flight.out.dep} 起飛，大約要提早兩個半小時到機場；早餐在家吃或過安檢後在機場吃，飛機上還有一餐。" },
   { date: "2027-01-07", slot: "lunch", pick: null, what: "機上（長榮供餐）", status: "decided", why: "飛機上吃午餐。落地 {T:flight.out.arr} 後要入境、領行李雪具、等租車接駁、辦手續，到 AEON 之前沒有正式的一餐，機上這餐要讓小孩吃飽。" },
   { date: "2027-01-07", slot: "snack", pick: null, what: "國際線到達口的 Lawson", stop: "cts", status: "proposed", why: "落地到拿車大約兩個小時，等接駁車時小孩會餓：國際線 2F 到達口旁的 Lawson（幾乎 24 小時）買飯糰、麵包、飲料，接駁車和開車路上吃。國內線的拉麵、餐廳要推著行李走十分鐘，不划算。" },
-  { date: "2027-01-07", slot: "dinner", pick: "aeonfood", stop: "aeon", backup: ["nagoyaka"], status: "proposed", why: "AEON 這站 {t:aeon} 到，同時要買**接下來四天的早餐**（麵包、牛奶、水果、優格）：先在美食街讓大人小孩各點各的，一位大人先去超市採買，最快。**航班準時、拿車順利、大家還有精神**就改 なごやか亭 発寒店：離 AEON 開車幾分鐘、北海道評價很高的回轉壽司，吃完再回 AEON 超市；晚餐尖峰可能要等，到 Villa 會晚半小時以上。" },
+  { date: "2027-01-07", slot: "dinner", pick: "aeonfood", stop: "aeon", backup: ["nagoyaka"], status: "proposed", why: "先逛 TNOC，AEON 這站 {t:aeon} 才到，晚餐**隨便吃、求快**：美食街讓大人小孩各點各的，同時一位大人先去超市買**接下來四天的早餐**（麵包、牛奶、水果、優格），一小時內離開。等不及的話，TNOC 附近的狸小路也有很多小店可以先墊肚子。なごやか亭 発寒店（回轉壽司）今天就先不要：晚餐尖峰要等，到 Villa 會更晚。" },
   /* 1/8 Kiroro */
   { date: "2027-01-08", slot: "breakfast", pick: null, what: "山鄉自己弄（AEON 買的麵包、牛奶、水果）", stop: "villa", status: "decided", why: "保姆 {T:nanny.start} 到；{dep:villa} 出門前在 Villa 吃完。" },
   { date: "2027-01-08", slot: "lunch", pick: "brasserie", stop: "kiroro", backup: ["lumiere", "pizzeria"], status: "proposed", why: "教練課的午休（時間可以跟 Gacha 調）下山吃，小孩和保姆在山鄉。Brasserie 在 Gondola 山麓站 1F，赤井川番茄擔擔麵、豬肉角煮拉麵；人多就去 Mountain Center 的 Cafeteria Lumière（自助、小孩自己挑）或 Pizzeria。" },

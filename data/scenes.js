@@ -13,7 +13,8 @@ window.SCENES = {
       { type: "title", eyebrow: "DAY 01 · HOKKAIDO", h: "抵達北海道", s: "兩家人、兩台車、四個小孩。從今天開始。", imgs: ["scene/chitose-1.jpg", "scene/coast-1.jpg", "scene/villa-5.jpg"], amb: "snow", dur: 6000 },
       { stop: "cts", video: "airplane.mp4", img: "video/airplane.jpg", h: "落地的時候，窗外應該已經是白色的。", s: "天光只剩兩個小時。今天不趕，先把人和行李接好。", amb: "quiet", dur: 7000 },
       { stop: "cts", label: "下雪的新千歲", imgs: ["scene/chitose-1.jpg", "scene/chitose-2.jpg", "scene/chitose-3.jpg"], h: "入境、領行李、雪板袋。", s: "國際線 98 號站牌等接駁。", amb: "snow", dur: 7500 },
-      { stop: "rental", dep: true, label: "兩台 DELICA 上路", imgs: ["scene/coast-1.jpg", "scene/coast-2.jpg", "scene/coast-3.jpg"], h: "沿著石狩灣往西，海在右手邊。", s: "銭函、春香，這一帶就是接下來四個晚上要住的地方。雪路第一天，慢慢開。", amb: "snow", dur: 8000 },
+      { stop: "rental", dep: true, label: "兩台 DELICA 上路", video: "city-snow.mp4", img: "video/city-snow.jpg", h: "上高速，先進札幌市區。", s: "天已經黑了。雪路第一天，慢慢開，跟緊前車。", amb: "snow", dur: 7000 },
+      { stop: "tnoc", label: "狸小路 4 丁目", imgs: ["spots/tanuki.jpg", "scene/sapporo-5.jpg"], h: "TNOC，北海道自己的戶外品牌。", s: "招牌是襪子。挑幾樣這趟用得到的保暖小物，別逛太久。", amb: "snow", dur: 6500 },
       { stop: "aeon", imgs: ["scene/aeon-1.jpg", "scene/aeon-2.jpg"], h: "天黑了。先吃晚餐，再把明早的東西買齊。", s: "只買必需品。小孩的耐心是今天最稀缺的資源。", amb: "snow", dur: 6500 },
       { type: "drive", video: "drive-night.mp4", img: "video/drive-night.jpg", t: "最後 {leg:aeon|villa} 分鐘", h: "往山裡開。", s: "後座大概已經睡著了。", amb: "drive", dur: 7000 },
       { stop: "villa", imgs: ["scene/villa-1.jpg", "scene/villa-2.jpg", "scene/villa-3.jpg", "scene/villa-4.jpg"], h: "到家了。", s: "落地窗外是白樺林和雪。兩家人的四個晚上，就是這裡。", amb: "fire", warm: true, dur: 9000 },
@@ -150,5 +151,5 @@ window.PLACE_OF_STOP = {
   ningle: "ningle-terrace", fstn: "furano-station", marche: "furano-marche", yuiga: null, junpei: null, chiyoda: "chiyoda-farm", shirahige: "shirahige-falls", aoiike: "blue-pond",
   favlux: "hotels/fav-lux", beer: "sapporo-beer-garden", takino: "takino", aoao: "aoao", soul: null, teine: "teine", kani: null,
   shikisai: null, senka: null, kitakaro: null, ichigen: null, tanuki: "susukino", odori: null, tvtower: "sapporo", hitsujigaoka: null, toriton: null, shiroi: null, kujira: null, rokkatei_otaru: null, kamaei: null, kitaichi: null, letao: null, orgel: null, sunagawa_sa: null, coop_furano: null, fenix: null, furanoya: null,
-  akarenga: null, clocktower: null, t38: null, ippin: null, rokkatei: null, hyosetsu: null
+  akarenga: null, clocktower: null, t38: null, ippin: null, rokkatei: null, hyosetsu: null, tnoc: "susukino"
 };
