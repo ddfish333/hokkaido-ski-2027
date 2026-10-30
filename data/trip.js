@@ -33,7 +33,7 @@ window.TRIP = {
       facts: ["門口魔毯接纜車", "95 m²・2 臥室・最多 5 人", "含早餐・溫泉・廚房", "停車免費"],
       video: "kiroro-hover.mp4", videoSm: "kiroro-hover-sm.mp4",
       color: "var(--violet-ink)", region: "otaru", clim: "kiroro", jma: ["石狩・空知・後志地方", "https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=016000"],
-      chapter: { img: "kiroro", theme: "粉之雪", place: "Kiroro", en2: "KIRORO", jp: "粉雪の森で", line: "天還沒亮就離開富良野，直上 Kiroro。兩個整天都在雪上：住 Yu Kiroro，門口的魔毯接纜車，滑完泡溫泉。" },
+      chapter: { img: "kiroro", theme: "粉之雪", place: "Kiroro", en2: "KIRORO", jp: "粉雪の森で", line: "一早離開富良野，直上 Kiroro。兩天都在雪上：住 Yu Kiroro，門口的魔毯接纜車，滑完泡溫泉。" },
       links: [["訂房頁（Hotels.com）", "https://uk.hotels.com/ho1223348352/yu-kiroro-akaigawa-japan/"], ["介紹（Powderhounds）", "https://www.powderhounds.com/japan/hokkaido/kiroro/accommodation/yu-kiroro.aspx"]], g: { rating: 4.5, n: 338, pid: "ChIJt3kKPmrdCl8RDPSZQE1bzAE" } },
     { id: "sapporo", stop: "favlux", name: "FAV LUX 札幌薄野", short: "札幌・薄野", area: "札幌", lat: 43.0523778, lon: 141.3485722,
       from: "2027-01-18", to: "2027-01-19", nights: 1, checkin: "15:00", checkout: "10:00",
@@ -273,7 +273,7 @@ window.TRIP = {
     { date: "2027-01-13", base: "furano", title: "富良野滑雪", sub: "可再請一次教練", sun: ["07:01", "16:16", "16:49"], },
     { date: "2027-01-14", base: "furano", title: "上午滑雪，送保姆", sub: "下午送保姆到巴士站，之後兩家自己顧小孩", sun: ["07:01", "16:17", "16:50"], },
     { date: "2027-01-15", base: "furano", title: "美瑛親子日", sub: "沒有保姆，全家一起：炸蝦丼、雪上樂園餵羊駝、瀑布、青池點燈", sun: ["07:00", "16:19", "16:51"], alert: "回程是天黑的山路，{dep:aoiike} 前出發；下雪的話青池會晚到，看完瀑布點燈就直接回程也可以" },
-    { date: "2027-01-16", base: "yukiroro", title: "富良野 → Kiroro・滑雪", sub: "天還沒亮就出發，直上 Kiroro 滑一整天；收板後入住 Yu Kiroro、泡溫泉", sun: ["07:03", "16:25", "16:57"], alert: "富良野到 Kiroro 全程約 {leg:lodge|kiroro} 分，最後一段是上 Kiroro 的山路：前一晚把行李、雪具都裝上車，小孩穿好衣服直接抱上車睡。下雪會晚到，小孩 Kids Academy 早上班趕不上就改下午班" },
+    { date: "2027-01-16", base: "yukiroro", title: "富良野 → Kiroro・滑雪", sub: "一早出發，直上 Kiroro 滑到吊椅收；收板後入住 Yu Kiroro、泡溫泉", sun: ["07:03", "16:25", "16:57"], alert: "富良野到 Kiroro 全程約 {leg:lodge|kiroro} 分，最後一段是上 Kiroro 的山路：前一晚把行李、雪具都裝上車，早餐在砂川 SA 吃。今天到雪場已近中午：大人可以買 4 小時券加明天 1 日券（比 2 日券便宜一點，但 4 小時用完會比吊椅收早一點）；小孩要上 Kids Academy 就上下午班" },
     { date: "2027-01-17", base: "yukiroro", title: "Kiroro 滑雪・整天", sub: "週日：飯店門口魔毯接纜車，一整天在 Kiroro；滑完泡溫泉、房間煮晚餐", sun: ["07:02", "16:26", "16:58"], alert: "山上陣風大時長峰、余市那幾條吊椅會停，出門前看一次 Kiroro 官網的運行狀態；兩天小孩怎麼顧（Kids Academy 或大人輪流）要先決定，見待辦" },
     { date: "2027-01-18", base: "sapporo", title: "Kiroro → 札幌・螃蟹", sub: "退房下山：白色戀人公園、回轉壽司，入住薄野；電視塔看日落、狸小路最後採購，晚上螃蟹會席", sun: ["07:02", "16:27", "16:59"], alert: "Yu Kiroro {T:bases.2.checkout} 退房，下山第一段是山路，下雪慢慢開。隔天一早搭機，雪具今晚要弄乾打包" },
     { date: "2027-01-19", base: "sapporo", title: "回台灣", sub: "{t:favlux} 出發，{T:rental.returnBy} 前還車", sun: ["07:01", "16:28", "17:00"], alert: "退稅商品不要拆、不要吃，收據集中" }

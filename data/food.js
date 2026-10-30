@@ -163,8 +163,8 @@ window.FOOD_PICKS = [
   { date: "2027-01-15", slot: "lunch", pick: "junpei", stop: "junpei", status: "decided", why: "美瑛的炸蝦丼，{open:junpei} 開門就到，避開旅行團尖峰；只收現金或 PayPay，週一休（今天週五有開）。美瑛附近沒有適合 {party} 的第二家，排隊就先去四季彩之丘、回程再來。" },
   { date: "2027-01-15", slot: "dinner", pick: null, what: "小木屋自己煮（富良野最後一晚，把食材用完）", stop: "lodge", backup: ["kumagera", "furanoya"], status: "proposed", why: "美瑛玩一整天 {t:lodge#2} 才回到小木屋，最後一晚把冰箱清空。還有力氣、想吃好一點：くまげら（今天週五有開）或 ふらのや，都離小木屋開車十分鐘內。" },
   /* 1/16 富良野 → Kiroro，滑一整天 */
-  { date: "2027-01-16", slot: "breakfast", pick: null, what: "車上吃（1/15 在美瑛選果、コープ富良野買的麵包、飯糰、牛奶）", stop: "lodge", status: "decided", why: "{dep:lodge} 天還沒亮就出發，小孩在車上睡；砂川 SA 停一下上廁所，商店早上 8 點才開，吃的要自己帶。" },
-  { date: "2027-01-16", slot: "lunch", pick: "brasserie", stop: "kiroro", backup: ["lumiere", "pizzeria"], status: "proposed", why: "全家在 Mountain Center 館內吃，不用換鞋出去：小孩上 Kids Academy 的話，中午下課剛好一起吃。Brasserie 的番茄擔擔麵、角煮拉麵；人多就去同館的 Lumière 自助或 Pizzeria。" },
+  { date: "2027-01-16", slot: "breakfast", pick: null, what: "砂川 SA（往札幌方向）的美食街、商店", stop: "sunagawa_sa_s", status: "proposed", why: "{dep:lodge} 出發，小孩先在車上吃點麵包墊胃（1/15 在美瑛選果買的）；開到砂川 SA 美食街剛開，大人小孩在這裡吃早餐、上廁所。" },
+  { date: "2027-01-16", slot: "lunch", pick: "brasserie", stop: "kiroro", backup: ["lumiere", "pizzeria"], status: "proposed", why: "全家在 Mountain Center 館內吃，不用換鞋出去：小孩要上 Kids Academy 下午班的話，吃完剛好送過去。Brasserie 的番茄擔擔麵、角煮拉麵；人多就去同館的 Lumière 自助或 Pizzeria。" },
   { date: "2027-01-16", slot: "dinner", pick: "yukashi", status: "proposed", why: "開了三小時車又滑一整天，第一晚不想再開山路出去：直接吃飯店裡的 Yukashi。評論說選擇少、價格高（館內只有這一間），所以只排這一晚，另一晚在房間煮。", book: "0135-48-6785 訂 {party}" },
   /* 1/17 Kiroro 整天 */
   { date: "2027-01-17", slot: "breakfast", pick: null, what: "Yu Kiroro 早餐（房價含）", stop: "yukiroro", status: "decided", why: "{dep:yukiroro} 搭 Gateway 纜車去雪場。" },

@@ -110,12 +110,12 @@ window.SCENES = {
     ]
   },
   "2027-01-16": {
-    poster: { img: "poster/0116-kiroro.jpg", line: "天還沒亮就離開富良野，直上 Kiroro 滑一整天；晚上住進山裡的 Yu Kiroro。" },
+    poster: { img: "poster/0116-kiroro.jpg", line: "一早離開富良野，直上 Kiroro 滑到吊椅收；晚上住進山裡的 Yu Kiroro。" },
     scenes: [
-      { type: "title", eyebrow: "DAY 10 · FURANO → KIRORO", h: "富良野・Kiroro", s: "天還沒亮就出發，直上粉雪的山。", imgs: ["scene/lodge-1.jpg", "scene/kiroro-1.jpg"], amb: "snow", dur: 5500 },
-      { stop: "lodge", imgs: ["scene/lodge-1.jpg", "scene/lodge-3.jpg", "scene/furano-4.jpg"], h: "{t}，天還是黑的。", s: "五個晚上。行李昨晚就上車了，小孩穿著雪衣在後座繼續睡。", amb: "quiet", dur: 7000 },
-      { type: "drive", video: "drive-night.mp4", img: "video/drive-night.jpg", t: "{leg:lodge|kiroro} 分鐘", h: "往西開，天慢慢亮。", s: "砂川停一下，上廁所、買杯熱的。最後一段是上 Kiroro 的山路。", amb: "drive", dur: 7000 },
-      { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "Kiroro，滑一整天。", s: "粉雪的山。四個大人上纜車，小孩在山腳玩雪。", amb: "quiet", dur: 7500 },
+      { type: "title", eyebrow: "DAY 10 · FURANO → KIRORO", h: "富良野・Kiroro", s: "一早出發，直上粉雪的山。", imgs: ["scene/lodge-1.jpg", "scene/kiroro-1.jpg"], amb: "snow", dur: 5500 },
+      { stop: "lodge", imgs: ["scene/lodge-1.jpg", "scene/lodge-3.jpg", "scene/furano-4.jpg"], h: "{t}，天剛亮。", s: "五個晚上。行李昨晚就上車了，小孩在後座再睡一下。", amb: "quiet", dur: 7000 },
+      { type: "drive", video: "drive-night.mp4", img: "video/drive-night.jpg", t: "{leg:lodge|kiroro} 分鐘", h: "往西開，天慢慢亮。", s: "砂川 SA 吃早餐、上廁所。最後一段是上 Kiroro 的山路。", amb: "drive", dur: 7000 },
+      { stop: "kiroro", imgs: ["scene/kiroro-1.jpg", "scene/kiroro-2.jpg"], h: "Kiroro，滑到吊椅收。", s: "粉雪的山。四個大人上纜車，小孩在山腳玩雪。", amb: "quiet", dur: 7500 },
       { stop: "yukiroro", label: "Yu Kiroro", imgs: ["scene/kiroro-2.jpg"], h: "收板，住進山裡。", s: "門口的魔毯接纜車。泡溫泉，晚餐就在館內。", amb: "quiet", warm: true, dur: 6500 },
       { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "早點睡。<br>明天還是一整天。", amb: "fire", warm: true, dur: 7500 }
     ]
