@@ -168,7 +168,7 @@ window.FOOD_PICKS = [
   { date: "2027-01-16", slot: "dinner", pick: "yukashi", status: "proposed", why: "開了三小時車又滑一整天，第一晚不想再開山路出去：直接吃飯店裡的 Yukashi。評論說選擇少、價格高（館內只有這一間），所以只排這一晚，另一晚在房間煮。", book: "0135-48-6785 訂 {party}" },
   /* 1/17 Kiroro 整天 */
   { date: "2027-01-17", slot: "breakfast", pick: null, what: "Yu Kiroro 早餐（房價含）", stop: "yukiroro", status: "decided", why: "{dep:yukiroro} 搭 Gateway 纜車去雪場。" },
-  { date: "2027-01-17", slot: "lunch", pick: "pizzeria", stop: "kiroro", backup: ["lumiere", "brasserie"], status: "proposed", why: "小孩上午班下課，全家一起吃：披薩幾個人分著吃、小孩不挑；Pizzeria 的最後點餐比其他家晚，週日中午人多可以晚一點吃。" },
+  { date: "2027-01-17", slot: "lunch", pick: "pizzeria", stop: "kiroro", backup: ["lumiere", "brasserie"], status: "proposed", why: "全家一起吃，吃完送小孩去 Kids Academy 下午班：披薩幾個人分著吃、小孩不挑；Pizzeria 的最後點餐比其他家晚，週日中午人多可以晚一點吃。" },
   { date: "2027-01-17", slot: "dinner", pick: null, what: "Yu Kiroro 房間自己煮", backup: ["yukashi"], status: "proposed", why: "房間有廚房，食材 1/15 在コープ富良野先買好（肉、蔬菜、米、小孩的）；滑完泡溫泉再煮，不用再出門。累到不想煮就再吃 Yukashi。" },
   /* 1/18 Kiroro → 札幌 */
   { date: "2027-01-18", slot: "breakfast", pick: null, what: "Yu Kiroro 早餐（房價含）", stop: "yukiroro", status: "decided", why: "吃完收行李，{dep:yukiroro} 退房下山。" },
