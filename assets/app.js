@@ -30,7 +30,9 @@
 
   var TODAY = todayJST();
   var baseById = {}; T.bases.forEach(function (b) { baseById[b.id] = b; });
-  var BASE_COLOR = { villa: "var(--glacier)", furano: "var(--ok)", sapporo: "var(--accent)" };
+  var BASE_STOPS = T.bases.map(function (b) { return b.stop; });  /* 住宿在 plan.json 的站點 id（villa、lodge、yukiroro、favlux） */
+  function climateOf(d) { var b = baseById[d.base] || {}; return T.climate[b.clim || d.base]; }
+  var BASE_COLOR = {}; T.bases.forEach(function (b) { BASE_COLOR[b.id] = b.color || "var(--glacier)"; });  /* 住宿的顏色、章節、地圖區、氣候都寫在 trip.js bases，加一間住宿不用改程式 */
   var state = { day: 0, origin: null, originManual: false, gps: null, wx: {}, wxTab: "villa", foodArea: "全部", mode: (window.Plan ? Plan.mode() : "normal") };
 
   /* ---------- 日圓／台幣 ---------- */
@@ -128,7 +130,7 @@
     if (cta) cta.innerHTML = '<a class="cta" href="' + dayHref(f) + '"><span>' + (TODAY < T.start ? "從第一天開始看" : TODAY <= T.end ? "今天 " + md(f.date) : "最後一天") + '</span><b>' + esc(f.title) + '</b></a>';
   }
 
-  /* ---------- 首頁：13 天海報牆與三章 ---------- */
+  /* ---------- 首頁：13 天海報牆與章節（每間住宿一章） ---------- */
   function renderPosters() {
     var box = $("#posters"); if (!box) return;
     var focus = focusDayIndex();
@@ -151,18 +153,16 @@
       var k = w.daily.time.indexOf(d.date);
       if (k >= 0) { var m = wmo(w.daily.weather_code[k]); return '<i class="ico">' + ICON[m[1]] + '</i><b>' + Math.round(w.daily.temperature_2m_max[k]) + '°</b><small>' + Math.round(w.daily.temperature_2m_min[k]) + '°</small><em>' + m[0] + (w.daily.snowfall_sum[k] >= 1 ? ' · 雪 ' + Math.round(w.daily.snowfall_sum[k]) + ' cm' : "") + '</em>'; }
     }
-    var c = T.climate[d.base]; if (!c) return "";
+    var c = climateOf(d); if (!c) return "";
     return '<i class="ico">' + ICON.snow + '</i><b>' + c.tmax + '°</b><small>' + c.tmin + '°</small><em>歷年平均</em>';
   }
   function refreshPosterWx() { document.querySelectorAll("[data-pw]").forEach(function (el) { var d = T.days.filter(function (x) { return x.date === el.dataset.pw; })[0]; if (d) el.innerHTML = posterWx(d); }); }
-  var CHAPTER_IMG = { villa: "otaru", furano: "furano", sapporo: "sapporo" };
-  /* 三章：海之雪、山之雪、街之雪——照片、主題小標、地名大標、日文短句、一段話 */
-  /* 三層：主題小標（海之雪）／地名大標（小樽 OTARU）／細明朝日文短句；文案 2026-10-26 由 Sean 定稿 */
-  var CHAPTER = {
-    villa: { en: "CHAPTER 01 · 4 NIGHTS", theme: "海之雪", place: "小樽", en2: "OTARU", jp: "雪国のはじまり", line: "第一站，住進小樽近郊的山鄉。白天在山鄉旁的 Onze 跟教練上課，傍晚留給小樽運河與堺町通。雪山、海岸、溫泉與壽司，構成最初的四晚。" },
-    furano: { en: "CHAPTER 02 · 5 NIGHTS", theme: "山之雪", place: "富良野", en2: "FURANO", jp: "雪山で過ごす日々", line: "五晚住在北之峰，這裡是旅程的滑雪重心。從小木屋出發，探索富良野的兩個滑雪區；也安排旭山動物園、美瑛雪原與青池點燈。" },
-    sapporo: { en: "CHAPTER 03 · 3 NIGHTS", theme: "街之雪", place: "札幌", en2: "SAPPORO", jp: "街を楽しむ", line: "最後三晚回到札幌。把車停好，走進城市裡的餐廳、商店與冬日街景。想滑雪還能再上山，其餘時間就留給美食與自由探索。" }
-  };
+  /* 章節：每間住宿一章，文案在 trip.js bases[].chapter（主題小標／地名大標／日文短句／一段話，2026-10-26 Sean 定稿；10-30 加 Kiroro 一章）；
+     「CHAPTER 0N · N NIGHTS」由順序和晚數算 */
+  function chapterOf(b, i) {
+    var c = b.chapter || {};
+    return { img: c.img || b.id, theme: c.theme, place: c.place, en2: c.en2, jp: c.jp || "", line: c.line || "", en: "CHAPTER " + (i < 9 ? "0" : "") + (i + 1) + " · " + b.nights + " NIGHT" + (b.nights > 1 ? "S" : "") };
+  }
   var LINK_ICON = {
     "官網": '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>',
     "訂房": '<svg viewBox="0 0 24 24"><path d="M3 18V8a2 2 0 012-2h14a2 2 0 012 2v10M3 14h18M7 10h4v4H7z"/></svg>',
@@ -174,7 +174,7 @@
   function renderChapters() {
     var box = $("#chapterlist"); if (!box) return;
     box.innerHTML = T.bases.map(function (b, i) {
-      var k = CHAPTER_IMG[b.id], c = CHAPTER[b.id] || { en: "", jp: "", line: "" };
+      var c = chapterOf(b, i), k = c.img;
       var site = (b.links || []).filter(function (l) { return l[0] === "官網"; })[0];
       /* 影片不先下載：桌機滑鼠移上去、手機捲到畫面裡才載入，載好才淡入；之前都只顯示照片 */
       var vid = b.video ? '<video class="ch-vid" muted loop playsinline preload="none" data-src="' + BASE + 'assets/video/' + esc(b.video) + '"' + (b.videoSm ? ' data-src-sm="' + BASE + 'assets/video/' + esc(b.videoSm) + '"' : "") + ' aria-hidden="true"></video><span class="ch-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>' : "";
@@ -256,7 +256,7 @@
           '<div class="ss">' + m[0] + '・新雪 ' + (w.daily.snowfall_sum[k] || 0).toFixed(1) + ' cm・陣風 ' + Math.round(w.daily.wind_gusts_10m_max[k]) + ' km/h</div></div></div>';
       }
     }
-    var c = T.climate[d.base];
+    var c = climateOf(d);
     return '<div class="wxday"><span class="ico">' + ICON.snow + '</span><div><div class="tt">' + c.tmax + '° / ' + c.tmin + '°</div><div class="ss">' + esc(c.label) + ' 歷年平均・每日新雪約 ' + c.snow + ' cm（進入 16 天預報後改顯示即時）</div></div></div>';
   }
   /* 站點的營業時間／價錢／停車：照 id 去 spots.js、food.js 找，找不到就用 trip.js places 裡座標相同的點；只讀不抄，資料改了這裡自動跟著變 */
@@ -276,7 +276,7 @@
       }).join("") + '</div>';
   }
   function stopFacts(s, d) {
-    if (s.id === d.base || baseById[s.id] || ["villa", "lodge", "favlux"].indexOf(s.id) >= 0) {
+    if (s.id === d.base || baseById[s.id] || BASE_STOPS.indexOf(s.id) >= 0) {
       var hp = s.i > 0 && s.via !== "walk" && s.via !== "taxi" && Plan.plan.places[s.id] && Plan.plan.places[s.id].park; /* 住宿：開車回來的那一趟要停哪裡 */
       return hp ? '<br><span class="tl-facts">' + em("🅿 導航到 " + hp.name + (hp.note ? "：" + hp.note : "")) + '</span>' : "";
     }
@@ -316,7 +316,7 @@
   /* 保姆：上班時間、幾點回到住宿、加班多久，從 trip.js nanny 和當天時間表算 */
   function nannyCard(d, sch) {
     var N = T.nanny; if (!N || !N.lastDay || d.date > N.lastDay || d.date < T.days[1].date) return "";
-    var last = d.date === N.lastDay, baseStops = sch.stops.filter(function (s, i) { return i > 0 && (s.id === d.base || baseById[s.id] || ["villa", "lodge", "favlux"].indexOf(s.id) >= 0); });
+    var last = d.date === N.lastDay, baseStops = sch.stops.filter(function (s, i) { return i > 0 && (s.id === d.base || baseById[s.id] || BASE_STOPS.indexOf(s.id) >= 0); });
     var back = baseStops.length ? baseStops[baseStops.length - 1] : null;
     var lines = [];
     if (last) lines.push("最後一天：上午照常，" + N.bus + " 送她到富良野站搭巴士；之後兩家自己顧小孩，訂位人數改 " + esc((T.party || {}).noNanny || "8 人"));
@@ -348,12 +348,12 @@
       }).join("") + '</ol></div>';
     html += '<div class="side">';
     var alt = Plan.schedule(d.date, state.mode === "snow" ? "normal" : "snow");
-    if (d.base === "sapporo" && d.date < b.to && (window.SPOTS || []).some(function (x) { return x.kind === "停車"; })) {
+    if (b.carFree && d.date < b.to && (window.SPOTS || []).some(function (x) { return x.kind === "停車"; })) {
       var plots = (window.SPOTS || []).filter(function (x) { return x.kind === "停車"; });
       html += '<div class="card parkcard"><p class="panel-label">車停哪裡（飯店沒有停車場）</p><ul class="parklist">' + plots.map(function (x) {
         var url = navTo(x);
         return '<li class="' + (x.status === "check" ? "no" : "") + '"><a href="' + url + '" target="_blank" rel="noopener"><b>' + esc(x.name) + '</b><span>' + em(x.fee || "") + (x.caution ? ' · ' + em(x.caution) : "") + '</span></a></li>';
-      }).join("") + '</ul><p class="park-note">點店名直接開 Google Maps 導航到停車場入口。1/16 13:00 前先停パラカ，三晚不動。</p></div>';
+      }).join("") + '</ul><p class="park-note">點店名直接開 Google Maps 導航到停車場入口。' + md(b.from) + ' 到了先停パラカ，停到退房那天不動。</p></div>';
     }
     html += '<div class="card"><p class="panel-label">今天開車</p><div class="sunrow"><div><span>' + (state.mode === "snow" ? "下雪" : "一般") + '</span><b>' + fmtMin(sch.total.min) + '</b></div><div><span>' + (state.mode === "snow" ? "一般" : "下雪") + '</span><b>' + fmtMin(alt.total.min) + '</b></div><div><span>距離</span><b>' + sch.total.km + ' km</b></div>' + (sch.end != null ? '<div><span>最後到達</span><b>' + Plan.hm(sch.end) + '</b></div>' : "") + '</div></div>';
     html += '<div class="card"><p class="panel-label">天氣</p>' + dayWeather(d) + '</div>';
@@ -665,7 +665,7 @@
     }).join("");
   }
   /* 換出發地時，地圖跟著回到那一區（住宿 → 該區範圍；我的位置 → 目前位置） */
-  var ORIGIN_AREA = { villa: "otaru", furano: "furano", sapporo: "sapporo" }, gpsSeq = 0;
+  var ORIGIN_AREA = {}, gpsSeq = 0; T.bases.forEach(function (b) { ORIGIN_AREA[b.id] = b.region; });
   function showOrigin() {
     if (!map || !mapReady) return;
     if (state.origin === "gps") {

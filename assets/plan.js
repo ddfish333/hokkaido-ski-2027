@@ -54,12 +54,12 @@
   P.navTo = function (t, mode) { var id = placeNear(t, 0.05); return P.navUrl(id || t, mode); };
   /* ---------- 共用：從住宿到某個地點要多久。美食頁、景點頁、首頁車程表、單日頁都用這一份，各頁數字才會一樣 ----------
      順序：1) 住宿→雪場用 trip.js 的 drive 表（雪場頁同一張表） 2) 兩端都對得到站點就用 legs.json 的真實路段 3) 直線估算（和 estLeg 同一個算法）
-     札幌（車停三晚不動）：2.5 km 內走路，再遠就計程車／地鐵。回傳 { km, min, mode, label } */
+     carFree 的住宿（札幌，車停著不動）：2.5 km 內走路，再遠就計程車／地鐵。回傳 { km, min, mode, label } */
   P.travelMin = function (base, to, opts) {
     opts = opts || {}; if (!base || !to) return null;
     var T0 = window.TRIP, snow = (opts.mode || P.mode()) === "snow", km = hav(base, to);
-    /* 札幌：車進城就停著不動，所以預設走路／計程車；但那天的時間表如果有從飯店開車出去的路段（1/17 羊之丘、1/19 還車），就照開車算 */
-    var carFree = base.id === "sapporo", out = null;
+    /* 札幌：車進城就停著不動，所以預設走路／計程車；但那天的時間表如果有從飯店開車出去的路段（1/18 從 Kiroro 開進來、1/19 還車），就照開車算 */
+    var carFree = !!base.carFree, out = null;  /* trip.js bases 的 carFree：車停著不動的住宿（札幌） */
     if (carFree && opts.date && P.plan && P.plan.days[opts.date]) {
       var sd = schedule(opts.date, "normal"), bid = placeNear(base);
       if (sd.legs.some(function (l) { return l.frm === bid && l.mode === "drive"; })) carFree = false;
@@ -255,7 +255,7 @@
   var THEME_KEY = "snow13-theme", mqLight = window.matchMedia ? matchMedia("(prefers-color-scheme: light)") : null;
   function themePref() { try { return localStorage.getItem(THEME_KEY) || "auto"; } catch (e) { return "auto"; } }
   function themeResolve(p) { return p === "auto" ? (mqLight && mqLight.matches ? "light" : "dark") : p; }
-  /* ---------- 地圖上的三間住宿（景點、美食、滑雪三張地圖共用一份） ----------
+  /* ---------- 地圖上的住宿（景點、美食、滑雪三張地圖共用一份） ----------
      10/27 Sean：景點地圖要有三間旅館的紅點才好定位。以前是白色小菱形、被景點的點蓋住，看不到。
      現在：紅點＋紅底白字標籤（住哪、幾號到幾號），永遠疊在最上層；activeId＝這天住的那間，放大一點。 */
   P.addBaseMarkers = function (map, activeId) {

@@ -135,7 +135,7 @@
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "280px", className: "fm-pop" });
-    baseMarkers = Plan.addBaseMarkers(map, (ctx().b || {}).id);  /* 三間住宿：紅點，疊在最上層（plan.js 共用） */
+    baseMarkers = Plan.addBaseMarkers(map, (ctx().b || {}).id);  /* 每間住宿：紅點，疊在最上層（plan.js 共用） */
     var seen = {};
     FOOD.forEach(function (f) {
       var k = f.lat.toFixed(4) + "," + f.lon.toFixed(4), n = seen[k] = (seen[k] || 0) + 1;

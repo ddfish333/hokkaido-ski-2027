@@ -204,7 +204,7 @@
       /* 這天沒排滑雪：列最近的雪場 */
       var near = T.resorts.filter(function (r) { return r.id !== "asari" || d.base === "villa"; }).map(function (r) { return { r: r, dr: driveFrom(d.base, r) }; }).filter(function (x) { return x.dr; }).sort(function (x, y) { return x.dr.min - y.dr.min; }).slice(0, 4);
       return '<section class="sk-hero card none">' + head + '<h2>這天沒有排滑雪</h2><p class="sk-sub">' + em(d.sub) + '</p>' +
-        (d.base === "sapporo" ? '<p class="sk-note">想滑的大人：Teine 是帶小孩的首選（魔毯、Snow Land、授乳室都在 Olympia）；盤溪最近、半天剛好。選一張卡看票價和入口。</p>' : d.base === "villa" ? '<p class="sk-note">住山鄉的晚上：走路 5 分到 Onze，夜滑到約 22:45，大人輪流去。</p>' : "") +
+        (baseById[d.base] && baseById[d.base].skiNote ? '<p class="sk-note">' + em(fill(baseById[d.base].skiNote, d.date)) + '</p>' : "") +
         '<ul class="sk-nearlist">' + near.map(function (x) { return '<li><button type="button" class="lnk" data-focus="' + x.r.id + '">' + esc(x.r.name) + '</button><span class="num">' + fmtMin(x.dr.min) + (x.r.est ? '<small>估</small>' : "") + '</span></li>'; }).join("") + '</ul></section>';
     }
     r = r || resortById[k.rid];
@@ -248,7 +248,7 @@
   }
 
   /* ---------- 出門前 5 分鐘 ---------- */
-  var JMA = { villa: ["石狩・空知・後志地方", "https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=016000"], sapporo: ["石狩・空知・後志地方", "https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=016000"], furano: ["上川・留萌地方", "https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=012000"] };
+  var JMA = {}; T.bases.forEach(function (b) { if (b.jma) JMA[b.id] = b.jma; });  /* 氣象廳警報區域寫在 trip.js bases[].jma */
   function checklistHTML() {
     var d = dayById[state.day], k = skiStop(state.day), r = focusResort(); if (!r) return "";
     var jma = JMA[d.base], after = k && k.rid === r.id ? k.sched.stops.slice(k.i + 1) : [];
@@ -306,7 +306,7 @@
     }).join("");
   }
 
-  /* ---------- 影片：滑鼠移上去／手機捲到才載（和首頁三章同一套） ---------- */
+  /* ---------- 影片：滑鼠移上去／手機捲到才載（和首頁章節同一套） ---------- */
   function initVideos() {
     var vids = document.querySelectorAll(".sk-media .ch-vid"); if (!vids.length) return;
     var conn = navigator.connection || {}; if (conn.saveData) return;
@@ -352,7 +352,7 @@
     geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true, showUserHeading: true });
     map.addControl(geo, "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 16, maxWidth: "300px", className: "fm-pop" });
-    baseMarkers = Plan.addBaseMarkers(map, (dayById[state.day] || {}).base);  /* 三間住宿：紅點，疊在最上層（plan.js 共用） */
+    baseMarkers = Plan.addBaseMarkers(map, (dayById[state.day] || {}).base);  /* 每間住宿：紅點，疊在最上層（plan.js 共用） */
     T.resorts.forEach(function (r) {
       var el = document.createElement("button"); el.type = "button"; el.className = "sk-pin " + (r.group || "main"); el.style.setProperty("--ac", GROUP_COLOR[r.group || "main"]);
       el.setAttribute("aria-label", r.name);

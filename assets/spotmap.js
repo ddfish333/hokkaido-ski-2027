@@ -159,7 +159,7 @@
     } catch (e) { $("#fmfallback").hidden = false; return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: 14, maxWidth: "300px", className: "fm-pop" });
-    baseMarkers = Plan.addBaseMarkers(map, (ctx().b || {}).id);  /* 三間住宿：紅點，疊在最上層（plan.js 共用） */
+    baseMarkers = Plan.addBaseMarkers(map, (ctx().b || {}).id);  /* 每間住宿：紅點，疊在最上層（plan.js 共用） */
     var seen = {};
     SPOTS.forEach(function (s) {
       var k = s.lat.toFixed(4) + "," + s.lon.toFixed(4), n = seen[k] = (seen[k] || 0) + 1;

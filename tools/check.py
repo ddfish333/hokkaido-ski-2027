@@ -57,6 +57,8 @@ def text_fields():
         for k in ("checkin", "checkout"):  # 官方入住時間是事實，可以寫死；但裡面的標記一定要換得出來
             if b.get(k) and "{" in str(b[k]): yield f"trip.js bases {b['id']} {k}", b[k], b["from"], None, False
         for i, n in enumerate(b.get("notes") or []): yield f"trip.js bases {b['id']} notes[{i}]", n, b["from"], None, True
+        if b.get("skiNote"): yield f"trip.js bases {b['id']} skiNote", b["skiNote"], b["from"], None, True
+        if (b.get("chapter") or {}).get("line"): yield f"trip.js bases {b['id']} chapter.line", b["chapter"]["line"], b["from"], None, True
     for i, p in enumerate(load_js("data/food.js", "FOOD_PICKS") or []):
         for k in ("why", "book", "what"):
             if p.get(k): yield f"food.js FOOD_PICKS[{i}] {p.get('pick') or p.get('what')} {k}", p[k], p["date"], None, True
