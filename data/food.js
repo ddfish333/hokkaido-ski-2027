@@ -164,11 +164,11 @@ window.FOOD_PICKS = [
   { date: "2027-01-15", slot: "dinner", pick: null, what: "小木屋自己煮（富良野最後一晚，把食材用完）", stop: "lodge", backup: ["kumagera", "furanoya"], status: "proposed", why: "美瑛玩一整天 {t:lodge#2} 才回到小木屋，最後一晚把冰箱清空。還有力氣、想吃好一點：くまげら（今天週五有開）或 ふらのや，都離小木屋開車十分鐘內。" },
   /* 1/16 富良野 → Kiroro，滑一整天 */
   { date: "2027-01-16", slot: "breakfast", pick: null, what: "砂川 SA（往札幌方向）的美食街、商店", stop: "sunagawa_sa_s", status: "proposed", why: "{dep:lodge} 出發，小孩先在車上吃點麵包墊胃（1/15 在美瑛選果買的）；開到砂川 SA 美食街剛開，大人小孩在這裡吃早餐、上廁所。" },
-  { date: "2027-01-16", slot: "lunch", pick: "brasserie", stop: "kiroro", backup: ["lumiere", "pizzeria"], status: "proposed", why: "全家在 Mountain Center 館內吃，不用換鞋出去：小孩要上 Kids Academy 下午班的話，吃完剛好送過去。Brasserie 的番茄擔擔麵、角煮拉麵；人多就去同館的 Lumière 自助或 Pizzeria。" },
+  { date: "2027-01-16", slot: "lunch", pick: "brasserie", stop: "kiroro", backup: ["lumiere", "pizzeria"], status: "proposed", why: "全家在 Mountain Center 館內吃，不用換鞋出去：吃完剛好送小孩去 Kids Academy 下午班。Brasserie 的番茄擔擔麵、角煮拉麵；人多就去同館的 Lumière 自助或 Pizzeria。" },
   { date: "2027-01-16", slot: "dinner", pick: "yukashi", status: "proposed", why: "開了三小時車又滑一整天，第一晚不想再開山路出去：直接吃飯店裡的 Yukashi。評論說選擇少、價格高（館內只有這一間），所以只排這一晚，另一晚在房間煮。", book: "0135-48-6785 訂 {party}" },
   /* 1/17 Kiroro 整天 */
   { date: "2027-01-17", slot: "breakfast", pick: null, what: "Yu Kiroro 早餐（房價含）", stop: "yukiroro", status: "decided", why: "{dep:yukiroro} 搭 Gateway 纜車去雪場。" },
-  { date: "2027-01-17", slot: "lunch", pick: "pizzeria", stop: "kiroro", backup: ["lumiere", "brasserie"], status: "proposed", why: "換換口味：披薩幾個人分著吃、小孩不挑；Pizzeria 的最後點餐比其他家晚，週日中午可以錯開人潮晚一點吃。" },
+  { date: "2027-01-17", slot: "lunch", pick: "pizzeria", stop: "kiroro", backup: ["lumiere", "brasserie"], status: "proposed", why: "小孩上午班下課，全家一起吃：披薩幾個人分著吃、小孩不挑；Pizzeria 的最後點餐比其他家晚，週日中午人多可以晚一點吃。" },
   { date: "2027-01-17", slot: "dinner", pick: null, what: "Yu Kiroro 房間自己煮", backup: ["yukashi"], status: "proposed", why: "房間有廚房，食材 1/15 在コープ富良野先買好（肉、蔬菜、米、小孩的）；滑完泡溫泉再煮，不用再出門。累到不想煮就再吃 Yukashi。" },
   /* 1/18 Kiroro → 札幌 */
   { date: "2027-01-18", slot: "breakfast", pick: null, what: "Yu Kiroro 早餐（房價含）", stop: "yukiroro", status: "decided", why: "吃完收行李，{dep:yukiroro} 退房下山。" },

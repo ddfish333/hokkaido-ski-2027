@@ -125,7 +125,7 @@ window.SCENES = {
     scenes: [
       { type: "title", eyebrow: "DAY 11 · KIRORO", h: "Kiroro 滑雪", s: "門口就是纜車。整天都在雪上。", imgs: ["scene/kiroro-2.jpg", "scene/kiroro-1.jpg"], amb: "snow", dur: 5500 },
       { stop: "yukiroro", label: "早上", imgs: ["scene/kiroro-1.jpg"], h: "{t}，搭纜車上山。", s: "早餐在飯店。車停著不用動。", amb: "quiet", dur: 6000 },
-      { stop: "kiroro", imgs: ["scene/kiroro-2.jpg", "scene/kiroro-1.jpg"], h: "第二天，往長峰、余市那邊滑。", s: "週日人多一點，早上的雪最好。", amb: "snow", dur: 7000 },
+      { stop: "kiroro", imgs: ["scene/kiroro-2.jpg", "scene/kiroro-1.jpg"], h: "第二天，往長峰、余市那邊滑。", s: "小孩上午在 Kids Academy 玩雪，大人趁早上的雪先滑。", amb: "snow", dur: 7000 },
       { t: "下午", video: "snowboard.mp4", img: "video/snowboard.jpg", h: "滑到吊椅收。", s: "這趟最後一次整天的雪。", amb: "quiet", dur: 6500 },
       { type: "end", t: "今晚", video: "fire.mp4", img: "video/fire.jpg", h: "泡溫泉，在房間煮晚餐。<br>明天下山回札幌。", amb: "fire", warm: true, dur: 8000 }
     ]
