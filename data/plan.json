@@ -636,37 +636,34 @@
       "stops": [
         {
           "id": "villa",
-          "at": "08:30",
+          "at": "09:30",
           "stay": 0,
-          "note": "走路 {leg:villa|onze|walk} 分到 Onze 山腳（センターハウス、Onze 單板學校都在那裡），雪板自己背；保姆第一天，小孩交給她（{T:coach.name} 教練 {T:coach.start} 開課，要提早到買票、換裝）"
+          "note": "走路 {leg:villa|onze|walk} 分到 Onze 山腳（センターハウス、Onze 單板學校都在那裡），雪板自己背；保姆第一天，早上大人可以先陪小孩吃早餐再交給她（{T:coach.name} 教練 {T:coach.start} 開課，要提早到買票、換裝）"
         },
         {
           "id": "onze",
           "via": "walk",
           "stay": 455,
-          "by": "08:45",
-          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（{T:coach.status}）。午休在センターハウス吃，或走回山鄉跟小孩一起吃；下課收板走回去"
+          "by": "09:45",
+          "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（{T:coach.status}）。午休在センターハウス吃，或走回山鄉跟小孩一起吃；下課時天已經黑了，收板走回去"
         },
         {
           "id": "villa",
           "via": "walk",
-          "stay": 35,
+          "stay": 30,
           "note": "換掉雪衣、接保姆和小孩，全家一起去小樽（保姆 {T:nanny.end} 下班，之後算加班）"
         },
         {
-          "id": "orgel",
-          "stay": 35,
-          "note": "全家第一站：音樂盒堂本館，小孩看一整屋子的音樂盒；{close:orgel} 關門。門口蒸氣時鐘每 15 分噴一次、整點最久"
-        },
-        {
           "id": "canal",
-          "stay": 15,
-          "note": "開到運河停車場，走到浅草橋看煤氣燈和倉庫倒影就好，雪地裡小孩走慢一點"
+          "stay": 20,
+          "note": "全家：開到運河停車場，走到浅草橋看夜裡的煤氣燈和倉庫倒影，雪地裡小孩走慢一點（音樂盒堂 {close:orgel} 就關，下課後趕不上）"
         },
         {
           "id": "masazushi",
           "stay": 90,
-          "note": "晚餐：おたる政寿司 本店——個室、兒童餐；停車位只有 6 台，兩台車不一定停得進，訂位時先問或停附近停車場。要先訂 {party}。不想花這個錢就改 とっぴ～（回轉、有停車場、不用訂）"
+          "note": "晚餐：おたる政寿司 本店——個室、兒童餐；停車位只有 6 台，兩台車不一定停得進，訂位時先問或停附近停車場。要先訂 {party}。不想花這個錢就改 とっぴ～（回轉、有停車場、不用訂）",
+          "at": "18:30",
+          "atLabel": "訂位"
         },
         {
           "id": "villa",
@@ -679,15 +676,15 @@
       "stops": [
         {
           "id": "villa",
-          "at": "08:30",
+          "at": "09:30",
           "stay": 0,
-          "note": "走路 {leg:villa|onze|walk} 分到 Onze；連假第一天，{T:coach.start} 一開吊椅就上山"
+          "note": "走路 {leg:villa|onze|walk} 分到 Onze；連假第一天，{T:coach.start} 開課，早上不用趕"
         },
         {
           "id": "onze",
           "via": "walk",
           "stay": 455,
-          "by": "08:45",
+          "by": "09:45",
           "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（連假人多：Onze 只有一條四人吊椅上山，午休錯開正中午）；下課收板走回山鄉"
         },
         {
@@ -698,32 +695,20 @@
         },
         {
           "id": "canal",
-          "stay": 5,
-          "note": "四個大人：停運河旁的觀光停車場（回程也從這裡開走）。{sun:set} 日落，到的時候天剛黑、煤氣燈剛亮——先在浅草橋拍一張藍調的運河，再往堺町通走"
-        },
-        {
-          "id": "kitaichi",
-          "via": "walk",
           "stay": 15,
-          "note": "先去最早關的：北一硝子三号館的北一ホール，167 盞煤油燈點著，{close:kitaichi} 關門（咖啡廳也是），看一圈、拍照就走"
-        },
-        {
-          "id": "letao",
-          "via": "walk",
-          "stay": 20,
-          "note": "LeTAO 本店：1F 買雙層起司蛋糕（回去配保姆的炸雞當甜點），{close:letao} 關門；對面六花亭、北菓楼也是 {close:rokkatei_otaru} 關，想買伴手禮一起買"
+          "note": "四個大人：停運河旁的觀光停車場（回程也從這裡開走）。天已經全黑，浅草橋看整排煤氣燈和倉庫倒影；堺町通的店（北一ホール、LeTAO、六花亭）{close:letao} 前就關了，這次不逛"
         },
         {
           "id": "kamaei",
           "via": "walk",
           "stay": 10,
-          "note": "沿堺町通往回走到かま栄：週六開到 {close:kamaei}，現炸パンロール一人一條墊肚子（晚餐是炸雞，別吃太多）"
+          "note": "走到かま栄：週六開到 {close:kamaei}，現炸パンロール一人一條墊肚子（晚餐是炸雞，別吃太多）"
         },
         {
           "id": "canal",
           "via": "walk",
-          "stay": 5,
-          "note": "走回停車場路上再經過浅草橋：天全黑了，整排煤氣燈和倉庫倒影"
+          "stay": 0,
+          "note": "走回停車場，開去吃晚餐"
         },
         {
           "id": "naruto",
@@ -741,15 +726,15 @@
       "stops": [
         {
           "id": "villa",
-          "at": "08:30",
+          "at": "09:30",
           "stay": 0,
-          "note": "走路 {leg:villa|onze|walk} 分到 Onze；教練課最後一天"
+          "note": "走路 {leg:villa|onze|walk} 分到 Onze；教練課最後一天，早上先把能收的行李收一收"
         },
         {
           "id": "onze",
           "via": "walk",
           "stay": 455,
-          "by": "08:45",
+          "by": "09:45",
           "note": "{T:coach.name} 教練全天課 {T:coach.start}–{T:coach.end}（連假人多，午休錯開正中午）；記得跟 Gacha 要三天的影片"
         },
         {
